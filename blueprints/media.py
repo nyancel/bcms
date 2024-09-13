@@ -8,23 +8,23 @@ import lib.media as media
 
 blueprint = flask.Blueprint()
 
-@blueprint.post("/media/upload")
-def upload():
+@blueprint.post("/media/upload_media")
+def upload_media():
     """
         TODO user authentication
     """
     
-    if "image" not in flask.request.files:
+    if "media" not in flask.request.files:
         return flask.jsonify(
-            {"error": "post request is missing a 'image' paramater"}
+            {"error": "post request is missing a 'media' paramater"}
         ), 400
     
-    image = flask.request.files["image"]
-    success = media.upload.save_image(image)
+    media = flask.request.files["media"]
+    success = media.upload.save_media(media)
     
     if not success:
         return flask.jsonify(
-            {"error": "an unknown error occured whilst saving the image"}
+            {"error": "an unknown error occured whilst saving the file"}
         ), 404
 
     return flask.jsonify({

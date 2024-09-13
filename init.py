@@ -3,7 +3,8 @@ import os
 folders = [
     "volume",
     "volume/media",
-    "volume/media/uploads",
+    "volume/media/metadata",
+    "volume/media/files",
 ]
 
 for folder in folders:
