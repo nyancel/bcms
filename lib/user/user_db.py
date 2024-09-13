@@ -1,6 +1,5 @@
 from typing import Optional as opt
 
-import datetime
 import sqlalchemy as sql
 import sqlalchemy.orm as orm
 import dotenv
@@ -37,5 +36,5 @@ class User(Driver.BASE):
     salt: orm.Mapped[str]
     hash: orm.Mapped[str]
     user_role: orm.Mapped[UserRole]
-    last_edited: orm.Mapped[datetime.datetime]
-    created_at: orm.Mapped[datetime.datetime]
+    last_edited: orm.Mapped[float]
+    created_at: orm.Mapped[float]
