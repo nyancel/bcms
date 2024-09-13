@@ -3,15 +3,18 @@
 
 * frontend renderer
 
+Emmie:
 * media uploads
 * media thumbnails
 * media distribution
 
-* user login
+Simon:
+* user login 
 * user authentication
 * user lookup
 * user profiles
 
+Marius:
 * article editing
 * article deletion
 * article publishing
