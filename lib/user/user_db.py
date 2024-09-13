@@ -21,14 +21,14 @@ class Driver:
 
 
 class UserRole(enum.Enum):
-    "READER" = -10
-    "JOURNALIST" = 0
-    "EDITORIAL" = 10
-    "ADMIN" = 20
+    READER = -10
+    JOURNALIST = 0
+    EDITORIAL = 10
+    ADMIN = 20
 
 
 class User(Driver.BASE):
-    __tablename__ = "collection"
+    __tablename__ = "user"
     id: orm.Mapped[str] = orm.mapped_column(primary_key=True)
     first_name: orm.Mapped[opt[str]]
     last_name: orm.Mapped[opt[str]]
@@ -38,3 +38,12 @@ class User(Driver.BASE):
     user_role: orm.Mapped[UserRole]
     last_edited: orm.Mapped[float]
     created_at: orm.Mapped[float]
+
+
+class UserToken(Driver.BASE):
+    __tablename__ = "user_token"
+    id: orm.Mapped[str] = orm.mapped_column(primary_key=True)
+    user_id: orm.Mapped[str]
+    token: orm.Mapped[str]
+    created_at: orm.Mapped[float]
+    expires_at: orm.Mapped[float]

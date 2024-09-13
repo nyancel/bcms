@@ -1,4 +1,4 @@
-The .env file is placed under: `./volume/.env`
+The .env file is placed as: `./.env`
 
 --- begin .env ---
 
