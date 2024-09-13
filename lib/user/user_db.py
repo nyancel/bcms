@@ -2,9 +2,11 @@ from typing import Optional as opt
 
 import sqlalchemy as sql
 import sqlalchemy.orm as orm
+import util.crypt as crypt
 import dotenv
 import os
 import enum
+import time
 
 dotenv.load_dotenv()
 DATABASE_PATH = os.getenv("USER_DB_PATH")
@@ -21,10 +23,10 @@ class Driver:
 
 
 class UserRole(enum.Enum):
-    READER = -10
-    JOURNALIST = 0
-    EDITORIAL = 10
-    ADMIN = 20
+    READER = 0
+    JOURNALIST = 10
+    EDITORIAL = 20
+    ADMIN = 30
 
 
 class User(Driver.BASE):
@@ -38,6 +40,11 @@ class User(Driver.BASE):
     user_role: orm.Mapped[UserRole]
     last_edited: orm.Mapped[float]
     created_at: orm.Mapped[float]
+
+    def __init__(self, **kw: sql.Any):
+        super().__init__(**kw)
+        self.id = crypt.new_uid()
+        self.created_at = time.time()
 
 
 class UserToken(Driver.BASE):
