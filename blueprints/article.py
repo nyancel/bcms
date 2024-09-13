@@ -5,7 +5,6 @@ bp = flask.Blueprint()
 @bp.post("/article/post")
 def post_article():
 
-
 @bp.post("/article/delete")
 def delete_article():
 
@@ -17,5 +16,3 @@ def list_all_article():
 
 @bp.post("/article/retrieve")
 def retrieve_article():
-
-    
