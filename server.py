@@ -1,10 +1,12 @@
 import flask
 
 import blueprints.article
+import blueprints.media
 import blueprints.user
 
 server = flask.Flask(__name__)
 server.register_blueprint(blueprints.article.bp)
+server.register_blueprint(blueprints.media.bp)
 server.register_blueprint(blueprints.user.bp)
 
 @server.post("/ping")

@@ -2,17 +2,19 @@ import json
 import os
 import PIL.Image
 import time
+import math
+import io
 
 import werkzeug.datastructures as flask_datastructures
 
 # a list of all the resolutions uploaded images should be available in
 # if a file is not 16x9 the image width or height will be bigger
 # the original file's resolution is also saved if it's not in this list
-image_resolutions = [
-    (1920, 1080),
-    (1280, 720),
-    (960, 540),
-    (640, 360),
+desired_image_resolutions = [
+    1080,
+    720,
+    540,
+    360,
 ]
 
 def save_media(file: flask_datastructures.FileStorage) -> hash:
@@ -23,10 +25,14 @@ def save_media(file: flask_datastructures.FileStorage) -> hash:
     """
     
     print(file.mimetype)
-    if file.mimetype in ["jpeg", "jpg", "png"]:
-        metadata, hash = _save_image(file)
+    if file.mimetype in ["image/jpeg", "image/png"]:
+        hash = file.__hash__()
+        
+        metadata = _save_image(file, hash)
+        if not metadata:
+            return metadata
 
-        success = _save_metadata(metadata, f"volume/media/metadata/{hash}")
+        success = _save_metadata(metadata, f"volume/media/metadata/{hash}.json")
         if not success:
             return success
 
@@ -41,43 +47,49 @@ def _save_metadata(metadata, file_path):
     
     return 1
 
-def _save_image(uploaded_image: flask_datastructures.FileStorage) -> hash:
+def _save_image(uploaded_image: flask_datastructures.FileStorage, image_hash) -> dict:
     """
         takes in an image and uploads it to an S3 buckets
-        
-        returns a hash of the file
     """
-    
-    image_hash = uploaded_image.__hash__()
-
     image_path = f"volume/media/files/{image_hash}"
+    filename = uploaded_image.filename.rsplit(".")[0]
+    file_extention = uploaded_image.filename.split(".")[-1]
     
-    if os.path.exists(image_path):
-        return FileExistsError("image with that filename already exists")
+    available_image_resolutions = []
     
-    if not uploaded_image.save(image_path):
-        return 0
+    def _save_image_to_S3(image: PIL.Image):
+        available_image_resolutions.append(image.size)
+        
+        image_size = f"{image.size[0]}_{image.size[1]}"
+        image.save(f"{image_path}/{image_size}.{file_extention}", optimize=True, quality=95)
     
-    # load the image using PIL and resize it to the specified resolutions
-    pillow_image_data = PIL.Image.open(image_path)
+    if os.path.isdir(image_path):
+        return FileExistsError("an image with that hash is already saved")
+    
+    os.mkdir(image_path)
+    image_bytes = io.BytesIO(uploaded_image.stream.read())
+    pillow_image_data = PIL.Image.open(image_bytes)
+    
     image_width, image_height = pillow_image_data.size
-    image_resolutions = []
+    _save_image_to_S3(pillow_image_data)
     
-    for resolution in image_resolutions:
-        if (image_width, image_height) != resolution:
-            resized_image = resize_image(pillow_image_data, resolution)
-            image_resolutions.append(resized_image.size)
-            
-            resized_image.save(f"{image_path}_{resized_image.size}", optimize=True, quality=95)
+    for resolution in desired_image_resolutions:
+        if resolution != min(image_width, image_height): # make sure we don't save two images of the same resolution
+            resized_image = resize_pillow_image(pillow_image_data, resolution)
+            _save_image_to_S3(resized_image)
+        
+
     
     metadata = {
-        "filename": uploaded_image.name,
-        "creation_date": time.time(),
+        "filename": filename,
+        "file_extention": file_extention,
+        "file_mimetype": uploaded_image.mimetype,
+        "creation_time": time.time(), # the creation time is saved after everything is done, unsure if this should be changed to when the request to save is recieved
         "is_deleted": False,
-        "available_image_resolutions": image_resolutions
+        "available_image_resolutions": available_image_resolutions
     }
     
-    return metadata, image_hash
+    return metadata
 
 def _save_video():
     """
@@ -86,15 +98,14 @@ def _save_video():
     
     return None
 
-def resize_image(image: PIL.Image, desired_resolution: tuple[int, int]) -> PIL.Image:
+def resize_pillow_image(image: PIL.Image, desired_resolution: int) -> PIL.Image:
     image_width, image_height = image.size
     
-    width_scale = max(desired_resolution[0] / image_width, 1)
-    height_scale = max(desired_resolution[1] / image_height, 1)
+    smallest_axis_size = min(image_width, image_height)
     
-    scale = max(width_scale, height_scale)
+    image_scale = desired_resolution / smallest_axis_size
     
-    new_width = int(image_width * scale)
-    new_height = int(image_height * scale)
+    new_width = int(image_width * image_scale)
+    new_height = int(image_height * image_scale)
     
-    return image.resize((new_width, new_height), PIL.Image.ANTIALIAS)
+    return image.resize((new_width, new_height), PIL.Image.Resampling.BICUBIC)
