@@ -22,17 +22,23 @@ def upload_media():
     media_file = flask.request.files["media"]
     success_check = lib.media.upload.save_media(media_file)
     
+    if success_check == 1:
+        return flask.jsonify({
+            "message": f"File upload successful!"
+        }), 200
+            
     if isinstance(success_check, FileExistsError):
         return flask.jsonify(success_check.args), 400
     
-    if not success_check:
-        return flask.jsonify(
-            {"error": "an unknown error occured whilst saving the file"}
-        ), 500
-
+    if isinstance(success_check, Exception):
+        return flask.jsonify({
+            "error": f"an unhandled error '{str(success_check)}' occured whilst uploading the file"
+        })
     return flask.jsonify({
-        "message": f"File upload successful!"
-    }), 200
+        "error": "an unknown error occured whilst uploading the file"
+    }), 500
+
+
 
 
 # @blueprint.post("/media/delete")

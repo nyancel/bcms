@@ -16,11 +16,9 @@ desired_image_resolutions = [
 ]
 
     
-def save_media(file: flask_datastructures.FileStorage) -> None:
+def save_media(file: flask_datastructures.FileStorage) -> int | Exception:
     """
         takes in a file and saves it using a suite of different functions
-        
-        returns a hash of the file or an error if it failed
     """
     
     file_bytes = io.BytesIO(file.stream.read())
@@ -65,7 +63,7 @@ def _save_image(uploaded_image: flask_datastructures.FileStorage, image_bytes: i
     
     for resolution in desired_image_resolutions:
         if resolution != min(image_width, image_height): # make sure we don't save two images of the same resolution
-            resized_image = resize_pillow_image(pillow_image_data, resolution)
+            resized_image = _resize_pillow_image(pillow_image_data, resolution)
             __save_image_to_S3(resized_image)
     
     metadata = {
@@ -86,7 +84,7 @@ def _save_video():
     
     return None
 
-def resize_pillow_image(image: PIL.Image, desired_resolution: int) -> PIL.Image:
+def _resize_pillow_image(image: PIL.Image, desired_resolution: int) -> PIL.Image:
     image_width, image_height = image.size
     
     smallest_axis_size = min(image_width, image_height)
