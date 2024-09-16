@@ -16,16 +16,19 @@ def upload_media():
     
     if "media" not in flask.request.files:
         return flask.jsonify(
-            {"error": "post request is missing a file named 'media'"}
+            {"error": "post request is missing a file labeled 'media'"}
         ), 400
     
     media_file = flask.request.files["media"]
-    success = lib.media.upload.save_media(media_file)
+    success_check = lib.media.upload.save_media(media_file)
     
-    if not success:
+    if isinstance(success_check, FileExistsError):
+        return flask.jsonify(success_check.args), 400
+    
+    if not success_check:
         return flask.jsonify(
             {"error": "an unknown error occured whilst saving the file"}
-        ), 404
+        ), 500
 
     return flask.jsonify({
         "message": f"File upload successful!"

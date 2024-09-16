@@ -2,83 +2,71 @@ import json
 import os
 import PIL.Image
 import time
-import math
 import io
+import hashlib
 
 import werkzeug.datastructures as flask_datastructures
 
-# a list of all the resolutions uploaded images should be available in
-# if a file is not 16x9 the image width or height will be bigger
-# the original file's resolution is also saved if it's not in this list
+# resolutions of the smallest axies every uploaded image should be available in 
 desired_image_resolutions = [
-    1080,
+    1080, #will resize 2560x1440 to 1920x1080, and 1204x1514 to 1080x1358
     720,
     540,
     360,
 ]
 
-def save_media(file: flask_datastructures.FileStorage) -> hash:
+    
+def save_media(file: flask_datastructures.FileStorage) -> None:
     """
         takes in a file and saves it using a suite of different functions
         
-        returns a hash of the file, or 0 if it failed
+        returns a hash of the file or an error if it failed
     """
     
-    print(file.mimetype)
+    file_bytes = io.BytesIO(file.stream.read())
+    hash = hashlib.md5(file_bytes.read()).hexdigest()
+    
+    if os.path.isdir(f"volume/media/files/{hash}"):
+        return FileExistsError({
+            "error": "a file with that hash is already saved",
+            "hash": hash
+        })
+    
     if file.mimetype in ["image/jpeg", "image/png"]:
-        hash = file.__hash__()
-        
-        metadata = _save_image(file, hash)
-        if not metadata:
-            return metadata
+        metadata = _save_image(file, file_bytes, hash)
+        _save_metadata(metadata, f"volume/media/metadata/{hash}.json")
 
-        success = _save_metadata(metadata, f"volume/media/metadata/{hash}.json")
-        if not success:
-            return success
-
-        return hash
+        return 1
 
 def _save_metadata(metadata, file_path):
-    if os.path.exists(file_path):
-        return FileExistsError("metadata with that filename already exists")
-    
     with open(file_path, "w") as f:
         json.dump(metadata, f)
     
     return 1
 
-def _save_image(uploaded_image: flask_datastructures.FileStorage, image_hash) -> dict:
-    """
-        takes in an image and uploads it to an S3 buckets
-    """
+def _save_image(uploaded_image: flask_datastructures.FileStorage, image_bytes: io.BytesIO, image_hash) -> dict:
     image_path = f"volume/media/files/{image_hash}"
     filename = uploaded_image.filename.rsplit(".")[0]
     file_extention = uploaded_image.filename.split(".")[-1]
     
     available_image_resolutions = []
     
-    def _save_image_to_S3(image: PIL.Image):
+    def __save_image_to_S3(image: PIL.Image):
         available_image_resolutions.append(image.size)
         
         image_size = f"{image.size[0]}_{image.size[1]}"
         image.save(f"{image_path}/{image_size}.{file_extention}", optimize=True, quality=95)
     
-    if os.path.isdir(image_path):
-        return FileExistsError("an image with that hash is already saved")
-    
     os.mkdir(image_path)
-    image_bytes = io.BytesIO(uploaded_image.stream.read())
     pillow_image_data = PIL.Image.open(image_bytes)
     
     image_width, image_height = pillow_image_data.size
-    _save_image_to_S3(pillow_image_data)
+    __save_image_to_S3(pillow_image_data)
     
     for resolution in desired_image_resolutions:
         if resolution != min(image_width, image_height): # make sure we don't save two images of the same resolution
             resized_image = resize_pillow_image(pillow_image_data, resolution)
-            _save_image_to_S3(resized_image)
-        
-
+            __save_image_to_S3(resized_image)
     
     metadata = {
         "filename": filename,
