@@ -1,0 +1,19 @@
+meta {
+  name: Update article
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://127.0.0.1:3000/article/update_article
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": "1726557131472957-pcquRZCiH183",
+    "title": "AGAIN Now i am changed",
+    "body": "I ONLY CHANGE THIS"
+  }
+}

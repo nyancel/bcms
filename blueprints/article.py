@@ -47,43 +47,37 @@ def delete_article() -> dict:
         return flask.jsonify({"error": "Article_id is empty!"}), 400
 
     # Delete article
-    delete_code = article.delete_article(id)
+    delete_code: bool = article.delete_article(id)
     if not delete_code:
         return flask.jsonify({"error": "Could not delete article!"}), 500
 
     return flask.jsonify({"success": "Article successfully deleted"}), 200
 
 
-# @bp.route("/article/edit/<int:id>", methods=["PUT"])
-# def update_article(id: int):
-#     # Get the relevant article from database
-#     db_session = article_db.Driver.SessionMaker()
+@bp.post("update_article")
+def update_article():
+    # Get the JSON data from the request
+    data: Optional[Dict[str, Any]] = flask.request.get_json()
+    if data is None:
+        return flask.jsonify({"error": "Invalid JSON data"}), 400
 
-#     article = db_session.get(Article, {"id": id})
-#     if article == None:
-#         return flask.jsonify({"error": "Could not find post!"}), 400
+    # Get relevant fields from JSON
+    id: str = data["id"]
+    title: str = data["title"]
+    body: str = data["body"]
 
-#     data = request.get_json()
+    if not id:
+        return flask.jsonify({"error": "Article ID is empty!"}), 400
 
-#     if "title" not in data and "body" not in data:
-#         return flask.jsonify({"error": "Updates to article is empty!"}), 400
+    # Atleast title or the body needs to be edited
+    if not title and not body:
+        return flask.jsonify({"error": "Title/body is empty!"}), 400
 
-#     with article_db.Driver.SessionMaker() as db_session:
-#         """
-#         TODO
-#         - check if title or body has changed, update row if yes
-#         """
-#         db_session.query(Article).filter(Article.id == id).update.({"title": data["title"]})
-#         db_session.query(Article).filter(Article.id == id).update.({"body": data["body"]})
-#         db_session.commit()
+    updated_article = article.update_article(id, title, body)
+    if not updated_article:
+        return flask.jsonify({"error": "Could not update article!"}), 400
 
-#     # Modify title or body
-#     if "title" in data and data["title"] != db_session.title:
-#         return flask.jsonify({"error": "Could not find post!"}), 400
-
-#     ## UPDATER FUNCTION
-
-#     db_session.close()
+    return flask.jsonify(updated_article.to_dict()), 200
 
 
 # @bp.route("/article/list_all", methods=["GET"])

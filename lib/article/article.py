@@ -1,4 +1,7 @@
 import lib.article.article_db as article_db
+import sqlalchemy.sql as sql
+
+import time
 
 
 def create_article(title: str, body: str, user_id: str) -> article_db.Article:
@@ -49,3 +52,33 @@ def delete_article(article_id: str) -> bool:
             return True
         except:
             return False
+
+
+def update_article(article_id: str, title: str, body: str) -> article_db.Article:
+    """
+    Updates an existing article in the database with new title and/or body content.
+
+    Parameters:
+    article_id (str): The ID of the article to be updated.
+    title (str): The new title for the article. If empty, the title will not be updated.
+    body (str): The new body content for the article. If empty, the body will not be updated.
+
+    Returns:
+    article_db.Article: The updated Article object.
+    """
+    with article_db.Driver.SessionMaker() as db_session:
+        article: article_db.Article = db_session.query(article_db.Article).get(
+            article_id
+        )
+        if title:
+            article.title = title
+        if body:
+            article.body = body
+
+        article.update_timestamp = time.time()
+
+        # Save changes
+        db_session.add(article)
+        db_session.commit()
+
+    return article
