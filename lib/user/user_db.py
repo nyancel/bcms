@@ -32,9 +32,9 @@ class UserRole(enum.Enum):
 class User(Driver.BASE):
     __tablename__ = "user"
     id: orm.Mapped[str] = orm.mapped_column(primary_key=True)
+    email: orm.Mapped[str] = orm.mapped_column(unique=True)
     first_name: orm.Mapped[opt[str]]
     last_name: orm.Mapped[opt[str]]
-    email: orm.Mapped[str]
     salt: orm.Mapped[str]
     hash: orm.Mapped[str]
     user_role: orm.Mapped[UserRole]

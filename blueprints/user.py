@@ -1,6 +1,8 @@
 import flask
 import lib.user
 import lib.user.user
+import lib.util
+import lib.util.crypt
 
 bp = flask.Blueprint("user_bp", __name__)
 bp.url_prefix = "/user/"
@@ -8,7 +10,29 @@ bp.url_prefix = "/user/"
 
 @bp.post("login")
 def login():
-    pass
+    json: dict = flask.request.json
+    email = json.get("email")
+    password = json.get("password")
+
+    if None in [email, password]:
+        return flask.jsonify(
+            {"error": "missing email or password"}
+        ), 400
+
+    user = lib.user.user.get_user_by_email(email)
+    if not user:
+        return flask.jsonify(
+            {"error": "user not found"}
+        ), 400
+
+    pw_check = lib.util.crypt.hash_with_salt(password, user.salt)
+    if pw_check != user.hash:
+        return flask.jsonify(
+            {"error": "user not found"}
+        ), 400
+
+    flask.session["user_id"] = user.id
+    return flask.jsonify(user.to_dict())
 
 
 @bp.post("logout")
@@ -40,10 +64,19 @@ def register_new_user():
 
 @bp.post("me")
 def me():
-    """
-    Returns info about who the current user is logged in as
-    """
-    pass
+    user_id = flask.session.get("user_id")
+    if not user_id:
+        return flask.jsonify(
+            {"error": "not authenticated"}
+        ), 400
+
+    user = lib.user.user.get_user(user_id)
+    if not user:
+        return flask.jsonify(
+            {"error": "no user data"}
+        ), 400
+
+    return flask.jsonify(user.to_dict())
 
 
 @bp.post("list_users")
