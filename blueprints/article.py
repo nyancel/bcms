@@ -80,9 +80,13 @@ def update_article():
     return flask.jsonify(updated_article.to_dict()), 200
 
 
-# @bp.route("/article/list_all", methods=["GET"])
-# def get_all_articles():
-#     pass
+@bp.post("list_all_articles")
+def list_all_articles():
+    article_list = article.list_all_articles()
+    if len(article_list) == 0:
+        return flask.jsonify({"error": "No articles to list!"}), 400
+
+    return flask.jsonify(article_list), 200
 
 
 @bp.post("get_article")
