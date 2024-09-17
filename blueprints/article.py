@@ -3,7 +3,6 @@ import flask
 from typing import Any, Dict, Optional
 
 import lib.article.article as article
-import lib.article.article_db as article_db
 
 bp = flask.Blueprint("article", __name__, url_prefix="/article/")
 
@@ -11,7 +10,7 @@ bp = flask.Blueprint("article", __name__, url_prefix="/article/")
 
 
 @bp.post("new_article")
-def post_article():
+def post_article() -> dict:
     # Get the JSON data from the request
     data: Optional[Dict[str, Any]] = flask.request.get_json()
     if data is None:
@@ -35,9 +34,24 @@ def post_article():
     return flask.jsonify(new_article.to_dict()), 201
 
 
-# @bp.route("/article/delete", methods=["DELETE"])
-# def delete_article():
-#     pass
+@bp.post("delete_article")
+def delete_article() -> dict:
+    # Get the JSON data from the request
+    data: Optional[Dict[str, Any]] = flask.request.get_json()
+    if data is None:
+        return flask.jsonify({"error": "Invalid JSON data"}), 400
+
+    # Get id from JSON
+    id: str = data["id"]
+    if not id:
+        return flask.jsonify({"error": "Article_id is empty!"}), 400
+
+    # Delete article
+    delete_code = article.delete_article(id)
+    if not delete_code:
+        return flask.jsonify({"error": "Could not delete article!"}), 500
+
+    return flask.jsonify({"success": "Article successfully deleted"}), 200
 
 
 # @bp.route("/article/edit/<int:id>", methods=["PUT"])
