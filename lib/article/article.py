@@ -57,6 +57,7 @@ def delete_article(article_id: str) -> bool:
 def update_article(article_id: str, title: str, body: str) -> article_db.Article:
     """
     Updates an existing article in the database with new title and/or body content.
+    Also updates update_timestamp of the article.
 
     Parameters:
     article_id (str): The ID of the article to be updated.
