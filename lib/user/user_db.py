@@ -2,7 +2,7 @@ from typing import Optional as opt
 
 import sqlalchemy as sql
 import sqlalchemy.orm as orm
-import util.crypt as crypt
+import lib.util.crypt as crypt
 import dotenv
 import os
 import enum
