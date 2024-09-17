@@ -1,4 +1,6 @@
 /volume
+# test folder i use for some local scripts
+/local-only
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

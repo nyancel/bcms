@@ -4,11 +4,11 @@
 # * media distribution
 
 import flask
-import lib.media as media
+import lib.media.upload
 
-blueprint = flask.Blueprint()
+bp = flask.Blueprint("media", __name__)
 
-@blueprint.post("/media/upload_media")
+@bp.post("/media/upload_media")
 def upload_media():
     """
         TODO user authentication
@@ -16,20 +16,29 @@ def upload_media():
     
     if "media" not in flask.request.files:
         return flask.jsonify(
-            {"error": "post request is missing a 'media' paramater"}
+            {"error": "post request is missing a file labeled 'media'"}
         ), 400
     
-    media = flask.request.files["media"]
-    success = media.upload.save_media(media)
+    media_file = flask.request.files["media"]
+    success_check = lib.media.upload.save_media(media_file)
     
-    if not success:
-        return flask.jsonify(
-            {"error": "an unknown error occured whilst saving the file"}
-        ), 404
-
+    if success_check == 1:
+        return flask.jsonify({
+            "message": f"File upload successful!"
+        }), 200
+            
+    if isinstance(success_check, FileExistsError):
+        return flask.jsonify(success_check.args), 400
+    
+    if isinstance(success_check, Exception):
+        return flask.jsonify({
+            "error": f"an unhandled error '{str(success_check)}' occured whilst uploading the file"
+        })
     return flask.jsonify({
-        "message": f"File upload successful!"
-    }), 200
+        "error": "an unknown error occured whilst uploading the file"
+    }), 500
+
+
 
 
 # @blueprint.post("/media/delete")

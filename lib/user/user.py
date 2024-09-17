@@ -14,3 +14,11 @@ def create_new_user(email: str, password: str) -> user_db.User:
         db_session.add(new_user)
         db_session.commit()
     return new_user
+
+
+def save_user(user: user_db.User) -> user_db.User:
+    user.last_edited = time.time()
+    with user_db.Driver.SessionMaker() as db_session:
+        db_session.add(user)
+        db_session.commit()
+    return user

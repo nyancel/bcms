@@ -5,7 +5,16 @@ meta {
 }
 
 post {
-  url: http://localhost:3000/api/user/register_new_user
-  body: none
+  url: http://localhost:3000/user/register_new_user
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "email": "user@email.com",
+    "password": "123password",
+    "firstname": "John",
+    "lastname": "Hancock"
+  }
 }
