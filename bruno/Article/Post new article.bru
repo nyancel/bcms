@@ -1,0 +1,19 @@
+meta {
+  name: Post new article
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://127.0.0.1:3000/article/new_article
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "title": "Heisann",
+    "body": "dette er en sann historie om blablblal",
+    "user_id": "012031230"
+  }
+}

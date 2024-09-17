@@ -1,18 +1,82 @@
 import flask
 
-bp = flask.Blueprint()
+from typing import Any, Dict, Optional
 
-@bp.post("/article/post")
+import lib.article.article as article
+import lib.article.article_db as article_db
+
+bp = flask.Blueprint("article", __name__, url_prefix="/article/")
+
+# INPUT - JSON, OUTPUT - JSON
+
+
+@bp.post("new_article")
 def post_article():
+    # Get the JSON data from the request
+    data: Optional[Dict[str, Any]] = flask.request.get_json()
+    if data is None:
+        return flask.jsonify({"error": "Invalid JSON data"}), 400
 
-@bp.post("/article/delete")
-def delete_article():
+    # Get relevant fields for creation
+    title: str = data["title"]
+    body: str = data["body"]
+    user_id: str = data["user_id"]
 
-@bp.post("/article/edit")
-def edit_article():
+    if not title or not body:
+        return flask.jsonify({"error": "Post or title is empty!"}), 400
+    if not user_id:
+        return flask.jsonify({"error": "User_id could not be found in JSON!"}), 400
 
-@bp.post("/article/list_all")
-def list_all_article():
+    # Create new article instance
+    new_article = article.create_article(title=title, body=body, user_id=user_id)
+    if not new_article:
+        return flask.jsonify({"error": "Could not create article!"}), 400
 
-@bp.post("/article/retrieve")
-def retrieve_article():
+    return flask.jsonify(new_article.to_dict()), 201
+
+
+# @bp.route("/article/delete", methods=["DELETE"])
+# def delete_article():
+#     pass
+
+
+# @bp.route("/article/edit/<int:id>", methods=["PUT"])
+# def update_article(id: int):
+#     # Get the relevant article from database
+#     db_session = article_db.Driver.SessionMaker()
+
+#     article = db_session.get(Article, {"id": id})
+#     if article == None:
+#         return flask.jsonify({"error": "Could not find post!"}), 400
+
+#     data = request.get_json()
+
+#     if "title" not in data and "body" not in data:
+#         return flask.jsonify({"error": "Updates to article is empty!"}), 400
+
+#     with article_db.Driver.SessionMaker() as db_session:
+#         """
+#         TODO
+#         - check if title or body has changed, update row if yes
+#         """
+#         db_session.query(Article).filter(Article.id == id).update.({"title": data["title"]})
+#         db_session.query(Article).filter(Article.id == id).update.({"body": data["body"]})
+#         db_session.commit()
+
+#     # Modify title or body
+#     if "title" in data and data["title"] != db_session.title:
+#         return flask.jsonify({"error": "Could not find post!"}), 400
+
+#     ## UPDATER FUNCTION
+
+#     db_session.close()
+
+
+# @bp.route("/article/list_all", methods=["GET"])
+# def get_all_articles():
+#     pass
+
+
+# @bp.route("/article/retrieve/<int:id>", methods=["GET"])
+# def get_article():
+#     pass
