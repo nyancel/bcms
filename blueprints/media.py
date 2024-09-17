@@ -22,18 +22,8 @@ def upload_media():
     files = flask.request.files.getlist("media")
     success_check = lib.media.upload.save_files(files)
     
-    print(success_check)
-    
-    # if isinstance(success_check, FileExistsError):
-    #     return flask.jsonify(success_check), 400
-    
-    # if isinstance(success_check, Exception):
-    #     return flask.jsonify({
-    #         "error": f"an unhandled error '{str(success_check)}' occured whilst uploading the file"
-    #     }), 500
-    
     return flask.jsonify({
-        "message": "File upload successful!",
+        "message": "File upload request recieved",
         "data": success_check
     }), 200
 
