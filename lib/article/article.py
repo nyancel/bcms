@@ -83,3 +83,11 @@ def update_article(article_id: str, title: str, body: str) -> article_db.Article
         db_session.commit()
 
     return article
+
+
+def get_article(article_id: str) -> article_db.Article:
+    with article_db.Driver.SessionMaker() as db_session:
+        article: article_db.Article = db_session.query(article_db.Article).get(
+            article_id
+        )
+    return article

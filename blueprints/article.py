@@ -17,9 +17,9 @@ def post_article() -> dict:
         return flask.jsonify({"error": "Invalid JSON data"}), 400
 
     # Get relevant fields for creation
-    title: str = data["title"]
-    body: str = data["body"]
-    user_id: str = data["user_id"]
+    title: str = data.get("title")
+    body: str = data.get("body")
+    user_id: str = data.get("user_id")
 
     if not title or not body:
         return flask.jsonify({"error": "Post or title is empty!"}), 400
@@ -42,7 +42,7 @@ def delete_article() -> dict:
         return flask.jsonify({"error": "Invalid JSON data"}), 400
 
     # Get id from JSON
-    id: str = data["id"]
+    id: str = data.get("id")
     if not id:
         return flask.jsonify({"error": "Article_id is empty!"}), 400
 
@@ -62,9 +62,9 @@ def update_article():
         return flask.jsonify({"error": "Invalid JSON data"}), 400
 
     # Get relevant fields from JSON
-    id: str = data["id"]
-    title: str = data["title"]
-    body: str = data["body"]
+    id: str = data.get("id")
+    title: str = data.get("title")
+    body: str = data.get("body")
 
     if not id:
         return flask.jsonify({"error": "Article ID is empty!"}), 400
@@ -85,6 +85,21 @@ def update_article():
 #     pass
 
 
-# @bp.route("/article/retrieve/<int:id>", methods=["GET"])
-# def get_article():
-#     pass
+@bp.post("get_article")
+def get_article():
+    # Get the JSON data from the request
+    data: Optional[Dict[str, Any]] = flask.request.get_json()
+    if data is None:
+        return flask.jsonify({"error": "Invalid JSON data"}), 400
+
+    # Get relevant fields from JSON
+    id: str = data.get("id")
+
+    if not id:
+        return flask.jsonify({"error": "Article ID is empty!"}), 400
+
+    fetched_article = article.get_article(id)
+    if not fetched_article:
+        return flask.jsonify({"error": "Article is not found!"}), 400
+
+    return flask.jsonify(fetched_article.to_dict()), 200
