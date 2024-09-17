@@ -37,7 +37,10 @@ def login():
 
 @bp.post("logout")
 def logout():
-    pass
+    flask.session.clear()
+    return flask.jsonify({
+        "success": "user logged out"
+    })
 
 
 @bp.post("register_new_user")
@@ -51,8 +54,14 @@ def register_new_user():
             {"error": "missing email or password"}
         ), 400
 
-    new_user = lib.user.user.create_new_user(new_user_email, new_user_password)
+    # check unique constraint for email
+    user = lib.user.user.get_user_by_email(new_user_email)
+    if user:
+        return flask.jsonify(
+            {"error": "email already registered"}
+        ), 400
 
+    new_user = lib.user.user.create_new_user(new_user_email, new_user_password)
     if json.get("firstname"):
         new_user.first_name = json.get("firstname")
     if json.get("lastname"):
