@@ -86,8 +86,40 @@ def update_article(article_id: str, title: str, body: str) -> article_db.Article
 
 
 def get_article(article_id: str) -> article_db.Article:
+    """
+    Retrieves an article from the database by its ID.
+
+    Parameters:
+    article_id (str): The ID of the article to be retrieved.
+
+    Returns:
+    article_db.Article: The Article object corresponding to the provided ID.
+    """
     with article_db.Driver.SessionMaker() as db_session:
         article: article_db.Article = db_session.query(article_db.Article).get(
             article_id
         )
+
     return article
+
+
+def list_all_articles() -> list:
+    """
+    Retrieves all articles from the database and returns a list of dictionaries representing the articles.
+
+    The function truncates the body of each article to 200 characters.
+
+    Returns:
+    list: A list of dictionaries, each representing an article with its attributes.
+    """
+    articles_list = []
+
+    # Get all articles from table
+    with article_db.Driver.SessionMaker() as db_session:
+        articles: list = db_session.query(article_db.Article).all()
+
+    for article in articles:
+        article.body = article.body[:200]
+        articles_list.append(article.to_dict())
+
+    return articles_list
