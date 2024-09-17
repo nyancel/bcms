@@ -30,3 +30,11 @@ def get_user(user_id: str) -> user_db.User:
         user_query = user_query.where(user_db.User.id == user_id)
         user = user_query.first()
     return user
+
+
+def get_user_by_email(user_email: str) -> user_db.User:
+    with user_db.Driver.SessionMaker() as db_session:
+        user_query = db_session.query(user_db.User)
+        user_query = user_query.where(user_db.User.email == user_email)
+        user = user_query.first()
+    return user
