@@ -1,19 +1,18 @@
 import flask
-import dotenv
-import os
+
+import lib.util.env as env
 
 import blueprints.article
 import blueprints.media
 import blueprints.user
 
-dotenv.load_dotenv()
 
 server = flask.Flask(__name__)
 server.register_blueprint(blueprints.article.bp)
 server.register_blueprint(blueprints.media.bp)
 server.register_blueprint(blueprints.user.bp)
 
-server.secret_key = os.getenv("SECRET_KEY")
+server.secret_key = env.SECRET_KEY
 
 @server.post("/ping")
 def sanity():
