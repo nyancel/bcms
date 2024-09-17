@@ -40,10 +40,19 @@ def register_new_user():
 
 @bp.post("me")
 def me():
-    """
-    Returns info about who the current user is logged in as
-    """
-    pass
+    user_id = flask.session.get("user_id")
+    if not user_id:
+        return flask.jsonify(
+            {"error": "not authenticated"}
+        ), 400
+    
+    user = lib.user.user.get_user(user_id)
+    if not user:
+        return flask.jsonify(
+            {"error": "no user data"}
+        ), 400
+
+    return flask.jsonify(user.to_dict)
 
 
 @bp.post("list_users")
