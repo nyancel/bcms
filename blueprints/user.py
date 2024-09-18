@@ -95,7 +95,7 @@ def me():
             {"error": "token not supplied"}
         ), 400
 
-    token = lib.user.token.get_token(token)
+    token = lib.user.token.get_token(user_token)
     if not token:
         return flask.jsonify(
             {"error": "token invalid"}
