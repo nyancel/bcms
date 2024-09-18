@@ -3,7 +3,6 @@ import time
 import lib.user.user_db as user_db
 import lib.util.crypt as crypt
 
-
 def create_new_user(email: str, password: str) -> user_db.User:
     new_user = user_db.User()
     new_user.salt = crypt.random_string(64)

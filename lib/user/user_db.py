@@ -62,6 +62,18 @@ class UserToken(Driver.BASE):
     __tablename__ = "user_token"
     id: orm.Mapped[str] = orm.mapped_column(primary_key=True)
     user_id: orm.Mapped[str]
-    token: orm.Mapped[str]
     created_at: orm.Mapped[float]
     expires_at: orm.Mapped[float]
+
+    def __init__(self, **kw: sql.Any):
+        super().__init__(**kw)
+        self.id = crypt.new_uid()
+        self.expires_at = time.time() + 60*60  # valid for one hour by default
+        self.created_at = time.time()
+
+    def to_dict(self):
+        _dict = {}
+        _dict["id"] = self.id
+        _dict["user_id"] = self.user_id
+        _dict["created_at"] = self.created_at
+        _dict["expires_at"] = self.expires_at

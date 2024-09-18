@@ -1,7 +1,8 @@
 import flask
-import lib.user
+import time
+
 import lib.user.user
-import lib.util
+import lib.user.token
 import lib.util.crypt
 
 bp = flask.Blueprint("user_bp", __name__)
@@ -31,13 +32,26 @@ def login():
             {"error": "user not found"}
         ), 400
 
-    flask.session["user_id"] = user.id
-    return flask.jsonify(user.to_dict())
+    user_token = lib.user.token.create_new_token(user.id)
+    return flask.jsonify(user_token.to_dict())
 
 
 @bp.post("logout")
 def logout():
-    flask.session.clear()
+    json: dict = flask.request.json
+    user_token = json.get("user_token")
+
+    if not user_token:
+        return flask.jsonify(
+            {"error": "token not supplied"}
+        ), 400
+
+    deleted = lib.user.token.delete_token(user_token)
+    if not deleted:
+        return flask.jsonify(
+            {"error": "could not delete token"}
+        ), 400
+
     return flask.jsonify({
         "success": "user logged out"
     })
@@ -73,13 +87,27 @@ def register_new_user():
 
 @bp.post("me")
 def me():
-    user_id = flask.session.get("user_id")
-    if not user_id:
+    json: dict = flask.request.json
+    user_token = json.get("user_token")
+
+    if not user_token:
         return flask.jsonify(
-            {"error": "not authenticated"}
+            {"error": "token not supplied"}
         ), 400
 
-    user = lib.user.user.get_user(user_id)
+    token = lib.user.token.get_token(token)
+    if not token:
+        return flask.jsonify(
+            {"error": "token invalid"}
+        ), 400
+
+    if time.time() > token.expires_at:
+        lib.user.token.delete_token(token.id)
+        return flask.jsonify(
+            {"error": "token expired"}
+        ), 400
+
+    user = lib.user.user.get_user(token.user_id)
     if not user:
         return flask.jsonify(
             {"error": "no user data"}
