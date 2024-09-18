@@ -2,6 +2,7 @@ import os
 
 folders = [
     "volume",
+    "volume/db",
     "volume/media",
     "volume/media/metadata",
     "volume/media/files",
