@@ -82,7 +82,7 @@ def register_new_user():
         new_user.last_name = json.get("lastname")
     lib.user.user.save_user(new_user)
 
-    return flask.jsonify(new_user.to_dict()), 200
+    return flask.jsonify(new_user.to_dict())
 
 
 @bp.post("me")
@@ -118,19 +118,136 @@ def me():
 
 @bp.post("list_users")
 def list_users():
-    pass
+    users = lib.user.user.get_all_users()
+    users = [u.to_dict() for u in users]
+
+    # purge fields we dont want exposed to the client
+    for u in users:
+        u.pop("email")
+        u.pop("user_role")
+
+    return flask.jsonify(users)
 
 
 @bp.post("show_user")
 def show_user():
-    pass
+    json: dict = flask.request.json
+    user_id = json.get("user_id")
+
+    if not user_id:
+        return flask.jsonify(
+            {"error": "user_id not provided"}
+        ), 400
+
+    user = lib.user.user.get_user(user_id)
+    if not user:
+        return flask.jsonify(
+            {"error": "user not found"}
+        ), 400
+
+    # purge fields we dont want exposed to the client
+    user_dict = user.to_dict()
+    user_dict.pop("email")
+    user_dict.pop("user_role")
+    return flask.jsonify(user_dict)
 
 
 @bp.post("edit_user")
 def edit_user():
-    pass
+    json: dict = flask.request.json
+    user_token = json.get("user_token")
+    password = json.get("password")
+
+    # errors and early returns
+    if None in [user_token, password]:
+        return flask.jsonify(
+            {"error": "token or password not supplied"}
+        ), 400
+
+    token = lib.user.token.get_token(user_token)
+    if not token:
+        return flask.jsonify(
+            {"error": "token invalid"}
+        ), 400
+
+    if time.time() > token.expires_at:
+        lib.user.token.delete_token(token.id)
+        return flask.jsonify(
+            {"error": "token expired"}
+        ), 400
+
+    user = lib.user.user.get_user(token.user_id)
+    if not user:
+        return flask.jsonify(
+            {"error": "no user data"}
+        ), 400
+
+    pw_check = lib.util.crypt.hash_with_salt(password, user.salt)
+    if pw_check != user.hash:
+        return flask.jsonify(
+            {"error": "invalid password"}
+        ), 400
+
+    # Logic
+    if json.get("new_password"):
+        user.salt = lib.util.crypt.random_string(64)
+        user.hash = lib.util.crypt.hash_with_salt(
+            json.get("new_password"), user.salt
+        )
+
+    if json.get("firstname"):
+        user.first_name = json.get("firstname")
+
+    if json.get("lastname"):
+        user.last_name = json.get("lastname")
+
+    if json.get("new_email"):
+        user.email = json.get("new_email")
+
+    lib.user.user.save_user(user)
+    return flask.jsonify(user.to_dict())
 
 
 @bp.post("delete_user")
 def delete_user():
-    pass
+    json: dict = flask.request.json
+    user_token = json.get("user_token")
+    password = json.get("password")
+
+    # errors and early returns
+    if None in [user_token, password]:
+        return flask.jsonify(
+            {"error": "token or password not supplied"}
+        ), 400
+
+    token = lib.user.token.get_token(user_token)
+    if not token:
+        return flask.jsonify(
+            {"error": "token invalid"}
+        ), 400
+
+    if time.time() > token.expires_at:
+        lib.user.token.delete_token(token.id)
+        return flask.jsonify(
+            {"error": "token expired"}
+        ), 400
+
+    user = lib.user.user.get_user(token.user_id)
+    if not user:
+        return flask.jsonify(
+            {"error": "no user data"}
+        ), 400
+
+    pw_check = lib.util.crypt.hash_with_salt(password, user.salt)
+    if pw_check != user.hash:
+        return flask.jsonify(
+            {"error": "invalid password"}
+        ), 400
+
+    deleted = lib.user.user.delete_user(user.id)
+    if not deleted:
+        return flask.jsonify(
+            {"error": "could not delete"}
+        ), 400
+
+    return flask.jsonify({"success": "user deleted"})

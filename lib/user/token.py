@@ -12,11 +12,13 @@ def create_new_token(user_id: str) -> user_db.UserToken:
 
 def delete_token(token_id: str) -> bool:
     with user_db.Driver.SessionMaker() as session:
-        token = session.query(user_db.UserToken)\
-            .where(user_db.UserToken.id == token_id)\
-            .first()
+        token_query = session.query(user_db.UserToken)
+        token_query = token_query.where(user_db.UserToken.id == token_id)
+        token = token_query.first()
+
         if not token:
             return False
+
         session.delete(token)
         session.commit()
     return True
@@ -24,7 +26,7 @@ def delete_token(token_id: str) -> bool:
 
 def get_token(token_id: str) -> user_db.UserToken:
     with user_db.Driver.SessionMaker() as session:
-        token = session.query(user_db.UserToken)\
-            .where(user_db.UserToken.id == token_id)\
-            .first()
+        token_query = session.query(user_db.UserToken)
+        token_query = token_query.where(user_db.UserToken.id == token_id)
+        token = token_query.first()
     return token

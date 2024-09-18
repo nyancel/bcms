@@ -38,12 +38,16 @@ class User(Driver.BASE):
     user_role: orm.Mapped[UserRole]
     last_edited: orm.Mapped[float]
     created_at: orm.Mapped[float]
+    is_deleted: orm.Mapped[bool]
+    deletion_time: orm.Mapped[float]
 
     def __init__(self, **kw: sql.Any):
         super().__init__(**kw)
         self.user_role = UserRole.READER
         self.id = crypt.new_uid()
         self.created_at = time.time()
+        self.is_deleted = False
+        self.deletion_time = 0
         return self
 
     def to_dict(self):
@@ -70,6 +74,7 @@ class UserToken(Driver.BASE):
         self.id = crypt.new_uid()
         self.expires_at = time.time() + 60*60  # valid for one hour by default
         self.created_at = time.time()
+        return self
 
     def to_dict(self):
         _dict = {}
@@ -77,3 +82,4 @@ class UserToken(Driver.BASE):
         _dict["user_id"] = self.user_id
         _dict["created_at"] = self.created_at
         _dict["expires_at"] = self.expires_at
+        return _dict

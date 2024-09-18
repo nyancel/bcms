@@ -19,7 +19,7 @@ def hash_with_salt(input: str, salt: str) -> str:
     return hex_digest
 
 
-def random_string(length: int) -> str:
+def random_string(length: int = 64) -> str:
     symbols = string.ascii_letters + string.digits
     random_symbols = [random.choice(symbols) for i in range(length)]
     result = "".join(symbol for symbol in random_symbols)

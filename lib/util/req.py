@@ -4,7 +4,7 @@ import json
 import lib.util.env as env
 
 
-def validate_token(token_id: str):
+def fetch_user_from_token(token_id: str):
     target = f"{env.SERVER_ADRESS}/user/me"
     headers = {
         "content-type": "application/json"
