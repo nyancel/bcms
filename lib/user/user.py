@@ -48,3 +48,14 @@ def get_all_users() -> list[user_db.User]:
         user_query = user_query.where(user_db.User.is_deleted == False)
         users = user_query.all()
     return users
+
+
+def delete_user(user_id: str) -> bool:
+    user = get_user(user_id)
+    if not user:
+        return False
+    user.is_deleted = True
+    user = save_user(user)
+    if not user:
+        return False
+    return True
