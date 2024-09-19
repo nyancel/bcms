@@ -1,18 +1,12 @@
-from typing import Optional as opt
-
+import time
 import sqlalchemy as sql
 import sqlalchemy.orm as orm
+
 import lib.util.crypt as crypt
-import dotenv
-import os
-import enum
-import time
-import datetime
+import lib.util.env as env
 
-import lib.user.user_db as user_db
 
-dotenv.load_dotenv()
-DATABASE_PATH = os.getenv("ARTICLE_DB_PATH")
+DATABASE_PATH = env.ARTICLE_DB_PATH
 
 
 class Base(orm.DeclarativeBase):

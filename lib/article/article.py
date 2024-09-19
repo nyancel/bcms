@@ -1,5 +1,4 @@
 import lib.article.article_db as article_db
-import sqlalchemy.sql as sql
 
 import time
 
