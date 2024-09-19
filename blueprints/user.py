@@ -85,8 +85,8 @@ def register_new_user():
     return flask.jsonify(new_user.to_dict())
 
 
-@bp.post("me")
-def me():
+@bp.post("who")
+def who():
     json: dict = flask.request.json
     user_token = json.get("user_token")
 

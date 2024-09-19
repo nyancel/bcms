@@ -59,7 +59,40 @@ def test_logout_user(token: str):
         return True, logout
 
 
+def test_who_user(token: str):
+    print("🟡 LOGGING OUT USER")
+    who_body = {
+        "user_token": token,
+    }
+
+    request = client.post("/user/who", json=who_body)
+    who_response: dict = request.json
+
+    if "error" in who_response.keys():
+        print("❌ TEST FAILED")
+        return False, who_response
+    else:
+        print("✅ TEST PASSED")
+        return True, who_response
+
+
+def test_list_users():
+    print("🟡 LISTING USERS")
+    request = client.post("/user/list_users", json={})
+    who_response: list = request.json
+
+    if request.status_code != 200:
+        print("❌ TEST FAILED")
+        return False, who_response
+    print("✅ TEST PASSED")
+    return True, who_response
+
+
 def run():
     result, data = test_new_user()
     result, data = test_login_user()
-    result, data = test_logout_user(data.get("id"))
+    token = data.get("id")
+    result, data = test_who_user(token)
+    result, data = test_logout_user(token)
+    result, data = test_list_users()
+    print(data)
