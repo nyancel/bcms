@@ -1,6 +1,7 @@
 import lib.article.article_db as article_db
 
 import time
+import json
 
 
 def create_article(title: str, body: str, user_id: str) -> article_db.Article:
@@ -21,8 +22,10 @@ def create_article(title: str, body: str, user_id: str) -> article_db.Article:
     # Create new article instance and edit relevant fields
     new_article = article_db.Article()
     new_article.title = title
-    new_article.body = body
     new_article.user_id = user_id
+
+    # Convert body:list to JSON string
+    new_article.body = json.dumps(body)
 
     # Add to database
     with article_db.Driver.SessionMaker() as db_session:
@@ -43,45 +46,22 @@ def delete_article(article_id: str) -> bool:
     bool: True if the article was successfully deleted, False otherwise.
     """
     with article_db.Driver.SessionMaker() as db_session:
-        try:
-            db_session.query(article_db.Article).filter(
-                article_db.Article.id == article_id
-            ).delete()
-            db_session.commit()
-            return True
-        except:
+        article = (
+            db_session.query(article_db.Article)
+            .filter(article_db.Article.id == article_id)
+            .first()
+        )
+        db_session.commit()
+
+        if not article:
             return False
 
-
-def update_article(article_id: str, title: str, body: str) -> article_db.Article:
-    """
-    Updates an existing article in the database with new title and/or body content.
-    Also updates update_timestamp of the article.
-
-    Parameters:
-    article_id (str): The ID of the article to be updated.
-    title (str): The new title for the article. If empty, the title will not be updated.
-    body (str): The new body content for the article. If empty, the body will not be updated.
-
-    Returns:
-    article_db.Article: The updated Article object.
-    """
-    with article_db.Driver.SessionMaker() as db_session:
-        article: article_db.Article = db_session.query(article_db.Article).get(
-            article_id
-        )
-        if title:
-            article.title = title
-        if body:
-            article.body = body
-
-        article.update_timestamp = time.time()
-
-        # Save changes
+        article.isDeleted = True
+        article.isListed = False
         db_session.add(article)
         db_session.commit()
 
-    return article
+    return True
 
 
 def get_article(article_id: str) -> article_db.Article:
@@ -98,8 +78,36 @@ def get_article(article_id: str) -> article_db.Article:
         article: article_db.Article = db_session.query(article_db.Article).get(
             article_id
         )
+        if not article:
+            return None
+
+        # Return body as JSON string
+        article.body = json.loads(article.body)
 
     return article
+
+
+def save_article(article: article_db.Article):
+    """
+    Saves an article to the database, updating its timestamp.
+
+    Parameters:
+    article (article_db.Article): The Article object to be saved.
+
+    Returns:
+    bool: True if the article was successfully saved, False otherwise.
+    """
+    with article_db.Driver.SessionMaker() as db_session:
+        try:
+            article.update_timestamp = time.time()
+
+            # Save changes
+            db_session.add(article)
+            db_session.commit()
+        except:
+            return False
+
+    return True
 
 
 def list_all_articles() -> list:
@@ -118,7 +126,18 @@ def list_all_articles() -> list:
         articles: list = db_session.query(article_db.Article).all()
 
     for article in articles:
-        article.body = article.body[:200]
+        if article.isDeleted:
+            continue
+
+        body_dict = json.loads(article.body)
+        print(body_dict)
+
+        truncated_body = ""
+        for item in body_dict:
+            if item["type"] == "paragraph":
+                truncated_body += item["content"]
+
+        article.body = truncated_body[:200]
         articles_list.append(article.to_dict())
 
     return articles_list

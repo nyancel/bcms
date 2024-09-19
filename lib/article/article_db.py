@@ -29,6 +29,7 @@ class Article(Driver.BASE):
     update_timestamp: orm.Mapped[float]
     isAccepted: orm.Mapped[bool] = orm.mapped_column(default=False)
     isListed: orm.Mapped[bool] = orm.mapped_column(default=True)
+    isDeleted: orm.Mapped[bool] = orm.mapped_column(default=False)
 
     def __init__(self, **kw: sql.Any):
         super().__init__(**kw)
@@ -46,4 +47,5 @@ class Article(Driver.BASE):
         _dict["update_timestamp"] = self.update_timestamp
         _dict["isAccepted"] = self.isAccepted
         _dict["isListed"] = self.isListed
+        _dict["isDeleted"] = self.isDeleted
         return _dict

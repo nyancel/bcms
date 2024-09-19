@@ -73,11 +73,20 @@ def update_article():
     if not title and not body:
         return flask.jsonify({"error": "Title/body is empty!"}), 400
 
-    updated_article = article.update_article(id, title, body)
-    if not updated_article:
-        return flask.jsonify({"error": "Could not update article!"}), 400
+    fetched_article = article.get_article(id)
+    if not fetched_article:
+        return flask.jsonify({"error": "Article not found!"}), 400
 
-    return flask.jsonify(updated_article.to_dict()), 200
+    if title:
+        fetched_article.title = title
+    if body:
+        fetched_article.body = body
+
+    save_code = article.save_article(fetched_article)
+    # if not save_code:
+    #     return flask.jsonify({"error": "Could not update article!"}), 400
+
+    return flask.jsonify(fetched_article.to_dict()), 200
 
 
 @bp.post("list_all_articles")
