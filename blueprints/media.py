@@ -1,20 +1,14 @@
-# TODO
-# * media uploads
-# * media thumbnails
-# * media distribution
+import threading
 
 import flask
 import lib.media.upload
+import lib.media.fetch
 
 bp = flask.Blueprint("media", __name__)
 
 
 @bp.post("/media/upload_media")
 def upload_media():
-    """
-    TODO user authentication
-    """
-
     if "media" not in flask.request.files:
         return (
             flask.jsonify({"error": "post request is missing a file labeled 'media'"}),
@@ -32,6 +26,19 @@ def upload_media():
     )
 
 
-# @blueprint.post("/media/delete")
-# def delete():
-#     return flask.jsonify(user)
+@bp.post("/media/fetch_media")
+def fetch_media():
+    media_ID = flask.request.args.get("media_ID")
+    
+    if not media_ID:
+        return flask.jsonify(
+            {"error": "no media_ID given"},
+            400
+        )
+    
+    data = lib.media.fetch.get_media_full(media_ID)
+    
+    if isinstance(data, Exception):
+        return flask.jsonify({"error": data.args[0]}), 400
+
+    return flask.jsonify(data), 200

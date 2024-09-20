@@ -1,0 +1,15 @@
+meta {
+  name: upload_image
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://127.0.0.1:3000/media/upload_media
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  media: @file(./upload_image.jpg)
+}
