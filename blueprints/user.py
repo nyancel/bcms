@@ -251,3 +251,30 @@ def delete_user():
         ), 400
 
     return flask.jsonify({"success": "user deleted"})
+
+
+@bp.post("refresh_token")
+def refresh_token():
+    json: dict = flask.request.json
+    user_token = json.get("user_token")
+    token = lib.user.token.get_token(user_token)
+
+    if not token:
+        return flask.jsonify(
+            {"error": "token invalid"}
+        ), 400
+
+    if time.time() > token.expires_at:
+        lib.user.token.delete_token(token.id)
+        return flask.jsonify(
+            {"error": "token expired"}
+        ), 400
+
+    user = lib.user.user.get_user(token.user_id)
+    if not user:
+        return flask.jsonify(
+            {"error": "no user data"}
+        ), 400
+    lib.user.token.delete_token(token.id)
+    new_token = lib.user.token.create_new_token(user.id)
+    return flask.jsonify(new_token.to_dict())
