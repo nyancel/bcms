@@ -5,7 +5,7 @@ if __name__ == "__main__":
 import lib.media.media_db as media_db
 
 # get the metadata for a media piece and only the metadata
-def get_media_metadata(media_id: str) -> media_db.Media | None:
+def get_media_metadata(media_id: str) -> dict | None:
     with media_db.Driver.SessionMaker() as db_session:
         media_query = db_session.query(media_db.Media)
         media_query = media_query.where(media_db.Media.id == media_id)
@@ -15,13 +15,17 @@ def get_media_metadata(media_id: str) -> media_db.Media | None:
     if media_metadata:
         return media_metadata.to_dict()
 
+
 # get a specific resolution
-def get_specific_media_instance(instance_id: str) -> media_db.MediaInstance:
+def get_specific_media_instance(instance_id: str) -> dict | None:
     with media_db.Driver.SessionMaker() as db_session:
         media_query = db_session.query(media_db.MediaInstance)
         media_query = media_query.where(media_db.MediaInstance.instance_id == instance_id)
         media_instance = media_query.first()
-    return media_instance
+    
+    if media_instance:
+        return media_instance.to_dict()
+
 
 def get_media_full(media_id: str) -> Exception | dict[str: media_db.Media, str: list[media_db.MediaInstance]]:
     media_content = {}
@@ -38,12 +42,12 @@ def get_media_full(media_id: str) -> Exception | dict[str: media_db.Media, str: 
         media_query = media_query.where(media_db.MediaInstance.parent_id == media_id)
         media_content["instances"] = []
         for instance in media_query.all():
-            instance_data = instance.to_dict()
-            # i swear this is temporary
-            instance_data["url"] = f"http://localhost:8080/volume/media/files/{media_id}/{instance_data['instance_id']}.{media_content['metadata']['file_extention']}"
-            media_content["instances"].append(instance_data)
+            instance_dict = instance.to_dict()
+            if instance_dict:
+                media_content["instances"].append(instance_dict)
     
     return media_content
+
 
 if __name__ == "__main__":
     import json

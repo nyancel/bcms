@@ -3,6 +3,7 @@ import threading
 import flask
 import lib.media.upload
 import lib.media.fetch
+import lib.util.env
 
 bp = flask.Blueprint("media", __name__)
 
@@ -42,3 +43,37 @@ def fetch_media():
         return flask.jsonify({"error": data.args[0]}), 400
 
     return flask.jsonify(data), 200
+
+@bp.get("/media/fetch_media_instance")
+def fetch_media_instance():
+    instance_ID = flask.request.args.get("instance_ID")
+    
+    if not instance_ID:
+        return flask.jsonify(
+            {"error": "no instance_ID given"},
+            400
+        )
+    
+    data = lib.media.fetch.get_specific_media_instance(instance_ID)
+
+    if not data:
+        return flask.jsonify(
+            {"error": "an unhandled error occured whilst fetching instance data"},
+            400
+        )
+    
+    parent_ID = data["parent_id"]
+    metadata = lib.media.fetch.get_media_metadata(parent_ID)
+    
+    if not metadata:
+        return flask.jsonify(
+            {"error": "an unhandled error occured whilst fetching metadata"},
+            400
+        )
+    
+    file_extention = metadata["file_extention"]
+    filename = metadata["filename"]
+    
+    filepath = f"volume/media/files/{parent_ID}/{instance_ID}.{file_extention}"
+    
+    return flask.send_file(filepath, download_name=filename)

@@ -101,7 +101,6 @@ def _save_image(uploaded_image: flask_datastructures.FileStorage, image_ID: str,
         media_instance = media_db.MediaInstance()
         media_instance.instance_id = instance_id
         media_instance.parent_id = db_parent_ID
-        media_instance.url = "TODO"
         media_instance.x_dimension = image.size[0]
         media_instance.y_dimension = image.size[1]
         
