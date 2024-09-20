@@ -55,3 +55,13 @@ return
   }
 }
 ```
+
+GET    /media/fetch_media_instance"
+<!-- do note that the instance_ID will not be a drop in replacement due to the database being local -->
+query
+params:query {
+  instance_ID: 1726829477543921-De1ySZKWvQEN
+}
+
+return
+<file object>
