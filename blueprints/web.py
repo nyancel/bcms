@@ -6,7 +6,7 @@ bp.url_prefix = "/"
 
 @bp.get("")
 def web_index():
-    return "hello world"
+    return flask.render_template("pages/index.jinja")
 
 
 @bp.get("/signin")

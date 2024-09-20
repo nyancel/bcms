@@ -25,7 +25,10 @@
     <link rel="icon" type="image/png" href="{{url_for('static', filename='media/icon.png')}}" />
 </head>
 
-<body class="">
+<body class="p-12">
+
+    {% include "components/header.jinja" %}
+
     {% block body %}
 
     {% endblock body %}
