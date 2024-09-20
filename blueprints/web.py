@@ -19,6 +19,6 @@ def web_editor():
     return "hello world"
 
 
-@bp.get("/article/<string:id>")
+@bp.get("/article")
 def web_article():
     return "hello world"
