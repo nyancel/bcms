@@ -29,5 +29,5 @@ def random_string(length: int = 64) -> str:
 def new_uid() -> str:
     timestamp = time.time()
     timestamp = str(timestamp).replace(".", "")
-    result = f"{timestamp}-{random_string(12)}"
+    result = f"{random_string(12)}-{timestamp}"
     return result
