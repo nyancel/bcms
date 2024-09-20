@@ -83,8 +83,8 @@ def update_article():
         fetched_article.body = body
 
     save_code = article.save_article(fetched_article)
-    # if not save_code:
-    #     return flask.jsonify({"error": "Could not update article!"}), 400
+    if not save_code:
+        return flask.jsonify({"error": "Could not update article!"}), 400
 
     return flask.jsonify(fetched_article.to_dict()), 200
 
@@ -116,3 +116,11 @@ def get_article():
         return flask.jsonify({"error": "Article is not found!"}), 400
 
     return flask.jsonify(fetched_article.to_dict()), 200
+
+
+@bp.post("approve_article")
+def approve_article():
+    """
+    set isListed = True, BARE FOR EDITORIAL OG ADMINS
+    - kan unliste på samme endpoint!!
+    """

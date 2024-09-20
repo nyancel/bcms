@@ -114,7 +114,7 @@ def list_all_articles() -> list:
     """
     Retrieves all articles from the database and returns a list of dictionaries representing the articles.
 
-    The function truncates the body of each article to 200 characters.
+    The function truncates the total paragraphs of each article to 200 characters.
 
     Returns:
     list: A list of dictionaries, each representing an article with its attributes.
