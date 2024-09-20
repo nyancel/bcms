@@ -36,30 +36,25 @@ def save_files(files: list[flask_datastructures.FileStorage]) -> list[str, Excep
     }
     
     for file in files:
-        result = save_file(file)
+        file_ID = save_file(file)
         
         filename = file.filename.replace(" ", "_")
         
-        if result == 1:
-            return_payload["results"][filename] = {
-                "success": 1
-            }
-
-        elif isinstance(result, Exception):
+        if isinstance(file_ID, Exception):
             return_payload["results"][filename] = {
                 "success": 0,
-                "message": result.args
+                "message": file_ID.args
             }
         
         else:
             return_payload["results"][filename] = {
-                "success": -1,
-                "message": "unknown error"
+                "success": 1,
+                "file_ID": file_ID
             }
     
     return return_payload
 
-def save_file(file: flask_datastructures.FileStorage, uploader = None) -> int | Exception:
+def save_file(file: flask_datastructures.FileStorage, uploader = None) -> str | Exception:
     success = 0    
     file_ID = lib.util.crypt.new_uid()
     
@@ -89,7 +84,7 @@ def save_file(file: flask_datastructures.FileStorage, uploader = None) -> int | 
             db_session.add(db_entry)
             db_session.commit()
         
-        return 1
+        return file_ID
 
     return Exception("an unknown error occured")
 
@@ -100,14 +95,14 @@ def _save_image(uploaded_image: flask_datastructures.FileStorage, image_bytes: i
     available_image_resolutions = []
     
     def __save_image_to_S3(image: PIL.Image, db_parent_ID):
+        instance_id = lib.util.crypt.new_uid()
         media_instance = media_db.MediaInstance()
-        media_instance.instance_id = lib.util.crypt.new_uid()
+        media_instance.instance_id = instance_id
         media_instance.parent_id = db_parent_ID
         media_instance.x_dimension = image.size[0]
         media_instance.y_dimension = image.size[1]
         
-        image_size = f"{image.size[0]}_{image.size[1]}"
-        image.save(f"{image_path}/{image_size}.{file_extention}", optimize=True, quality=95)
+        image.save(f"{image_path}/{instance_id}.{file_extention}", optimize=True, quality=95)
         
         with media_db.Driver.SessionMaker() as db_session:
             db_session.add(media_instance)

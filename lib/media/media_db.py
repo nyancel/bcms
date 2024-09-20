@@ -21,9 +21,19 @@ class MediaInstance(Driver.BASE):
     __tablename__ = "file"
     instance_id: orm.Mapped[str] = orm.mapped_column(primary_key=True)
     parent_id: orm.Mapped[str]
+    url: orm.Mapped[str]
     x_dimension: orm.Mapped[int]
     y_dimension: orm.Mapped[int]
 
+    def to_dict(self):
+        _dict = {}
+        _dict["instance_id"] = self.instance_id
+        _dict["parent_id"] = self.parent_id
+        _dict["url"] = self.parent_id
+        _dict["x_dimension"] = self.x_dimension
+        _dict["y_dimension"] = self.y_dimension
+        
+        return _dict
 
 class Media(Driver.BASE):
     __tablename__ = "media"
@@ -56,5 +66,4 @@ class Media(Driver.BASE):
         _dict["is_deleted"] = self.is_deleted
         _dict["deletion_time"] = self.deletion_time
         
-        # TODO
         return _dict
