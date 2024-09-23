@@ -2,9 +2,12 @@ import lib.article.article_db as article_db
 
 import time
 import json
+from typing import Optional
 
 
-def create_article(title: str, body: str, user_id: str) -> article_db.Article:
+def create_article(
+    title: str, body: str, user_id: str, draft: bool, desc: Optional[str]
+) -> article_db.Article:
     """
     Creates and saves a new Article instance in the database.
 
@@ -12,6 +15,7 @@ def create_article(title: str, body: str, user_id: str) -> article_db.Article:
     title (str): The title of the article.
     body (str): The body content of the article.
     user_id (str): The ID of the user who created the article.
+    draft (bool):
 
     Returns:
     article_db.Article: The newly created Article object.
@@ -24,8 +28,14 @@ def create_article(title: str, body: str, user_id: str) -> article_db.Article:
     new_article.title = title
     new_article.user_id = user_id
 
+    # If direct post without draft
+    if draft == False:
+        new_article.isDraft = draft
+
     # Convert body:list to JSON string
     new_article.body = json.dumps(body)
+
+    new_article.desc = desc if desc else ""
 
     # Add to database
     with article_db.Driver.SessionMaker() as db_session:
@@ -57,6 +67,7 @@ def delete_article(article_id: str) -> bool:
             return False
 
         article.isDeleted = True
+        article.isDraft = False
         article.isListed = False
         db_session.add(article)
         db_session.commit()
@@ -101,10 +112,15 @@ def save_article(article: article_db.Article):
         try:
             article.update_timestamp = time.time()
 
+            # Ensure the body is serialized to a JSON string
+            if isinstance(article.body, list):
+                article.body = json.dumps(article.body)
+
             # Save changes
             db_session.add(article)
             db_session.commit()
-        except:
+        except Exception as error:
+            print("An exception occurred:", type(error).__name__, error)
             return False
 
     return True
@@ -126,18 +142,9 @@ def list_all_articles() -> list:
         articles: list = db_session.query(article_db.Article).all()
 
     for article in articles:
-        if article.isDeleted:
+        if article.isDeleted or not article.isListed:
             continue
 
-        body_dict = json.loads(article.body)
-        print(body_dict)
-
-        truncated_body = ""
-        for item in body_dict:
-            if item["type"] == "paragraph":
-                truncated_body += item["content"]
-
-        article.body = truncated_body[:200]
-        articles_list.append(article.to_dict())
+        articles_list.append({"title": article.title, "desc": article.desc})
 
     return articles_list

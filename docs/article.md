@@ -43,12 +43,17 @@ heading contains a short text that is the heading of an article
 The table which contains the articles have following attributes:
 
 - id: primary key to identify the article
-- title, body: used to store title and body of article.
+- title: used to store title
+- body: body of article. Is a nested dictionary with text, pictures...
+- desc: short description of the article. Should only be text
 - user_id: foreign key to the user table
 - timestamp: when the article was posted
 - update_timestamp: when the article was edited
 - isAccepted: to determine if the article is been accepted by the redaksjon
-- isListed: to determine if the article has been deleted or not
+- accepted_id: who has approved the article
+- isListed: to determine if the article is listed on the page
+- isDraft: is the article in drafts?
+- isDeleted: to determine if the article is not draft 
 
 ## JSON representation
 

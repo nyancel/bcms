@@ -24,11 +24,14 @@ class Article(Driver.BASE):
     id: orm.Mapped[str] = orm.mapped_column(primary_key=True)
     title: orm.Mapped[str]
     body: orm.Mapped[str]
+    desc: orm.Mapped[str]
     user_id: orm.Mapped[str]
     timestamp: orm.Mapped[float]
     update_timestamp: orm.Mapped[float]
+    accepted_id: orm.Mapped[str]
     isAccepted: orm.Mapped[bool] = orm.mapped_column(default=False)
-    isListed: orm.Mapped[bool] = orm.mapped_column(default=True)
+    isListed: orm.Mapped[bool] = orm.mapped_column(default=False)
+    isDraft: orm.Mapped[bool] = orm.mapped_column(default=True)
     isDeleted: orm.Mapped[bool] = orm.mapped_column(default=False)
 
     def __init__(self, **kw: sql.Any):
@@ -37,15 +40,21 @@ class Article(Driver.BASE):
         self.timestamp = time.time()
         self.update_timestamp = time.time()
 
+        # Approving process happens after creation of article
+        self.accepted_id = ""
+
     def to_dict(self):
         _dict = {}
         _dict["id"] = self.id
         _dict["title"] = self.title
         _dict["body"] = self.body
+        _dict["desc"] = self.desc
         _dict["user_id"] = self.user_id
         _dict["timestamp"] = self.timestamp
         _dict["update_timestamp"] = self.update_timestamp
         _dict["isAccepted"] = self.isAccepted
+        _dict["accepted_id"] = self.accepted_id
+        _dict["isDraft"] = self.isDraft
         _dict["isListed"] = self.isListed
         _dict["isDeleted"] = self.isDeleted
         return _dict

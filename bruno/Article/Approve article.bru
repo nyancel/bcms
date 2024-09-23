@@ -1,11 +1,11 @@
 meta {
-  name: Update article
+  name: Approve article
   type: http
-  seq: 4
+  seq: 7
 }
 
 post {
-  url: http://127.0.0.1:3000/article/update_article
+  url: http://127.0.0.1:3000/article/approve_article
   body: json
   auth: none
 }
@@ -13,6 +13,6 @@ post {
 body:json {
   {
     "id": "VVCmKvCQCkFb-1727122211289939",
-    "desc": "This is an desc"
+    "approved_id": "Bruker 1"
   }
 }
