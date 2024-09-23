@@ -14,12 +14,10 @@ async function gallery_load_all_media() {
 
   all_media.sort((a, b) => b.creation_time - a.creation_time);
 
-  let gallery_clone = gallery_image_display.cloneNode(false);
-  gallery_clone.innerHTML = null;
-
   let media_promises = all_media
     .filter((metadata) => metadata && metadata.id)
     .map(async (metadata) => {
+      console.log(metadata);
       let image_metadata = await util_fetch_post_json("/media/fetch_media", {
         media_ID: metadata.id,
       });
@@ -52,12 +50,23 @@ async function gallery_load_all_media() {
       let img = entry.querySelector("img");
       img.width = Math.pow(min, 0.5);
       img.src = target_url;
+
+      let remove_media_button = entry.querySelector(".remove-image-button");
+      console.log(remove_media_button);
+      remove_media_button.onclick = async () => {
+        await util_fetch_post_json("/media/mark_media_as_unlisted", {
+          media_ID: metadata.id,
+          mark_as_unlisted: true,
+        });
+        gallery_load_all_media();
+      };
+
       return entry;
     });
 
   let media_entries = await Promise.all(media_promises);
-  media_entries.forEach((entry) => gallery_clone.appendChild(entry));
-  gallery_image_display.innerHTML = gallery_clone.innerHTML;
+  gallery_image_display.innerHTML = null;
+  media_entries.forEach((entry) => gallery_image_display.appendChild(entry));
 }
 
 async function gallery_upload_current_files() {

@@ -4,6 +4,8 @@
 
 <template id="gallery-image-preview-template">
     <div class="p-2 bg-green-400">
+        <input class="hidden image-id" type="text">
+        <button class="remove-image-button p-2 bg-red-500 text-white rounded-md">Remove image</button>
         <img class="w-full" />
     </div>
 </template>
@@ -16,7 +18,7 @@
 
 <button id="upload-image-button" class="p-2 bg-blue-600 text-white rounded-md">Upload</button>
 
-<ol id="gallery-image-display">
+<ol id="gallery-image-display" class="space-y-4">
 
 </ol>
 
