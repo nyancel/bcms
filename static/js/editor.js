@@ -40,3 +40,14 @@ function move_item_up(index) {
   article[index] = article[index - 1];
   article[index - 1] = item;
 }
+
+function log_article() {
+  console.log(article);
+}
+
+function init() {
+  let log_button = document.getElementById("log-article");
+  log_button.onclick = log_article;
+}
+
+window.onload = init;

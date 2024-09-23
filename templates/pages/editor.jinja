@@ -2,5 +2,22 @@
 
 {% block body %}
 
+<template id="article-paragraph-template">
+</template>
+
+<template id="article-image-template">
+</template>
+
+<template id="article-heading-template">
+</template>
+
+<button 
+id="log-article"
+class="p-2 bg-blue-500 rounded-md text-white"
+>
+Log Article
+</button>
+
+
 <script src="{{url_for('static', filename='js/editor.js')}}"></script>
 {% endblock body %}
