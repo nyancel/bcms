@@ -1,0 +1,14 @@
+{% extends "pages/base.jinja" %}
+
+{% block body %}
+
+<p>
+    gallery
+</p>
+
+<input id="image-upload-source" type="file" multiple />
+
+<button id="upload-image-button" class="p-2 bg-blue-600 text-white rounded-md">Upload</button>
+
+<script src="{{url_for('static', filename='js/gallery.js')}}"></script>
+{% endblock body %}

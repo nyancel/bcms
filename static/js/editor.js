@@ -152,7 +152,7 @@ function log_article() {
 }
 
 // startup
-function init() {
+function gallery_init() {
   let log_button = document.getElementById("log-article");
   log_button.onclick = log_article;
 
@@ -166,4 +166,4 @@ function init() {
   add_heading_button.onclick = add_heading;
 }
 
-window.onload = init;
+window.onload = gallery_init;
