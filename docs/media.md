@@ -23,6 +23,9 @@ return
 ```
 
 
+--------------------------
+
+
 POST    /media/fetch_media"
 <!-- do note that the media_ID will not be a drop in replacement due to the database being local -->
 query
@@ -57,6 +60,10 @@ return
 }
 ```
 
+
+--------------------------
+
+
 GET    /media/fetch_media_instance
 <!-- do note that the instance_ID will not be a drop in replacement due to the database being local -->
 query
@@ -70,3 +77,33 @@ return
 POST   /media/fetch_all_media_metadata
 return
 list[dict]
+
+
+--------------------------
+
+
+POST   /media/mark_media_as_deleted
+query
+params:query {
+  media_ID: 03zgBAdZHaVg-1727112328808513
+  mark_as_deleted: false
+}
+
+return
+<!-- returns True if the media deletion state was changed, returns False if nothing changed -->
+bool or error
+
+
+--------------------------
+
+
+POST   /media/mark_media_as_unlisted
+query
+params:query {
+  media_ID: 03zgBAdZHaVg-1727112328808513
+  mark_as_unlisted: false
+}
+
+return
+<!-- returns True if the media unlisted state was changed, returns False if nothing changed -->
+bool or error
