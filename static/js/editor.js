@@ -43,10 +43,30 @@ function generate_preview() {
         container.appendChild(entry);
 
         // connect the input to the article item
-        let textarea = entry.querySelector("textarea");
+        let textarea = entry.querySelector(".paragraph-input");
         textarea.value = article[index].text;
         textarea.onchange = () => {
           article[index].text = textarea.value;
+        };
+
+        // hook up the delete button
+        let delete_button = entry.querySelector(".delete-button");
+        delete_button.onclick = () => {
+          remove_item(index);
+          generate_preview();
+        };
+
+        // hook up the buttons to move item up and down
+        let move_up_button = entry.querySelector(".move-up-button");
+        move_up_button.onclick = () => {
+          move_item_up(index);
+          generate_preview();
+        };
+
+        let move_down_button = entry.querySelector(".move-down-button");
+        move_down_button.onclick = () => {
+          move_item_down(index);
+          generate_preview();
         };
 
         break;
@@ -76,12 +96,18 @@ function move_item_down(index) {
   let item = article[index];
   article[index] = article[index + 1];
   article[index + 1] = item;
+  // assign new indexes
+  article[index].index = index;
+  article[index + 1].index = index + 1;
 }
 
 function move_item_up(index) {
   let item = article[index];
   article[index] = article[index - 1];
   article[index - 1] = item;
+  // assign new indexes
+  article[index].index = index;
+  article[index - 1].index = index - 1;
 }
 
 function add_paragraph() {
