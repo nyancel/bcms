@@ -1,9 +1,11 @@
 import threading
 
 import flask
+import lib.util.env
+
 import lib.media.upload
 import lib.media.fetch
-import lib.util.env
+import lib.media.morph
 
 bp = flask.Blueprint("media", __name__)
 
@@ -26,6 +28,66 @@ def upload_media():
         ),
         200,
     )
+
+
+@bp.post("/media/mark_media_as_deleted")
+def delete_media():
+    media_ID = flask.request.args.get("media_ID")
+    mark_as_deleted = flask.request.args.get("mark_as_deleted")
+    
+    if not media_ID:
+        return flask.jsonify({"error": "no media_ID value was supplied"})
+    
+    if not mark_as_deleted:
+        return flask.jsonify({"error": "no mark_as_deleted value was supplied"})
+
+    if mark_as_deleted.casefold() == "true":
+        mark_as_deleted = True
+    elif mark_as_deleted.casefold() == "false":
+        mark_as_deleted = False
+    
+    data = lib.media.morph.mark_media_as_deleted(media_ID, mark_as_deleted)
+    
+    if data == True:
+        return flask.jsonify({"message": "media state was successfully set"}), 200
+    
+    if data == False:
+        return flask.jsonify({"message": "media state remains unchanged"}), 200
+        
+    if isinstance(data, Exception):
+        return flask.jsonify({"error": data.args[0]}), 400
+    
+    return flask.jsonify({"error": "an unhandled exception occured"}), 400
+
+@bp.post("/media/mark_media_as_unlisted")
+def mark_media_as_deleted():
+    media_ID = flask.request.args.get("media_ID")
+    mark_as_unlisted = flask.request.args.get("mark_as_unlisted")
+    
+    if not media_ID:
+        return flask.jsonify({"error": "no media_ID value was supplied"})
+    
+    if not mark_as_unlisted:
+        return flask.jsonify({"error": "no mark_as_unlisted value was supplied"})
+    
+    if mark_as_unlisted.casefold() == "true":
+        mark_as_unlisted = True
+    elif mark_as_unlisted.casefold() == "false":
+        mark_as_unlisted = False
+    
+    data = lib.media.morph.mark_media_as_unlisted(media_ID, mark_as_unlisted)
+    
+    if data == True:
+        return flask.jsonify({"message": "media state was successfully set"}), 200
+    
+    if data == False:
+        return flask.jsonify({"message": "media state remains unchanged"}), 200
+        
+    if isinstance(data, Exception):
+        return flask.jsonify({"error": data.args[0]}), 400
+    
+    return flask.jsonify({"error": "an unhandled exception occured"}), 400
+
 
 
 @bp.post("/media/fetch_media")
@@ -51,6 +113,9 @@ def fetch_media():
 def fetch_all_media_metadata():
     data = lib.media.fetch.get_all_media_metadata()
 
+    if data == []:
+        return flask.jsonify({"error": "the server does not have any public media on it"}), 400
+    
     if not data:
         return flask.jsonify({"error": "no metadata could be found"}), 400
 

@@ -43,6 +43,8 @@ class Media(Driver.BASE):
     file_hash: orm.Mapped[str]
     content_type: orm.Mapped[str]
     creation_time: orm.Mapped[float]
+    is_unlisted: orm.Mapped[bool] = orm.mapped_column(default=False)
+    unlisted_time: orm.Mapped[float] = orm.mapped_column(default=0)
     is_deleted: orm.Mapped[bool] = orm.mapped_column(default=False)
     deletion_time: orm.Mapped[float] = orm.mapped_column(default=0)
 
@@ -61,6 +63,8 @@ class Media(Driver.BASE):
         _dict["file_mimetype"] = self.file_mimetype
         _dict["content_type"] = self.content_type
         _dict["creation_time"] = self.creation_time
+        _dict["is_unlisted"] = self.is_unlisted
+        _dict["unlisted_time"] = self.unlisted_time
         _dict["is_deleted"] = self.is_deleted
         _dict["deletion_time"] = self.deletion_time
         

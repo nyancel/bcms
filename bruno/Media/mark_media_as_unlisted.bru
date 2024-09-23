@@ -1,0 +1,20 @@
+meta {
+  name: mark_media_as_unlisted
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://127.0.0.1:3000/media/mark_media_as_unlisted?media_ID=03zgBAdZHaVg-1727112328808513&mark_as_unlisted=false
+  body: none
+  auth: none
+}
+
+params:query {
+  media_ID: 03zgBAdZHaVg-1727112328808513
+  mark_as_unlisted: false
+}
+
+body:multipart-form {
+  : mark_as_unlisted
+}
