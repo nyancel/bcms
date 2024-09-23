@@ -41,6 +41,7 @@ class Media(Driver.BASE):
     file_extention: orm.Mapped[str]
     file_mimetype: orm.Mapped[str]
     file_hash: orm.Mapped[str]
+    alt_text: orm.Mapped[str]
     content_type: orm.Mapped[str]
     creation_time: orm.Mapped[float]
     is_unlisted: orm.Mapped[bool] = orm.mapped_column(default=False)
@@ -61,6 +62,8 @@ class Media(Driver.BASE):
         _dict["filename"] = self.filename
         _dict["file_extention"] = self.file_extention
         _dict["file_mimetype"] = self.file_mimetype
+        _dict["file_hash"] = self.file_hash
+        _dict["alt_text"] = self.alt_text
         _dict["content_type"] = self.content_type
         _dict["creation_time"] = self.creation_time
         _dict["is_unlisted"] = self.is_unlisted
