@@ -4,12 +4,16 @@ const gallery_image_preview_template = document.getElementById(
   "gallery-image-preview-template"
 );
 
-async function gallery_load_all_media() {
-  let all_media_response = await fetch("/media/fetch_all_media_metadata");
-  let all_media_json = await all_media_response.json();
+const gallery_image_display = document.getElementById("gallery-image-display");
 
-  for (let index = 0; index <= all_media_json.length; index++) {
-    let metadata = all_media_json[index];
+async function gallery_load_all_media() {
+  let all_media = await util_fetch_post(
+    "/media/fetch_all_media_metadata",
+    undefined
+  );
+
+  for (let index = 0; index <= all_media.length; index++) {
+    let metadata = all_media[index];
     if (!metadata) {
       continue;
     }
@@ -17,37 +21,34 @@ async function gallery_load_all_media() {
       continue;
     }
 
-    let image_metadata_response = await fetch("/media/fetch_media", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ media_ID: metadata.id }),
+    let image_metadata = await util_fetch_post("/media/fetch_media", {
+      media_ID: metadata.id,
     });
 
-    let image_metadata_json = await image_metadata_response.json();
-    let resolutions = image_metadata_json.instances;
+    let resolutions = image_metadata.instances;
 
-    console.log(resolutions);
+    let min = Math.pow(gallery_image_display.clientWidth, 2);
 
-    let min = resolutions[0].x_dimension * resolutions[0].y_dimension;
+    let smallest = resolutions[0].x_dimension * resolutions[0].y_dimension;
     let instance_id = resolutions[0].instance_id;
 
-    console.log(min);
-    console.log(instance_id);
-
-    for (let index = 0; index <= all_media_json.length; index++) {
-      let new_res = resolutions[0].x_dimension * resolutions[0].y_dimension;
-      if (new_res < min) {
-        min = resolutions[index].x_dimension * resolutions[index].y_dimension;
+    for (let index = 0; index < resolutions.length; index++) {
+      let new_res =
+        resolutions[index].x_dimension * resolutions[index].y_dimension;
+      if (new_res < smallest && new_res > min) {
+        smallest = new_res;
         instance_id = resolutions[index].instance_id;
       }
     }
 
-    console.log(min);
-    console.log(instance_id);
-
-    console.log(`/media/fetch_media_instance?instance_ID=${instance_id}`);
+    let target_url = `/media/fetch_media_instance?instance_ID=${instance_id}`;
+    let entry = document.createElement("li");
+    let image = gallery_image_preview_template.cloneNode(true).content;
+    entry.appendChild(image);
+    gallery_image_display.appendChild(entry);
+    let img = entry.querySelector("img");
+    img.width = Math.pow(min, 0.5);
+    img.src = target_url;
   }
 }
 
