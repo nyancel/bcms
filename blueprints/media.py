@@ -44,6 +44,16 @@ def fetch_media():
 
     return flask.jsonify(data), 200
 
+@bp.get("/media/fetch_all_media_metadata")
+def fetch_all_media_metadata():
+    data = lib.media.fetch.get_all_media_metadata()
+    
+    if not data:
+        return flask.jsonify({"error": "no metadata could be found"}), 400
+
+    return flask.jsonify(data), 200
+
+    
 @bp.get("/media/fetch_media_instance")
 def fetch_media_instance():
     instance_ID = flask.request.args.get("instance_ID")

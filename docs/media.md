@@ -8,10 +8,11 @@ return
 ```json
 {
     "data": {
-        "results": {
-            "1726830246422429-2NNNGu2xWJnq": {
-                "original_filename": "upload_image.jpg",
-                "success": 1
+        "results": [
+            {
+              "original_filename": "upload_image.jpg",
+              "success": 1,
+              "key": "1726830246422429-2NNNGu2xWJnq"
             },
             ...
         },
@@ -56,7 +57,7 @@ return
 }
 ```
 
-GET    /media/fetch_media_instance"
+GET    /media/fetch_media_instance
 <!-- do note that the instance_ID will not be a drop in replacement due to the database being local -->
 query
 params:query {
@@ -65,3 +66,7 @@ params:query {
 
 return
 <file object>
+
+GET   /media/fetch_all_media_metadata
+return
+list[dict]

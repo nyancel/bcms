@@ -4,6 +4,8 @@ if __name__ == "__main__":
     
 import lib.media.media_db as media_db
 
+
+
 # get the metadata for a media piece and only the metadata
 def get_media_metadata(media_id: str) -> dict | None:
     with media_db.Driver.SessionMaker() as db_session:
@@ -15,6 +17,18 @@ def get_media_metadata(media_id: str) -> dict | None:
     if media_metadata:
         return media_metadata.to_dict()
 
+def get_all_media_metadata() -> list[dict] | None:
+    with media_db.Driver.SessionMaker() as db_session:
+        media_query = db_session.query(media_db.Media)
+        media_query = media_query.where(media_db.Media.is_deleted == False)
+        media_metadata = media_query.all()
+    
+    returnlist = []
+    
+    for media in media_metadata:
+        returnlist.append(media.to_dict())
+    
+    return returnlist
 
 # get a specific resolution
 def get_specific_media_instance(instance_id: str) -> dict | None:
