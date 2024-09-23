@@ -47,7 +47,7 @@ def fetch_media():
     return flask.jsonify(data), 200
 
 
-@bp.get("/media/fetch_all_media_metadata")
+@bp.post("/media/fetch_all_media_metadata")
 def fetch_all_media_metadata():
     data = lib.media.fetch.get_all_media_metadata()
 
@@ -85,8 +85,7 @@ def fetch_media_instance():
         )
 
     file_extention = metadata["file_extention"]
-    filename = f"{metadata["filename"]}.{metadata["file_extention"]}"
+    filename = metadata["filename"]
 
     filepath = f"volume/media/files/{parent_ID}/{instance_ID}.{file_extention}"
-
-    return flask.send_file(filepath, download_name=filename)
+    return flask.send_file(filepath, download_name=f"{filename}.{file_extention}")
