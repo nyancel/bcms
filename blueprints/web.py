@@ -16,7 +16,7 @@ def web_signin():
 
 @bp.get("/editor")
 def web_editor():
-    return "hello world"
+    return flask.render_template("pages/editor.jinja")
 
 
 @bp.get("/article")
