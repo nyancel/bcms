@@ -23,19 +23,28 @@ async function gallery_load_all_media() {
       let image_metadata = await util_fetch_post_json("/media/fetch_media", {
         media_ID: metadata.id,
       });
-      let resolutions = image_metadata.instances;
       let min = Math.pow(gallery_image_display.clientWidth, 2);
-      let smallest = resolutions[0].x_dimension * resolutions[0].y_dimension;
-      let instance_id = resolutions[0].instance_id;
 
-      for (let index = 0; index < resolutions.length; index++) {
-        let new_res =
-          resolutions[index].x_dimension * resolutions[index].y_dimension;
-        if (new_res < smallest && new_res > min) {
-          smallest = new_res;
-          instance_id = resolutions[index].instance_id;
+      let resolutions = await Promise.all(
+        image_metadata.instances.map((res) => {
+          return {
+            id: res.instance_id,
+            resolution: res.x_dimension * res.y_dimension,
+          };
+        })
+      );
+
+      // by default pick the highest res, then loop over and select the lowest
+      // res that is acceptable for the display.
+      resolutions = resolutions.sort((a, b) => a.resolution - b.resolution);
+      let instance_id = resolutions[resolutions.length - 1].id;
+      for (let r of resolutions) {
+        if (r.resolution > min) {
+          instance_id = r.id;
+          break;
         }
       }
+
       let target_url = `/media/fetch_media_instance?instance_ID=${instance_id}`;
       let entry = document.createElement("li");
       let image = gallery_image_preview_template.cloneNode(true).content;
