@@ -15,7 +15,7 @@ const base_heading = {
 
 const base_image = {
   type: "image",
-  text: "",
+  alt_text: "",
   index: 0,
   src: "https://picsum.photos/200",
 };
@@ -32,14 +32,16 @@ const container = document.getElementById("editor-container");
 // view functions
 function generate_preview() {
   container.innerHTML = null;
+  let entry;
+  let item;
 
   for (let index = 0; index < article.length; index++) {
     switch (article[index].type) {
       case "paragraph":
         // append the paragraph template to the DOM
-        let entry = document.createElement("li");
-        let p = paragraph_template.cloneNode(true).content;
-        entry.appendChild(p);
+        entry = document.createElement("li");
+        item = paragraph_template.cloneNode(true).content;
+        entry.appendChild(item);
         container.appendChild(entry);
 
         // connect the input to the article item
@@ -48,35 +50,55 @@ function generate_preview() {
         textarea.onchange = () => {
           article[index].text = textarea.value;
         };
-
-        // hook up the delete button
-        let delete_button = entry.querySelector(".delete-button");
-        delete_button.onclick = () => {
-          remove_item(index);
-          generate_preview();
-        };
-
-        // hook up the buttons to move item up and down
-        let move_up_button = entry.querySelector(".move-up-button");
-        move_up_button.onclick = () => {
-          move_item_up(index);
-          generate_preview();
-        };
-
-        let move_down_button = entry.querySelector(".move-down-button");
-        move_down_button.onclick = () => {
-          move_item_down(index);
-          generate_preview();
-        };
-
         break;
 
       case "image":
+        // append the image template to the DOM
+        entry = document.createElement("li");
+        item = image_template.cloneNode(true).content;
+        entry.appendChild(item);
+        container.appendChild(entry);
+
+        // connect the image-template to the relevant item
+        let display = entry.querySelector(".image-display");
+        display.src = article[index].src;
+        let alt_text = entry.querySelector(".image-alt-text-input");
+        alt_text.value = article[index].alt_text;
+        alt_text.onchange = () => {
+          article[index].alt_text = alt_text.value;
+        };
+
         break;
 
       case "heading":
         break;
+
+      // skip to next item if we dont have a template for the type
+      default:
+        console.log("skipping, unkown type");
+        console.log(article[index]);
+        continue;
     }
+
+    // hook up the delete button
+    let delete_button = entry.querySelector(".delete-button");
+    delete_button.onclick = () => {
+      remove_item(index);
+      generate_preview();
+    };
+
+    // hook up the buttons to move item up and down
+    let move_up_button = entry.querySelector(".move-up-button");
+    move_up_button.onclick = () => {
+      move_item_up(index);
+      generate_preview();
+    };
+
+    let move_down_button = entry.querySelector(".move-down-button");
+    move_down_button.onclick = () => {
+      move_item_down(index);
+      generate_preview();
+    };
   }
 }
 
