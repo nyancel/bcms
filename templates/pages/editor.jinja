@@ -3,6 +3,10 @@
 {% block body %}
 
 <template id="article-paragraph-template">
+    <div class="p-2 bg-green-400">
+        <p>Paragraf</p>
+        <textarea rows="5" class="w-full"></textarea>
+    </div>
 </template>
 
 <template id="article-image-template">
@@ -11,12 +15,30 @@
 <template id="article-heading-template">
 </template>
 
-<button 
-id="log-article"
-class="p-2 bg-blue-500 rounded-md text-white"
->
-Log Article
+<ol id="editor-container" class="space-y-4">
+
+</ol>
+
+<button id="log-article" class="p-2 bg-blue-500 rounded-md text-white">
+    Log Article
 </button>
+
+
+<button id="add-paragraph" class="p-2 bg-slate-800 rounded-md text-white">
+    Add paragraph
+</button>
+
+
+<button id="add-image" class="p-2 bg-slate-800 rounded-md text-white">
+    Add media
+</button>
+
+<button id="add-heading" class="p-2 bg-slate-800 rounded-md text-white">
+    Add heading
+</button>
+
+
+
 
 
 <script src="{{url_for('static', filename='js/editor.js')}}"></script>
