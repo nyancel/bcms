@@ -64,6 +64,7 @@ async function gallery_upload_current_files() {
     formdata
   );
   gallery_load_all_media();
+  gallery_input_source.value = null;
 }
 
 // startup
