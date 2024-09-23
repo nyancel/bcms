@@ -44,7 +44,7 @@ def fetch_media():
 
     return flask.jsonify(data), 200
 
-@bp.get("/media/fetch_all_media_metadata")
+@bp.post("/media/fetch_all_media_metadata")
 def fetch_all_media_metadata():
     data = lib.media.fetch.get_all_media_metadata()
     

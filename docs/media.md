@@ -67,6 +67,6 @@ params:query {
 return
 <file object>
 
-GET   /media/fetch_all_media_metadata
+POST   /media/fetch_all_media_metadata
 return
 list[dict]
