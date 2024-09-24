@@ -40,8 +40,8 @@ Alexander:
 
 Emmie:
 
-- [ ] media uploads
-- [ ] media thumbnails
+- [x] ✅ media uploads
+- [x] ✅ media thumbnails
 - [ ] media distribution
 - [ ] frontend metadata
 
