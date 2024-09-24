@@ -1,6 +1,7 @@
 import flask
 import time
 
+import lib.user.rights
 import lib.user.user
 import lib.user.token
 import lib.util.crypt
@@ -82,6 +83,9 @@ def register_new_user():
         new_user.last_name = json.get("lastname")
     lib.user.user.save_user(new_user)
 
+    # assign default rights to new user (false on all)
+    lib.user.rights.create_new_user_rights(new_user.id)
+
     return flask.jsonify(new_user.to_dict())
 
 
@@ -108,6 +112,25 @@ def who():
         ), 400
 
     user = lib.user.user.get_user(token.user_id)
+    if not user:
+        return flask.jsonify(
+            {"error": "no user data"}
+        ), 400
+
+    return flask.jsonify(user.to_dict())
+
+
+@bp.post("rights")
+def rights():
+    json: dict = flask.request.json
+    user_id = json.get("user_id")
+
+    if not user_id:
+        return flask.jsonify(
+            {"error": "user_id not supplied"}
+        ), 400
+
+    user = lib.user.user.get_user(user_id)
     if not user:
         return flask.jsonify(
             {"error": "no user data"}

@@ -87,8 +87,11 @@ class UserToken(Driver.BASE):
 
 class UserRights(Driver.BASE):
     __tablename__ = "user_rights"
+    # meta stuff
     id: orm.Mapped[str] = orm.mapped_column(primary_key=True)
-    user_id: orm.Mapped[str]
+    user_id: orm.Mapped[str] = orm.mapped_column(unique=True)
+    last_edited: orm.Mapped[float]
+    created: orm.Mapped[float]
     # article privs
     can_post_draft: orm.Mapped[bool] = orm.mapped_column(default=False)
     can_approve_draft: orm.Mapped[bool] = orm.mapped_column(default=False)
@@ -114,6 +117,7 @@ class UserRights(Driver.BASE):
     def __init__(self, **kw: sql.Any):
         super().__init__(**kw)
         self.id = crypt.new_uid()
+        self.created = time.time()
         return self
 
     def to_dict(self):
