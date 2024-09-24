@@ -86,7 +86,7 @@ class UserToken(Driver.BASE):
 
 
 class UserRights(Driver.BASE):
-    __tablename__ = "user_token"
+    __tablename__ = "user_rights"
     id: orm.Mapped[str] = orm.mapped_column(primary_key=True)
     user_id: orm.Mapped[str]
     # article privs
