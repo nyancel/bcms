@@ -1,6 +1,7 @@
 import sqlalchemy as sql
 import sqlalchemy.orm as orm
 import time
+from typing import Optional as opt
 
 import lib.util.crypt as crypt
 import lib.util.env as env
@@ -41,7 +42,7 @@ class Media(Driver.BASE):
     file_extention: orm.Mapped[str]
     file_mimetype: orm.Mapped[str]
     file_hash: orm.Mapped[str]
-    alt_text: orm.Mapped[str]
+    alt_text: orm.Mapped[opt[str]]
     content_type: orm.Mapped[str]
     creation_time: orm.Mapped[float]
     is_unlisted: orm.Mapped[bool] = orm.mapped_column(default=False)
