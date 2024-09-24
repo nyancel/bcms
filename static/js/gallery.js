@@ -1,10 +1,12 @@
-const gallery_input_source = document.getElementById("image-upload-source");
+const C_GALLERY_INPUT_SOURCE = document.getElementById("image-upload-source");
 
-const gallery_image_preview_template = document.getElementById(
+const C_GALLERY_IMAGE_PREVIEW_TEMPLATE = document.getElementById(
   "gallery-image-preview-template"
 );
 
-const gallery_image_display = document.getElementById("gallery-image-display");
+const C_GALLERY_IMAGE_DISPLAY = document.getElementById(
+  "gallery-image-display"
+);
 
 async function gallery_load_all_media() {
   let all_media = await util_fetch_post_json(
@@ -27,7 +29,7 @@ async function gallery_load_all_media() {
       let image_metadata = await util_fetch_post_json("/media/fetch_media", {
         media_ID: metadata.id,
       });
-      let min = Math.pow(gallery_image_display.clientWidth, 2);
+      let min = Math.pow(C_GALLERY_IMAGE_DISPLAY.clientWidth, 2);
 
       let resolutions = await Promise.all(
         image_metadata.instances.map((res) => {
@@ -74,12 +76,12 @@ async function gallery_load_all_media() {
 
   // repopulate the dom
   let media_entries = await Promise.all(media_promises);
-  gallery_image_display.innerHTML = null;
-  media_entries.forEach((entry) => gallery_image_display.appendChild(entry));
+  C_GALLERY_IMAGE_DISPLAY.innerHTML = null;
+  media_entries.forEach((entry) => C_GALLERY_IMAGE_DISPLAY.appendChild(entry));
 }
 
 async function gallery_upload_current_files() {
-  let files = gallery_input_source.files;
+  let files = C_GALLERY_INPUT_SOURCE.files;
   let formdata = new FormData();
 
   for (let index = 0; index <= files.length; index++) {
@@ -88,7 +90,7 @@ async function gallery_upload_current_files() {
 
   await util_fetch_post_formdata("/media/upload_media", formdata);
   gallery_load_all_media();
-  gallery_input_source.value = null;
+  C_GALLERY_INPUT_SOURCE.value = null;
 }
 
 // startup

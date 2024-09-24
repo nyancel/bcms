@@ -1,67 +1,66 @@
-const EDITOR_ARTICLE = [];
+const C_EDITOR_ARTICLE = [];
 
 // default objects and const reffs
-const EDITOR_BASE_PARAGRAPH = {
+const C_EDITOR_BASE_PARAGRAPH = {
   type: "paragraph",
   text: "",
   index: 0,
 };
 
-const EDITOR_BASE_HEADING = {
+const C_EDITOR_BASE_HEADING = {
   type: "heading",
   text: "",
   index: 0,
 };
 
-const EDITOR_BASE_IMAGE = {
+const C_EDITOR_BASE_IMAGE = {
   type: "image",
   alt_text: "",
   index: 0,
   src: undefined,
 };
 
-const EDITOR_PARAGRAPH_TEMPLATE = document.getElementById(
+const C_EDITOR_PARAGRAPH_TEMPLATE = document.getElementById(
   "article-paragraph-template"
 );
-const EDITOR_IMAGE_TEMPLATE = document.getElementById("article-image-template");
-const EDITOR_HEADING_TEMPLATE = document.getElementById(
+const C_EDITOR_IMAGE_TEMPLATE = document.getElementById(
+  "article-image-template"
+);
+const C_EDITOR_HEADING_TEMPLATE = document.getElementById(
   "article-heading-template"
 );
 
-const EDITOR_CONTAINER = document.getElementById("editor-container");
+const C_EDITOR_CONTAINER = document.getElementById("editor-container");
 
 // editor image functions
-function editor_gallery_pop_up_select(index) {
-  console.log(index);
-}
-
+function editor_gallery_pop_up_select(index) {}
 function editor_gallery_pop_up_recieve(index, id) {}
 
 // editor insertion functions
 function editor_insert_paragraph() {
   // append the paragraph template to the DOM
   let entry = document.createElement("li");
-  let item = EDITOR_PARAGRAPH_TEMPLATE.cloneNode(true).content;
+  let item = C_EDITOR_PARAGRAPH_TEMPLATE.cloneNode(true).content;
   entry.appendChild(item);
-  EDITOR_CONTAINER.appendChild(entry);
+  C_EDITOR_CONTAINER.appendChild(entry);
 
   return entry;
 }
 
 function editor_connect_paragraph_change(entry, index) {
   let textarea = entry.querySelector(".paragraph-input");
-  textarea.value = EDITOR_ARTICLE[index].text;
+  textarea.value = C_EDITOR_ARTICLE[index].text;
   textarea.onchange = () => {
-    EDITOR_ARTICLE[index].text = textarea.value;
+    C_EDITOR_ARTICLE[index].text = textarea.value;
   };
 }
 
 function editor_insert_image() {
   // append the image template to the DOM
   let entry = document.createElement("li");
-  let item = EDITOR_IMAGE_TEMPLATE.cloneNode(true).content;
+  let item = C_EDITOR_IMAGE_TEMPLATE.cloneNode(true).content;
   entry.appendChild(item);
-  EDITOR_CONTAINER.appendChild(entry);
+  C_EDITOR_CONTAINER.appendChild(entry);
 
   return entry;
 }
@@ -69,11 +68,11 @@ function editor_insert_image() {
 function editor_connect_image_alt_text_change(entry, index) {
   // connect the alt-text and its relevant update
   let alt_text = entry.querySelector(".image-alt-text-input");
-  if (EDITOR_ARTICLE[index].alt_text) {
-    alt_text.value = EDITOR_ARTICLE[index].alt_text;
+  if (C_EDITOR_ARTICLE[index].alt_text) {
+    alt_text.value = C_EDITOR_ARTICLE[index].alt_text;
   }
   alt_text.onchange = () => {
-    EDITOR_ARTICLE[index].alt_text = alt_text.value;
+    C_EDITOR_ARTICLE[index].alt_text = alt_text.value;
   };
 }
 
@@ -104,11 +103,11 @@ function editor_connect_move_down(entry, index) {
 
 // view functions
 function editor_generate_preview() {
-  EDITOR_CONTAINER.innerHTML = null;
+  C_EDITOR_CONTAINER.innerHTML = null;
   let entry;
 
-  for (let index = 0; index < EDITOR_ARTICLE.length; index++) {
-    switch (EDITOR_ARTICLE[index].type) {
+  for (let index = 0; index < C_EDITOR_ARTICLE.length; index++) {
+    switch (C_EDITOR_ARTICLE[index].type) {
       case "paragraph":
         entry = editor_insert_paragraph();
         editor_connect_paragraph_change(entry, index);
@@ -118,12 +117,12 @@ function editor_generate_preview() {
         entry = editor_insert_image();
 
         // if src is undefined we have not yet chosen an image.
-        if (!EDITOR_ARTICLE[index].src) {
+        if (!C_EDITOR_ARTICLE[index].src) {
           let display = entry.querySelector(".image-display");
           display.classList.toggle("hidden", true);
         }
         // else src is defined and we render the image
-        else if (EDITOR_ARTICLE[index].src) {
+        else if (C_EDITOR_ARTICLE[index].src) {
           display.classList.toggle("hidden", false);
         }
 
@@ -136,7 +135,7 @@ function editor_generate_preview() {
       // skip to next item if we dont have a template for the type
       default:
         console.log("skipping, unkown type");
-        console.log(EDITOR_ARTICLE[index]);
+        console.log(C_EDITOR_ARTICLE[index]);
         continue;
     }
 
@@ -148,51 +147,51 @@ function editor_generate_preview() {
 
 // article functions
 function editor_add_item(item) {
-  let length = EDITOR_ARTICLE.length;
+  let length = C_EDITOR_ARTICLE.length;
   item.index = length;
-  EDITOR_ARTICLE.push(item);
+  C_EDITOR_ARTICLE.push(item);
   editor_generate_preview();
 }
 
 function editor_remove_item(index) {
-  EDITOR_ARTICLE.splice(index, 1);
+  C_EDITOR_ARTICLE.splice(index, 1);
 }
 
 function editor_move_item_down(index) {
-  let item = EDITOR_ARTICLE[index];
-  EDITOR_ARTICLE[index] = EDITOR_ARTICLE[index + 1];
-  EDITOR_ARTICLE[index + 1] = item;
+  let item = C_EDITOR_ARTICLE[index];
+  C_EDITOR_ARTICLE[index] = C_EDITOR_ARTICLE[index + 1];
+  C_EDITOR_ARTICLE[index + 1] = item;
   // assign new indexes
-  EDITOR_ARTICLE[index].index = index;
-  EDITOR_ARTICLE[index + 1].index = index + 1;
+  C_EDITOR_ARTICLE[index].index = index;
+  C_EDITOR_ARTICLE[index + 1].index = index + 1;
 }
 
 function editor_move_item_up(index) {
-  let item = EDITOR_ARTICLE[index];
-  EDITOR_ARTICLE[index] = EDITOR_ARTICLE[index - 1];
-  EDITOR_ARTICLE[index - 1] = item;
+  let item = C_EDITOR_ARTICLE[index];
+  C_EDITOR_ARTICLE[index] = C_EDITOR_ARTICLE[index - 1];
+  C_EDITOR_ARTICLE[index - 1] = item;
   // assign new indexes
-  EDITOR_ARTICLE[index].index = index;
-  EDITOR_ARTICLE[index - 1].index = index - 1;
+  C_EDITOR_ARTICLE[index].index = index;
+  C_EDITOR_ARTICLE[index - 1].index = index - 1;
 }
 
 function editor_add_paragraph() {
-  let p = { ...EDITOR_BASE_PARAGRAPH }; // clone the base paragraph;
+  let p = { ...C_EDITOR_BASE_PARAGRAPH }; // clone the base paragraph;
   editor_add_item(p);
 }
 
 function editor_add_image() {
-  let i = { ...EDITOR_BASE_IMAGE }; // clone the base paragraph;
+  let i = { ...C_EDITOR_BASE_IMAGE }; // clone the base paragraph;
   editor_add_item(i);
 }
 
 function editor_add_heading() {
-  let h = { ...EDITOR_BASE_HEADING }; // clone the base paragraph;
+  let h = { ...C_EDITOR_BASE_HEADING }; // clone the base paragraph;
   editor_add_item(h);
 }
 
 function editor_log_article() {
-  console.log(EDITOR_ARTICLE);
+  console.log(C_EDITOR_ARTICLE);
 }
 
 // startup
