@@ -5,33 +5,51 @@
 
 # TODO LIST
 
+Not Claimed
+
+- [ ] ❌ frontend renderer
+- [ ] ❌ frontend article listing
+- [ ] ❌ frontend user login
+- [ ] ❌ WEB route session login restriction
+- [ ] ❌ UTIL rate limiter
+
 Simon:
-[ ] 🟡 frontend editor
-[ ] 🟡 frontend renderer
-[x] ✅ frontend media upload
-[x] ✅ frontend media browser
-[x] ✅ user login
-[x] ✅ user authentication
-[x] ✅ user lookup
-[x] ✅ user profiles
-[x] ✅ user admin
+
+- [ ] 🟡 frontend editor
+  - [ ] ❌ upload image direct to gallery
+  - [ ] ❌ pop up select image from gallery
+  - [ ] ❌ update image alt text
+  - [ ] ❌ set title
+  - [ ] ❌ set author
+  - [ ] ❌ set ingress
+  - [ ] ❌ save draft on changes (async post)
+- [x] ✅ frontend media upload
+- [x] ✅ frontend media browser
+- [x] ✅ user login
+- [x] ✅ user authentication
+- [x] ✅ user lookup
+- [x] ✅ user profiles
+- [x] ✅ user admin
 
 Alexander:
-[ ] Event post
-[ ] Event get by filter
-[ ] Event subscribption
-[ ] Event lookup
+
+- [ ] Event post
+- [ ] Event get by filter
+- [ ] Event subscribption
+- [ ] Event lookup
 
 Emmie:
-[ ] media uploads
-[ ] media thumbnails
-[ ] media distribution
-[ ] frontend metadata
+
+- [ ] media uploads
+- [ ] media thumbnails
+- [ ] media distribution
+- [ ] frontend metadata
 
 Marius:
-[ ] article editing
-[ ] article deletion
-[ ] article publishing
-[ ] article listing
-[ ] desk review
-[ ] desk aproval
+
+- [ ] article editing
+- [ ] article deletion
+- [ ] article publishing
+- [ ] article listing
+- [ ] desk review
+- [ ] desk aproval
