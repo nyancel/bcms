@@ -1,3 +1,56 @@
+let C_FUNCTION_CACHE = []; // cache for functions
+const C_CACHE_KEY = "C_CACHE_KEY";
+
+function util_local_save_cache() {
+  localStorage.setItem(C_CACHE_KEY, JSON.stringify(C_FUNCTION_CACHE));
+}
+
+function util_local_load_cache() {
+  let tmp = JSON.parse(localStorage.getItem(C_CACHE_KEY));
+  if (tmp) {
+    C_FUNCTION_CACHE = JSON.parse(localStorage.getItem(C_CACHE_KEY));
+  }
+}
+
+function util_epoch_seconds() {
+  let d = new Date();
+  return d / 1000;
+}
+
+function util_cache_check(key) {
+  // load up the cache
+  util_local_load_cache();
+  // remove stale keys
+  for (let index = 0; index < C_FUNCTION_CACHE.length; index++) {
+    if (C_FUNCTION_CACHE[index].time < util_epoch_seconds()) {
+      C_FUNCTION_CACHE.splice(index, 1);
+    }
+  }
+  // save any changes
+  util_local_save_cache();
+
+  // find the item
+  for (let index = 0; index < C_FUNCTION_CACHE.length; index++) {
+    if (C_FUNCTION_CACHE[index].key == key) {
+      return C_FUNCTION_CACHE[index].value;
+    }
+  }
+  return null;
+}
+
+function util_cache_add(key, value) {
+  util_local_load_cache();
+  let c = {
+    key: key,
+    value: value,
+    time: util_epoch_seconds() + 3600, // valid for one hour
+  };
+
+  C_FUNCTION_CACHE.push(c);
+  console.log(c);
+  util_local_save_cache();
+}
+
 async function util_fetch_post_json(endpoint, data) {
   let response = await fetch(endpoint, {
     method: "POST",
@@ -22,6 +75,14 @@ async function util_fetch_post_formdata(endpoint, data) {
 }
 
 async function util_get_media_src_by_width(image_id, min_width) {
+  // check the cache first
+  let key = `util_get_media_src_by_width${image_id}${min_width}`;
+  let cached_value = util_cache_check(key);
+  if (cached_value) {
+    console.log("cache hit");
+    return cached_value;
+  }
+
   let image_metadata = await util_fetch_post_json("/media/fetch_media", {
     media_ID: image_id,
   });
@@ -50,5 +111,7 @@ async function util_get_media_src_by_width(image_id, min_width) {
 
   // format target url
   let target_url = `/media/fetch_media_instance?instance_ID=${instance_id}`;
+  // populate cache before returning
+  util_cache_add(key, target_url);
   return target_url;
 }

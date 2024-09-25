@@ -254,7 +254,7 @@ function editor_init() {
     });
 
   // temp for testing
-  add_image_button.click();
+  // add_image_button.click();
 }
 
 editor_init();
