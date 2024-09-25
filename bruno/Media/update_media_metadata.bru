@@ -5,12 +5,17 @@ meta {
 }
 
 post {
-  url: http://127.0.0.1:3000/media/update_media_metadata?media_ID=wRvIwIpkmUjn-1727289608849204&alt_text="HEISANN!!"
-  body: none
+  url: http://127.0.0.1:3000/media/update_media_metadata
+  body: json
   auth: none
 }
 
-params:query {
-  media_ID: wRvIwIpkmUjn-1727289608849204
-  alt_text: "HEISANN!!"
+body:json {
+  {
+    "media_ID": "mljLXB287ULK-17272914443755612",
+    "alt_text": "heisann!!",
+    "is_unlisted": true,
+    "is_deleted": false,
+    "filename": "BUH GUH"
+  }
 }

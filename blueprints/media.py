@@ -14,15 +14,18 @@ bp = flask.Blueprint("media", __name__)
 
 @bp.post("/media/upload_media")
 def upload_media():
+    """
+        TODO user auth with multipart form in bruno
+    """
     # json_body_data: dict = flask.request.json
     
     # auth_token = json_body_data.get("auth_token")
-    # if not auth_token:
-    #     return lib.media.lib.generic_error("auth_token not found")
-
-    # user, status_code = lib.util.req.fetch_user_from_token(auth_token)
-    # if status_code != 200:
-    #     return lib.media.lib.generic_error("user data not found")
+    # rights = lib.media.lib.get_user_rights_from_auth_token(auth_token)
+    # if not isinstance(rights, lib.util.req.UserRights):
+    #     return rights
+    
+    # if rights.can_post_media != True:
+    #     return lib.media.lib.generic_error(f"you lack the permissions for this action", statuscode=401)
 
     if "media" not in flask.request.files:
         return lib.media.lib.generic_error("post request is missing a file labeled 'media'")
@@ -38,6 +41,16 @@ def upload_media():
 
 @bp.post("/media/update_media_metadata")
 def update_media_metadata():
+    json_body_data: dict = flask.request.json
+    
+    auth_token = json_body_data.get("auth_token")
+    rights = lib.media.lib.get_user_rights_from_auth_token(auth_token)
+    if not isinstance(rights, lib.util.req.UserRights):
+        return rights
+    
+    if rights.can_update_media != True:
+        return lib.media.lib.generic_error(f"you lack the permissions for this action", statuscode=401)
+    
     json_body_data: dict = flask.request.json
     media_ID = json_body_data.get("media_ID")
 
@@ -75,6 +88,9 @@ def update_media_metadata():
 
 @bp.post("/media/fetch_media")
 def fetch_media():
+    """
+        TODO AUTH?
+    """
     json_body_data: dict = flask.request.json
     media_ID = json_body_data.get("media_ID")
 
@@ -95,6 +111,9 @@ def fetch_media():
 
 @bp.post("/media/fetch_all_media_metadata")
 def fetch_all_media_metadata():
+    """
+        TODO AUTH?
+    """
     data = lib.media.fetch.get_all_media_metadata()
 
     if data == []:
