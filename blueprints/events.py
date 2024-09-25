@@ -20,3 +20,15 @@ def submit():
     for s in subscribers:
         request.send(s.endpoint, payload=event_data)
 
+@bp.post("lookup")
+def lookup():
+    json : dict = flask.request.json
+    datalook = json.get("looking")
+    key = json.get("key")
+    
+    if None in [datalook, key]:
+        return flask.jsonify(
+            {"error": "missing info, idk"}
+        ), 400
+    
+    
