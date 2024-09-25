@@ -64,7 +64,7 @@ return
 --------------------------
 
 
-GET    /media/fetch_media_instance
+GET     /media/fetch_media_instance
 <!-- do note that the instance_ID will not be a drop in replacement due to the database being local -->
 query
 params:query {
@@ -74,7 +74,7 @@ params:query {
 return
 <file object>
 
-POST   /media/fetch_all_media_metadata
+POST    /media/fetch_all_media_metadata
 return
 list[dict]
 
@@ -82,7 +82,7 @@ list[dict]
 --------------------------
 
 
-POST   /media/mark_media_as_deleted
+POST    /media/mark_media_as_deleted
 query
 params:query {
   media_ID: 03zgBAdZHaVg-1727112328808513
@@ -97,7 +97,7 @@ bool or error
 --------------------------
 
 
-POST   /media/mark_media_as_unlisted
+POST    /media/mark_media_as_unlisted
 query
 params:query {
   media_ID: 03zgBAdZHaVg-1727112328808513
@@ -107,3 +107,25 @@ params:query {
 return
 <!-- returns True if the media unlisted state was changed, returns False if nothing changed -->
 bool or error
+
+
+--------------------------
+
+
+POST    /update_media_metadata
+query
+<!-- the parameters will vary depending on what you want to change, check the function in blueprints/media.py for the up to-date list -->
+params:query {
+  media_ID: 03zgBAdZHaVg-1727112328808513
+  alt_text: "HEISANN!!"
+}
+
+return
+```json
+{
+  "new_metadata": {
+    "alt_text": "\"HEISANN!!\""
+  },
+  "success": 1
+}
+```

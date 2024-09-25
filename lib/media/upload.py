@@ -46,8 +46,8 @@ def save_files(files: list[flask_datastructures.FileStorage]) -> list[str, Excep
             return_payload["results"].append({
                 "success": 0,
                 "original_filename": filename,
-                "message": success.args,
                 "key": file_ID,
+                "message": success.args,
             })
 
         else:
@@ -107,8 +107,7 @@ def _save_image(uploaded_image: flask_datastructures.FileStorage, image_ID: str,
         media_instance.x_dimension = image.size[0]
         media_instance.y_dimension = image.size[1]
 
-        image.save(f"{image_path}/{instance_id}.{file_extention}",
-                   optimize=True, quality=95)
+        image.save(f"{image_path}/{instance_id}.{file_extention}", optimize=True, quality=95)
 
         with media_db.Driver.SessionMaker() as db_session:
             db_session.add(media_instance)

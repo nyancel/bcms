@@ -29,6 +29,37 @@ def upload_media():
         200,
     )
 
+@bp.post("/media/update_media_metadata")
+def update_media_metadata():
+    media_ID = flask.request.args.get("media_ID")
+
+    if not media_ID:
+        return flask.jsonify({"error": "no media_ID value was supplied"})
+    
+    new_metadata = {
+        "alt_text": None
+    }
+    
+    for key in new_metadata:
+        value = flask.request.args.get(key)
+        if value:
+            new_metadata[key] = value
+    
+    if new_metadata == {}:
+        return flask.jsonify({"error": f"no valid metadata was supplied, please update one of `{', '.join(new_metadata.keys())}`"})
+
+    data = lib.media.morph.update_media_metadata(media_ID, new_metadata)
+
+    if isinstance(data, dict):
+        return flask.jsonify({
+            "success": 1,
+            "new_metadata": data
+        }), 200
+
+    if isinstance(data, Exception):
+        return flask.jsonify({"error": data.args[0]}), 400
+
+    return flask.jsonify({"error": "an unhandled exception occured"}), 400
 
 @bp.post("/media/mark_media_as_deleted")
 def delete_media():
@@ -88,6 +119,7 @@ def mark_media_as_deleted():
 
 @bp.post("/media/fetch_media")
 def fetch_media():
+    print(flask.request.json)
     json: dict = flask.request.json
     media_ID = json.get("media_ID")
 
@@ -98,9 +130,12 @@ def fetch_media():
         )
 
     data = lib.media.fetch.get_media_full(media_ID)
+    
 
     if isinstance(data, Exception):
         return flask.jsonify({"error": data.args[0]}), 400
+    
+    print(data)
 
     return flask.jsonify(data), 200
 
