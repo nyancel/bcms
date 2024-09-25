@@ -10,7 +10,7 @@ def test_new_user():
         "email": "user@email.com",
         "password": "123",
         "firstname": "John",
-        "lastname": "Hancock"
+        "lastname": "Hancock",
     }
 
     request = client.post("/user/register_new_user", json=new_user_body)
