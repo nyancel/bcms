@@ -14,13 +14,18 @@ bp = flask.Blueprint("media", __name__)
 
 @bp.post("/media/upload_media")
 def upload_media():
-    json_body_data: dict = flask.request.json
-    auth_token = json_body_data.get("auth_token")
-    if not auth_token:
-        return lib.media.lib.generate_generic_error("auth_token not found")
+    # json_body_data: dict = flask.request.json
+    
+    # auth_token = json_body_data.get("auth_token")
+    # if not auth_token:
+    #     return lib.media.lib.generic_error("auth_token not found")
+
+    # user, status_code = lib.util.req.fetch_user_from_token(auth_token)
+    # if status_code != 200:
+    #     return lib.media.lib.generic_error("user data not found")
 
     if "media" not in flask.request.files:
-        return lib.media.lib.generate_generic_error("post request is missing a file labeled 'media'")
+        return lib.media.lib.generic_error("post request is missing a file labeled 'media'")
 
     files = flask.request.files.getlist("media")
     success_check = lib.media.upload.save_files(files)
@@ -37,7 +42,7 @@ def update_media_metadata():
     media_ID = json_body_data.get("media_ID")
 
     if not media_ID:
-        return lib.media.lib.generate_generic_error("no media_ID value was supplied")
+        return lib.media.lib.generic_error("no media_ID value was supplied")
     
     # ensure only certain values can be changed with this endpoint
     valid_metadata_morph_keys = [
@@ -61,8 +66,8 @@ def update_media_metadata():
         }), 200
 
     if isinstance(data, Exception):
-        return lib.media.lib.generate_generic_error(
-            "an exception occured"
+        return lib.media.lib.generic_error(
+            "an exception occured",
             {"error": data.args[0]}
         )
     
@@ -74,14 +79,14 @@ def fetch_media():
     media_ID = json_body_data.get("media_ID")
 
     if not media_ID:
-        return lib.media.lib.generate_generic_error("no media_ID given")
+        return lib.media.lib.generic_error("no media_ID given")
 
     data = lib.media.fetch.get_media_full(media_ID)
     
 
     if isinstance(data, Exception):
-        return lib.media.lib.generate_generic_error(
-            "an exception occured"
+        return lib.media.lib.generic_error(
+            "an exception occured",
             {"error": data.args[0]}
         )
     
@@ -93,10 +98,10 @@ def fetch_all_media_metadata():
     data = lib.media.fetch.get_all_media_metadata()
 
     if data == []:
-        return lib.media.lib.generate_generic_error("the server does not have any public media on it")
+        return lib.media.lib.generic_error("the server does not have any public media on it")
 
     if not data:
-        return lib.media.lib.generate_generic_error("no metadata could be found")
+        return lib.media.lib.generic_error("no metadata could be found")
 
     return flask.jsonify(data), 200
 
@@ -106,18 +111,18 @@ def fetch_media_instance():
     instance_ID = flask.request.args.get("instance_ID")
 
     if not instance_ID:
-        return lib.media.lib.generate_generic_error("no instance_ID was specified")
+        return lib.media.lib.generic_error("no instance_ID was specified")
 
     data = lib.media.fetch.get_specific_media_instance(instance_ID)
 
     if not data:
-        return lib.media.lib.generate_generic_error("an unhandled error occured whilst fetching instance data")
+        return lib.media.lib.generic_error("an unhandled error occured whilst fetching instance data")
 
     parent_ID = data["parent_id"]
     metadata = lib.media.fetch.get_media_metadata(parent_ID)
 
     if not metadata:
-        return lib.media.lib.generate_generic_error("an unhandled error occured whilst fetching metadata")
+        return lib.media.lib.generic_error("an unhandled error occured whilst fetching metadata")
 
     file_extention = metadata["file_extention"]
     filename = metadata["filename"]
