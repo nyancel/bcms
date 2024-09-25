@@ -111,6 +111,7 @@ class UserRights(Driver.BASE):
         default=False)
     can_change_other_details: orm.Mapped[bool] = orm.mapped_column(
         default=False)
+    can_edit_user_rights: orm.Mapped[bool] = orm.mapped_column(default=False)
     # event details
     can_submit_event: orm.Mapped[bool] = orm.mapped_column(default=False)
 
