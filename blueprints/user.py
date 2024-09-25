@@ -89,6 +89,32 @@ def register_new_user():
     return flask.jsonify(new_user.to_dict())
 
 
+@bp.post("edit_user_rights")
+def edit_user_rights():
+    json: dict = flask.request.json
+    user_id: str = json.get("user_id")
+    # TODO, ensure user can actually update rights etc
+    if not user_id:
+        return flask.jsonify({
+            "error": "no user id supplied"
+        }), 400
+
+    user = lib.user.user.get_user(user_id)
+    if not user:
+        return flask.jsonify({
+            "error": "no user found"
+        }), 400
+
+    rights = lib.user.rights.get_user_rights(user_id)
+    if not rights:
+        return flask.jsonify({
+            "error": "no rights found"
+        }), 400
+
+    rights = lib.user.rights.update_rights(rights.id, json)
+    return flask.jsonify(rights.to_dict())
+
+
 @bp.post("who")
 def who():
     json: dict = flask.request.json
@@ -130,13 +156,13 @@ def rights():
             {"error": "user_id not supplied"}
         ), 400
 
-    user = lib.user.user.get_user(user_id)
-    if not user:
+    rights = lib.user.rights.get_user_rights(user_id)
+    if not rights:
         return flask.jsonify(
-            {"error": "no user data"}
+            {"error": "no data"}
         ), 400
 
-    return flask.jsonify(user.to_dict())
+    return flask.jsonify(rights.to_dict())
 
 
 @bp.post("list_users")
