@@ -25,44 +25,20 @@ async function gallery_load_all_media() {
   let media_promises = all_media
     .filter((metadata) => metadata && metadata.id)
     .map(async (metadata) => {
-      console.log(metadata);
-      let image_metadata = await util_fetch_post_json("/media/fetch_media", {
-        media_ID: metadata.id,
-      });
-      let min = Math.pow(C_GALLERY_IMAGE_DISPLAY.clientWidth, 2);
-
-      let resolutions = await Promise.all(
-        image_metadata.instances.map((res) => {
-          return {
-            id: res.instance_id,
-            resolution: res.x_dimension * res.y_dimension,
-          };
-        })
+      // generate the entries and assign relevant functions etc
+      let target_url = await util_get_media_src_by_width(
+        metadata.id,
+        C_GALLERY_IMAGE_DISPLAY.clientWidth
       );
 
-      // by default pick the highest res, then loop over and select the lowest
-      // res that is acceptable for the display.
-      resolutions = resolutions.sort((a, b) => a.resolution - b.resolution);
-      let instance_id = resolutions[resolutions.length - 1].id;
-      for (let r of resolutions) {
-        if (r.resolution > min) {
-          instance_id = r.id;
-          break;
-        }
-      }
-
-      // generate the entries and assign relevant functions etc
-      let target_url = `/media/fetch_media_instance?instance_ID=${instance_id}`;
       let entry = document.createElement("li");
-      let image = gallery_image_preview_template.cloneNode(true).content;
+      let image = C_GALLERY_IMAGE_PREVIEW_TEMPLATE.cloneNode(true).content;
       entry.appendChild(image);
       let img = entry.querySelector("img");
-      img.width = Math.pow(min, 0.5);
       img.src = target_url;
 
       // hookup the unlist button
       let remove_media_button = entry.querySelector(".remove-image-button");
-      console.log(remove_media_button);
       remove_media_button.onclick = async () => {
         await util_fetch_post_json("/media/mark_media_as_unlisted", {
           media_ID: metadata.id,

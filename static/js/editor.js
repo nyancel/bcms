@@ -17,7 +17,7 @@ const C_EDITOR_BASE_IMAGE = {
   type: "image",
   alt_text: "",
   index: 0,
-  src: undefined,
+  image_id: undefined,
 };
 
 const C_EDITOR_PARAGRAPH_TEMPLATE = document.getElementById(
@@ -36,6 +36,47 @@ const C_EDITOR_CONTAINER = document.getElementById("editor-container");
 function editor_gallery_pop_up_select(index) {}
 function editor_gallery_pop_up_recieve(index, id) {}
 
+function editor_image_upload(index) {
+  // select a file
+  let input = document.createElement("input");
+  input.type = "file";
+  input.accept = "png, jpg, jpeg";
+  input.multiple = false;
+  input.onchange = async () => {
+    // retrieve the selected file
+    let files = Array.from(input.files);
+    let file = files[0];
+    input.remove();
+
+    // upload the file to the gallery
+    let formdata = new FormData();
+    formdata.append("media", file);
+    let image = await util_fetch_post_formdata("/media/upload_media", formdata);
+    let image_id = image.data.results[0].key;
+    C_EDITOR_ARTICLE[index].image_id = image_id;
+    editor_generate_preview();
+  };
+  input.click();
+}
+
+function editor_image_render(entry, index) {
+  // if image_id is undefined we have not yet chosen an image.
+  let display = entry.querySelector(".image-display");
+  if (!C_EDITOR_ARTICLE[index].image_id) {
+    display.classList.toggle("hidden", true);
+    return;
+  }
+  // else image_id is defined and we render the image
+  const load = async () => {
+    display.src = await util_get_media_src_by_width(
+      C_EDITOR_ARTICLE[index].image_id,
+      entry.clientWidth
+    );
+    display.classList.toggle("hidden", false);
+  };
+  load();
+}
+
 // editor insertion functions
 function editor_insert_paragraph() {
   // append the paragraph template to the DOM
@@ -45,14 +86,6 @@ function editor_insert_paragraph() {
   C_EDITOR_CONTAINER.appendChild(entry);
 
   return entry;
-}
-
-function editor_connect_paragraph_change(entry, index) {
-  let textarea = entry.querySelector(".paragraph-input");
-  textarea.value = C_EDITOR_ARTICLE[index].text;
-  textarea.onchange = () => {
-    C_EDITOR_ARTICLE[index].text = textarea.value;
-  };
 }
 
 function editor_insert_image() {
@@ -65,7 +98,15 @@ function editor_insert_image() {
   return entry;
 }
 
-function editor_connect_image_alt_text_change(entry, index) {
+function editor_connect_paragraph(entry, index) {
+  let textarea = entry.querySelector(".paragraph-input");
+  textarea.value = C_EDITOR_ARTICLE[index].text;
+  textarea.onchange = () => {
+    C_EDITOR_ARTICLE[index].text = textarea.value;
+  };
+}
+
+function editor_image_connect(entry, index) {
   // connect the alt-text and its relevant update
   let alt_text = entry.querySelector(".image-alt-text-input");
   if (C_EDITOR_ARTICLE[index].alt_text) {
@@ -74,26 +115,30 @@ function editor_connect_image_alt_text_change(entry, index) {
   alt_text.onchange = () => {
     C_EDITOR_ARTICLE[index].alt_text = alt_text.value;
   };
+
+  // connect the upload buttons
+  let image_select_button = entry.querySelector(".image-gallery-select");
+  let image_upload_button = entry.querySelector(".image-gallery-upload");
+
+  image_upload_button.onclick = () => editor_image_upload(index);
 }
 
-// generic editor navigation functions
-function editor_connect_delete(entry, index) {
+function editor_connect_generic(entry, index) {
+  // generic delete
   let delete_button = entry.querySelector(".delete-button");
   delete_button.onclick = () => {
     editor_remove_item(index);
     editor_generate_preview();
   };
-}
 
-function editor_connect_move_up(entry, index) {
+  // generic move up
   let move_up_button = entry.querySelector(".move-up-button");
   move_up_button.onclick = () => {
     editor_move_item_up(index);
     editor_generate_preview();
   };
-}
 
-function editor_connect_move_down(entry, index) {
+  // generic move down
   let move_down_button = entry.querySelector(".move-down-button");
   move_down_button.onclick = () => {
     editor_move_item_down(index);
@@ -110,23 +155,13 @@ function editor_generate_preview() {
     switch (C_EDITOR_ARTICLE[index].type) {
       case "paragraph":
         entry = editor_insert_paragraph();
-        editor_connect_paragraph_change(entry, index);
+        editor_connect_paragraph(entry, index);
         break;
 
       case "image":
         entry = editor_insert_image();
-
-        // if src is undefined we have not yet chosen an image.
-        if (!C_EDITOR_ARTICLE[index].src) {
-          let display = entry.querySelector(".image-display");
-          display.classList.toggle("hidden", true);
-        }
-        // else src is defined and we render the image
-        else if (C_EDITOR_ARTICLE[index].src) {
-          display.classList.toggle("hidden", false);
-        }
-
-        editor_connect_image_alt_text_change(entry, index);
+        editor_image_render(entry, index);
+        editor_image_connect(entry, index);
         break;
 
       case "heading":
@@ -139,9 +174,7 @@ function editor_generate_preview() {
         continue;
     }
 
-    editor_connect_delete(entry, index);
-    editor_connect_move_down(entry, index);
-    editor_connect_move_up(entry, index);
+    editor_connect_generic(entry, index);
   }
 }
 
@@ -158,6 +191,9 @@ function editor_remove_item(index) {
 }
 
 function editor_move_item_down(index) {
+  if (index > C_EDITOR_ARTICLE.length - 2) {
+    return;
+  }
   let item = C_EDITOR_ARTICLE[index];
   C_EDITOR_ARTICLE[index] = C_EDITOR_ARTICLE[index + 1];
   C_EDITOR_ARTICLE[index + 1] = item;
@@ -167,6 +203,9 @@ function editor_move_item_down(index) {
 }
 
 function editor_move_item_up(index) {
+  if (index < 1) {
+    return;
+  }
   let item = C_EDITOR_ARTICLE[index];
   C_EDITOR_ARTICLE[index] = C_EDITOR_ARTICLE[index - 1];
   C_EDITOR_ARTICLE[index - 1] = item;
@@ -200,16 +239,25 @@ function editor_init() {
   log_button.onclick = editor_log_article;
 
   let add_paragraph_button = document.getElementById("add-paragraph");
-  add_paragraph_button.onclick = editor_add_paragraph;
+  add_paragraph_button.onclick = () =>
+    editor_add_item({
+      ...C_EDITOR_BASE_PARAGRAPH,
+    });
 
   let add_image_button = document.getElementById("add-image");
-  add_image_button.onclick = editor_add_image;
+  add_image_button.onclick = () => editor_add_item({ ...C_EDITOR_BASE_IMAGE });
 
   let add_heading_button = document.getElementById("add-heading");
-  add_heading_button.onclick = editor_add_heading;
+  add_heading_button.onclick = () =>
+    editor_add_item({
+      ...C_EDITOR_BASE_HEADING,
+    });
+
+  // temp for testing
+  add_image_button.click();
 }
 
 editor_init();
 
 // temp for testing
-editor_add_image();
+// editor_add_image();
