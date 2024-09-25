@@ -5,12 +5,14 @@ meta {
 }
 
 post {
-  url: http://127.0.0.1:3000/media/mark_media_as_deleted?media_ID=03zgBAdZHaVg-1727112328808513&mark_as_deleted=false
-  body: none
+  url: http://127.0.0.1:3000/media/mark_media_as_deleted
+  body: json
   auth: none
 }
 
-params:query {
-  media_ID: 03zgBAdZHaVg-1727112328808513
-  mark_as_deleted: false
+body:json {
+  {
+    "media_ID": "wRvIwIpkmUjn-1727289608849204",
+    "mark_as_deleted": false
+  }
 }

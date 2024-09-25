@@ -63,19 +63,15 @@ def update_media_metadata():
 
 @bp.post("/media/mark_media_as_deleted")
 def delete_media():
-    media_ID = flask.request.args.get("media_ID")
-    mark_as_deleted = flask.request.args.get("mark_as_deleted")
+    json_data: dict = flask.request.json
+    media_ID = json_data.get("media_ID")
+    mark_as_deleted = json_data.get("mark_as_deleted")
 
     if not media_ID:
         return flask.jsonify({"error": "no media_ID value was supplied"})
 
-    if not mark_as_deleted:
+    if mark_as_deleted not in [True, False]:
         return flask.jsonify({"error": "no mark_as_deleted value was supplied"})
-
-    if mark_as_deleted.casefold() == "true":
-        mark_as_deleted = True
-    elif mark_as_deleted.casefold() == "false":
-        mark_as_deleted = False
 
     data = lib.media.morph.mark_media_as_deleted(media_ID, mark_as_deleted)
 
@@ -93,14 +89,14 @@ def delete_media():
 
 @bp.post("/media/mark_media_as_unlisted")
 def mark_media_as_deleted():
-    json: dict = flask.request.json
-    media_ID = json.get("media_ID")
-    mark_as_unlisted = json.get("mark_as_unlisted")
+    json_data: dict = flask.request.json
+    media_ID = json_data.get("media_ID")
+    mark_as_unlisted = json_data.get("mark_as_unlisted")
 
     if not media_ID:
         return flask.jsonify({"error": "no media_ID value was supplied"})
 
-    if not mark_as_unlisted:
+    if mark_as_unlisted not in [True, False]:
         return flask.jsonify({"error": "no mark_as_unlisted value was supplied"})
 
     data = lib.media.morph.mark_media_as_unlisted(media_ID, mark_as_unlisted)
@@ -119,9 +115,8 @@ def mark_media_as_deleted():
 
 @bp.post("/media/fetch_media")
 def fetch_media():
-    print(flask.request.json)
-    json: dict = flask.request.json
-    media_ID = json.get("media_ID")
+    json_data: dict = flask.request.json
+    media_ID = json_data.get("media_ID")
 
     if not media_ID:
         return flask.jsonify(
