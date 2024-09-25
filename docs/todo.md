@@ -8,7 +8,6 @@
 Not Claimed
 
 - [ ] ❌ frontend renderer
-- [ ] 🟡 MARIUS frontend article listing
 - [ ] ❌ frontend user login
 - [ ] ❌ WEB route session login restriction
 - [ ] ❌ UTIL rate limiter
@@ -47,10 +46,11 @@ Emmie:
 
 Marius:
 
+- [ ] 🟡 frontend article listing
+- [ ] desk review ?
+- [ ] Auth of functions for user roles
 - [x] ✅ article editing
 - [x] ✅ article deletion
 - [x] ✅ article publishing
 - [x] ✅ article listing
-- [ ] desk review ?
 - [x] ✅ desk approval
-- [ ] Auth of functions for user roles
