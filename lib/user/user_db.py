@@ -95,6 +95,7 @@ class UserRights(Driver.BASE):
     # article privs
     can_post_draft: orm.Mapped[bool] = orm.mapped_column(default=False)
     can_approve_draft: orm.Mapped[bool] = orm.mapped_column(default=False)
+    can_read_drafts: orm.Mapped[bool] = orm.mapped_column(default=False)
     can_publish_article: orm.Mapped[bool] = orm.mapped_column(default=False)
     can_delete_article: orm.Mapped[bool] = orm.mapped_column(default=False)
     # media privs

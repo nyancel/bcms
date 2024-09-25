@@ -14,6 +14,7 @@ class UserRights:
         self.can_post_media: bool = data.get("can_post_media") == True
         self.can_unlist_media: bool = data.get("can_unlist_media") == True
         self.can_delete_media: bool = data.get("can_delete_media") == True
+        self.can_read_drafts: bool = data.get("can_read_drafts") == True
         self.can_assign_journalist: bool = data.get(
             "can_assign_journalist") == True
         self.can_assign_editorial: bool = data.get(
