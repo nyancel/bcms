@@ -32,7 +32,7 @@ class UserRights:
         self.can_submit_event: bool = data.get("can_submit_event") == True
 
 
-def fetch_user_from_token(token_id: str):
+def fetch_user_from_token(token_id: str) -> tuple[dict, int]:
     target = f"{env.SERVER_ADRESS}/user/who"
     headers = {
         "content-type": "application/json"
@@ -42,10 +42,10 @@ def fetch_user_from_token(token_id: str):
     }
     r = requests.post(target, headers=headers, json=data)
     j: dict = json.loads(r.text)
-    return j
+    return j, r.status_code
 
 
-def fetch_rights_from_user(user_id: str) -> UserRights:
+def fetch_rights_from_user(user_id: str) -> tuple[UserRights | dict, int]:
     target = f"{env.SERVER_ADRESS}/user/rights"
     headers = {
         "content-type": "application/json"
@@ -55,11 +55,11 @@ def fetch_rights_from_user(user_id: str) -> UserRights:
     }
     r = requests.post(target, headers=headers, json=data)
     if r.status_code != 200:
-        return json.loads(r.text)
-    return UserRights(json.loads(r.text))
+        return json.loads(r.text), r.status_code
+    return UserRights(json.loads(r.text)), r.status_code
 
 
-def get_admin_token():
+def get_admin_token() -> tuple[dict, int]:
     target = f"{env.SERVER_ADRESS}/user/login"
     headers = {
         "content-type": "application/json"

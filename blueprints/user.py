@@ -81,15 +81,25 @@ def register_new_user():
 @bp.post("edit_user_rights")
 def edit_user_rights():
     json: dict = flask.request.json
-    user_id: str = json.get("user_id")
+    # determine if we are allowd to edit user rights
+
     auth_token = json.get("auth_token")
+    if not auth_token:
+        return generate_error("auth_token not found")
 
-    user = lib.util.req.fetch_user_from_token(auth_token)
-    rights = lib.util.req.fetch_rights_from_user(user.get("id"))
+    user, status_code = lib.util.req.fetch_user_from_token(auth_token)
+    if status_code != 200:
+        return generate_error("user data not found")
 
-    if rights.get("can_edit_user_rights") != True:
+    rights, status_code = lib.util.req.fetch_rights_from_user(user.get("id"))
+    if status_code != 200:
+        return generate_error("could not fetch user rights")
+
+    if rights.can_edit_user_rights != True:
         return generate_error("Not allowed to edit", 401)
 
+    # fetch the relevant user
+    user_id: str = json.get("user_id")
     if not user_id:
         return generate_error("no user id supplied")
 
@@ -101,7 +111,10 @@ def edit_user_rights():
     if not rights:
         return generate_error("no rights found")
 
+    # assign the user rights we want to change
     updated_rights = lib.user.rights.update_rights(rights.id, json)
+    if not updated_rights:
+        return generate_error("could not update rights")
     return flask.jsonify(updated_rights.to_dict())
 
 
