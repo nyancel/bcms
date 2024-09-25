@@ -46,9 +46,9 @@ class Media(Driver.BASE):
     content_type: orm.Mapped[str]
     creation_time: orm.Mapped[float]
     is_unlisted: orm.Mapped[bool] = orm.mapped_column(default=False)
-    unlisted_time: orm.Mapped[float] = orm.mapped_column(default=0)
+    unlisted_state_update_time: orm.Mapped[float] = orm.mapped_column(default=0)
     is_deleted: orm.Mapped[bool] = orm.mapped_column(default=False)
-    deletion_time: orm.Mapped[float] = orm.mapped_column(default=0)
+    deleted_state_update_time: orm.Mapped[float] = orm.mapped_column(default=0)
 
     def __init__(self, **kw: sql.Any):
         super().__init__(**kw)
@@ -68,8 +68,8 @@ class Media(Driver.BASE):
         _dict["content_type"] = self.content_type
         _dict["creation_time"] = self.creation_time
         _dict["is_unlisted"] = self.is_unlisted
-        _dict["unlisted_time"] = self.unlisted_time
+        _dict["unlisted_state_update_time"] = self.unlisted_state_update_time
         _dict["is_deleted"] = self.is_deleted
-        _dict["deletion_time"] = self.deletion_time
+        _dict["deleted_state_update_time"] = self.deleted_state_update_time
         
         return _dict

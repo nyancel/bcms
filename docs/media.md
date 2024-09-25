@@ -82,49 +82,35 @@ list[dict]
 --------------------------
 
 
-POST    /media/mark_media_as_deleted
-query
-params:query {
-  media_ID: 03zgBAdZHaVg-1727112328808513
-  mark_as_deleted: false
-}
-
-return
-<!-- returns True if the media deletion state was changed, returns False if nothing changed -->
-bool or error
-
-
---------------------------
-
-
-POST    /media/mark_media_as_unlisted
-query
-params:query {
-  media_ID: 03zgBAdZHaVg-1727112328808513
-  mark_as_unlisted: false
-}
-
-return
-<!-- returns True if the media unlisted state was changed, returns False if nothing changed -->
-bool or error
-
-
---------------------------
-
-
 POST    /update_media_metadata
 query
 <!-- the parameters will vary depending on what you want to change, check the function in blueprints/media.py for the up to-date list -->
-params:query {
-  media_ID: 03zgBAdZHaVg-1727112328808513
-  alt_text: "HEISANN!!"
+```json
+{
+  "media_ID": "mljLXB287ULK-17272914443755612",
+  "alt_text": "heisann!!",
+  "is_unlisted": true,
+  "is_deleted": false,
+  "filename": "BUH GUH"
 }
 
 return
 ```json
 {
   "new_metadata": {
-    "alt_text": "\"HEISANN!!\""
+    "alt_text": "heisann!!",
+    "content_type": "image",
+    "creation_time": 1727291444.375793,
+    "deleted_state_update_time": 0,
+    "file_extention": "jpg",
+    "file_hash": "1ec95dc40c0c329d8739f1099f28921f",
+    "file_mimetype": "image/jpeg",
+    "filename": "BUH_GUH",
+    "id": "mljLXB287ULK-17272914443755612",
+    "is_deleted": false,
+    "is_unlisted": true,
+    "unlisted_state_update_time": 1727291520.5254042,
+    "uploader_user_id": "aPE4RTZwpWeu-17272914443757687"
   },
   "success": 1
 }
