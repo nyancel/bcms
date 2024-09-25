@@ -130,13 +130,13 @@ def rights():
             {"error": "user_id not supplied"}
         ), 400
 
-    user = lib.user.user.get_user(user_id)
-    if not user:
+    rights = lib.user.rights.get_user_rights(user_id)
+    if not rights:
         return flask.jsonify(
-            {"error": "no user data"}
+            {"error": "no data"}
         ), 400
 
-    return flask.jsonify(user.to_dict())
+    return flask.jsonify(rights.to_dict())
 
 
 @bp.post("list_users")
