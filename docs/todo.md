@@ -54,4 +54,3 @@ Marius:
 - [x] ✅ article publishing
 - [x] ✅ article listing
 - [x] ✅ desk approval
-  - Should the article be published automatically after approval? Or new function call to post?
