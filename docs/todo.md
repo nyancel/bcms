@@ -47,10 +47,11 @@ Emmie:
 Marius:
 
 - [ ] 🟡 frontend article listing
-- [ ] desk review ?
+- [ ] desk review
 - [ ] Auth of functions for user roles
 - [x] ✅ article editing
 - [x] ✅ article deletion
 - [x] ✅ article publishing
 - [x] ✅ article listing
 - [x] ✅ desk approval
+  - Should the article be published automatically after approval? Or new function call to post?
