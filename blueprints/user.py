@@ -11,10 +11,29 @@ bp = flask.Blueprint("user_bp", __name__)
 bp.url_prefix = "/user/"
 
 
-def generate_error(reason: str, code: int = 400) -> flask.Response:
+def generate_error(reason: str, code: int = 400):
     return flask.jsonify({
         "error": reason
     }), code
+
+
+def get_rights(json: dict):
+    auth_token = json.get("auth_token")
+    if not auth_token:
+        return generate_error("auth_token not found"), False
+
+    if not auth_token:
+        return (generate_error("auth_token not found")), False
+
+    user, status_code = lib.util.req.fetch_user_from_token(auth_token)
+    if status_code != 200:
+        return (generate_error("user data not found")), False
+
+    rights, status_code = lib.util.req.fetch_rights_from_user(user.get("id"))
+    if status_code != 200:
+        return (generate_error("could not fetch user rights")), False
+
+    return rights, True
 
 
 @bp.post("login")
@@ -82,20 +101,11 @@ def register_new_user():
 def edit_user_rights():
     json: dict = flask.request.json
     # determine if we are allowd to edit user rights
+    rights_or_error, is_valid = get_rights(json)
+    if not is_valid:
+        return rights_or_error
 
-    auth_token = json.get("auth_token")
-    if not auth_token:
-        return generate_error("auth_token not found")
-
-    user, status_code = lib.util.req.fetch_user_from_token(auth_token)
-    if status_code != 200:
-        return generate_error("user data not found")
-
-    rights, status_code = lib.util.req.fetch_rights_from_user(user.get("id"))
-    if status_code != 200:
-        return generate_error("could not fetch user rights")
-
-    if rights.can_edit_user_rights != True:
+    if not rights_or_error.can_edit_user_rights:
         return generate_error("Not allowed to edit", 401)
 
     # fetch the relevant user
@@ -107,12 +117,12 @@ def edit_user_rights():
     if not user:
         return generate_error("no user found")
 
-    rights = lib.user.rights.get_user_rights(user_id)
-    if not rights:
+    user_rights = lib.user.rights.get_user_rights(user_id)
+    if not user_rights:
         return generate_error("no rights found")
 
     # assign the user rights we want to change
-    updated_rights = lib.user.rights.update_rights(rights.id, json)
+    updated_rights = lib.user.rights.update_rights(user_rights.id, json)
     if not updated_rights:
         return generate_error("could not update rights")
     return flask.jsonify(updated_rights.to_dict())
