@@ -28,3 +28,17 @@ def fetch_rights_from_user(user_id: str):
     r = requests.post(target, headers=headers, json=data)
     j: dict = json.loads(r.text)
     return j
+
+
+def get_admin_token():
+    target = f"{env.SERVER_ADRESS}/user/login"
+    headers = {
+        "content-type": "application/json"
+    }
+    data = {
+        "email": env.SERVER_ADMIN_EMAIL,
+        "password": env.SERVER_ADMIN_PASSWORD
+    }
+    r = requests.post(target, headers=headers, json=data)
+    j: dict = json.loads(r.text)
+    return j

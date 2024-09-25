@@ -7,6 +7,9 @@ IS_PROD: bool = os.getenv("IS_PROD") == "TRUE"
 SECRET_KEY: str = os.getenv("SECRET_KEY")
 SERVER_ADRESS: str = os.getenv("SERVER_ADRESS")
 
+SERVER_ADMIN_EMAIL: str = os.getenv("SERVER_ADMIN_EMAIL")
+SERVER_ADMIN_PASSWORD: str = os.getenv("SERVER_ADMIN_PASSWORD")
+
 ARTICLE_DB_PATH: str = os.getenv("ARTICLE_DB_PATH")
 MEDIA_DB_PATH: str = os.getenv("MEDIA_DB_PATH")
 USER_DB_PATH: str = os.getenv("USER_DB_PATH")

@@ -1,6 +1,7 @@
 import flask
 
 import lib.util.env as env
+import lib.util.req as req
 
 import blueprints.article
 import blueprints.media
@@ -17,9 +18,15 @@ server.register_blueprint(blueprints.web.bp)
 server.secret_key = env.SECRET_KEY
 
 
-@server.post("/ping")
-def sanity():
-    return "pong"
+# temporary test routes
+if not env.IS_PROD:
+    @server.post("/ping")
+    def sanity():
+        return "pong"
+
+    @server.get("/admin")
+    def sanity_admin():
+        return flask.jsonify(req.get_admin_token())
 
 
 if __name__ == "__main__":

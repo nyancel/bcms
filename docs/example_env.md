@@ -10,6 +10,9 @@ ARTICLE_DB_PATH = ./volume/db/article.db
 MEDIA_DB_PATH = ./volume/db/media.db
 SECRET_KEY = secretkey123
 
+SERVER_ADMIN_EMAIL = server.admin@bifrost-uit.no
+SERVER_ADMIN_PASSWORD = 123476asdhasdoi123n12397afhasdlj091i123asd
+
 SMTP_SENDER_ADRESS = 123
 SMTP_SERVER_URL = 123
 SMTP_SERVER_PORT = 123

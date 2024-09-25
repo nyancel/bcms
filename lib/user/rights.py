@@ -36,7 +36,7 @@ def save_user_rights(rights: user_db.UserRights) -> user_db.UserRights:
     return rights
 
 
-def update_rights(rights_id: str, args: dict):
+def update_rights(rights_id: str, args: dict) -> user_db.UserRights:
     property_names = [p for p in dir(user_db.UserRights) if isinstance(
         getattr(user_db.UserRights, p), property
     )]
@@ -45,4 +45,5 @@ def update_rights(rights_id: str, args: dict):
     for p in property_names:
         if args.get(p) is not None:
             setattr(rights, p, args.get(p))
-    save_user_rights(rights)
+    rights = save_user_rights(rights)
+    return rights
