@@ -26,6 +26,6 @@ things you should be able to do include:
 - posting an event alongside an event-type or key.
 - retrieving events within x timeframe or based off some key
 - retrieving a specific event based on an ID
-- subscribing to an event-type or key
+- subscribing to an event-type or key   
 
 Events NEVER "expire", there is no modification or alteration of events

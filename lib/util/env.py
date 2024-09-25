@@ -10,6 +10,7 @@ SERVER_ADRESS: str = os.getenv("SERVER_ADRESS")
 ARTICLE_DB_PATH: str = os.getenv("ARTICLE_DB_PATH")
 MEDIA_DB_PATH: str = os.getenv("MEDIA_DB_PATH")
 USER_DB_PATH: str = os.getenv("USER_DB_PATH")
+EVENT_DB_PATH: str = os.getenv("EVENT_DB_PATH")
 
 SMTP_SENDER_ADRESS: str = os.getenv("SMTP_SENDER_ADRESS")
 SMTP_SERVER_URL: str = os.getenv("SMTP_SERVER_URL")
