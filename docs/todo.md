@@ -6,15 +6,11 @@
 # TODO LIST
 
 Not Claimed
-
+- [ ] ❌ frontend article listing
 - [ ] ❌ frontend renderer
 - [ ] ❌ frontend user login
 - [ ] ❌ WEB route session login restriction
 - [ ] ❌ UTIL rate limiter
-- [ ] ❌ Event post
-- [ ] ❌ Event get by filter
-- [ ] ❌ Event subscribption
-- [ ] ❌ Event lookup
 
 
 Simon:
@@ -46,9 +42,12 @@ Emmie:
 
 Marius:
 
-- [ ] 🟡 frontend article listing
-- [ ] desk review
-- [ ] Auth of functions for user roles
+- [ ] Event post
+- [ ] Event get by filter
+- [ ] Event subscribption
+- [ ] Event lookup
+- [x] ✅ desk review
+- [x] ✅ Auth of functions for user roles
 - [x] ✅ article editing
 - [x] ✅ article deletion
 - [x] ✅ article publishing
