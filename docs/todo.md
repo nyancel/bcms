@@ -11,6 +11,11 @@ Not Claimed
 - [ ] ❌ frontend user login
 - [ ] ❌ WEB route session login restriction
 - [ ] ❌ UTIL rate limiter
+- [ ] ❌ Event post
+- [ ] ❌ Event get by filter
+- [ ] ❌ Event subscribption
+- [ ] ❌ Event lookup
+
 
 Simon:
 
@@ -31,11 +36,6 @@ Simon:
 - [x] ✅ user admin
 
 Alexander:
-
-- [ ] Event post
-- [ ] Event get by filter
-- [ ] Event subscribption
-- [ ] Event lookup
 
 Emmie:
 
