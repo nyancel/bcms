@@ -8,7 +8,7 @@ const C_GALLERY_IMAGE_DISPLAY = document.getElementById(
   "gallery-image-display"
 );
 
-async function gallery_popup_load_all_media();() {
+async function gallery_popup_load_all_media() {
   let all_media = await util_fetch_post_json(
     "/media/fetch_all_media_metadata",
     undefined
@@ -44,7 +44,7 @@ async function gallery_popup_load_all_media();() {
           media_ID: metadata.id,
           mark_as_unlisted: true,
         });
-        gallery_popup_load_all_media();();
+        gallery_popup_load_all_media();
       };
 
       return entry;
@@ -65,7 +65,7 @@ async function gallery_upload_current_files() {
   }
 
   await util_fetch_post_formdata("/media/upload_media", formdata);
-  gallery_popup_load_all_media();();
+  gallery_popup_load_all_media();
   C_GALLERY_INPUT_SOURCE.value = null;
 }
 
@@ -74,7 +74,7 @@ function gallery_init() {
   let upload_button = document.getElementById("upload-image-button");
   upload_button.onclick = gallery_upload_current_files;
 
-  gallery_popup_load_all_media();();
+  gallery_popup_load_all_media();
 }
 
 gallery_init();
