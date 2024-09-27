@@ -33,8 +33,18 @@ const C_EDITOR_HEADING_TEMPLATE = document.getElementById(
 const C_EDITOR_CONTAINER = document.getElementById("editor-container");
 
 // editor image functions
-function editor_gallery_pop_up_select(index) {}
-function editor_gallery_pop_up_recieve(index, id) {}
+function editor_gallery_pop_up_select(index) {
+  const popup = window.open(
+    "/gallery-popup",
+    "popupWindow",
+    "width=600,height=400"
+  );
+
+  window.receive_data = function (data) {
+    C_EDITOR_ARTICLE[index].image_id = data.image_id;
+    editor_generate_preview();
+  };
+}
 
 function editor_image_upload(index) {
   // select a file
@@ -121,6 +131,7 @@ function editor_image_connect(entry, index) {
   let image_upload_button = entry.querySelector(".image-gallery-upload");
 
   image_upload_button.onclick = () => editor_image_upload(index);
+  image_select_button.onclick = () => editor_gallery_pop_up_select(index);
 }
 
 function editor_connect_generic(entry, index) {
@@ -148,6 +159,8 @@ function editor_connect_generic(entry, index) {
 
 // view functions
 function editor_generate_preview() {
+  let y_pos = window.scrollY;
+
   C_EDITOR_CONTAINER.innerHTML = null;
   let entry;
 
@@ -173,9 +186,12 @@ function editor_generate_preview() {
         console.log(C_EDITOR_ARTICLE[index]);
         continue;
     }
-
     editor_connect_generic(entry, index);
   }
+
+  requestAnimationFrame(() => {
+    window.scrollTo(0, y_pos);
+  });
 }
 
 // article functions

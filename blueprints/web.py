@@ -29,6 +29,6 @@ def web_gallery():
     return flask.render_template("pages/gallery.jinja")
 
 
-@bp.get("gallery-select")
+@bp.get("gallery-popup")
 def web_gallery_select():
-    return flask.render_template("pages/gallery_select.jinja")
+    return flask.render_template("pages/gallery_popup.jinja")
