@@ -37,10 +37,10 @@ def save_user_rights(rights: user_db.UserRights) -> user_db.UserRights:
 
 
 def update_rights(rights_id: str, args: dict) -> user_db.UserRights:
-    property_names = [p for p in dir(user_db.UserRights) if isinstance(
-        getattr(user_db.UserRights, p), property
-    )]
-    property_names = [p for p in property_names if p.startswith("can_")]
+    property_names = [
+        p for p in dir(user_db.UserRights)
+        if str(p).startswith("can_")
+    ]
     rights = get_rights(rights_id)
     for p in property_names:
         if args.get(p) is not None:
