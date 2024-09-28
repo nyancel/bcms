@@ -1,0 +1,58 @@
+{% extends "pages/base.jinja" %}
+
+{% block body %}
+
+<div class="grid grid-cols-2 gap-12 pt-12">
+
+    {# Sign in #}
+    <div class="grid grid-cols-2 gap-4 h-fit my-auto p-12 bg-gray-200 rounded-md shadow-md">
+        <h1 class="text-xl col-span-2">
+            Sign in to existing user
+        </h1>
+        <p>
+            Email
+        </p>
+        <input type="text" class="border bg-slate-100 p-2" />
+        <p>
+            Password
+        </p>
+        <input type="password" class="border bg-slate-100 p-2" />
+        <button class="col-span-2 bg-blue-400 p-2 rounded-md">
+            Sign In
+        </button>
+    </div>
+
+
+    {# Register #}
+    <div class="grid grid-cols-2 gap-4 h-fit my-auto p-12 bg-gray-200 rounded-md shadow-md">
+        <h1 class="text-xl col-span-2">
+            Register a new account
+        </h1>
+        <p>
+            First name
+        </p>
+        <input type="text" class="border bg-slate-100 p-2" />
+        <p>
+            Last name
+        </p>
+        <input type="text" class="border bg-slate-100 p-2" />
+        <p>
+            Email
+        </p>
+        <input type="text" class="border bg-slate-100 p-2" />
+        <p>
+            Password
+        </p>
+        <input type="password" class="border bg-slate-100 p-2" />
+        <p>
+            Repeat Password
+        </p>
+        <input type="password" class="border bg-slate-100 p-2" />
+        <button class="col-span-2 bg-green-600 p-2 rounded-md text-white">
+            Register
+        </button>
+    </div>
+
+</div>
+
+{% endblock body %}

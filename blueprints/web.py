@@ -11,7 +11,7 @@ def web_index():
 
 @bp.get("signin")
 def web_signin():
-    return "hello world"
+    return flask.render_template("pages/signin.jinja")
 
 
 @bp.get("editor")

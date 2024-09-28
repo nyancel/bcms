@@ -42,11 +42,18 @@ function user_render_details() {
   }
 }
 
-function init() {
+function user_function_init() {
+  console.log("on the signin page");
+}
+
+function user_status_init() {
   user_load_local();
   if (C_USER_DETAILS_CONTAINER) {
     user_render_details();
   }
+  if (window.location.pathname === "/signin") {
+    user_function_init();
+  }
 }
 
-init();
+user_status_init();
