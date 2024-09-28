@@ -66,8 +66,23 @@ def logout():
     if not user_token:
         return generate_error("token not supplied")
 
-    deleted = lib.user.token.delete_token(user_token)
-    if not deleted:
+    token = lib.user.token.get_token(user_token)
+    if not token:
+        return generate_error("token not found")
+
+    user = lib.user.user.get_user(token.user_id)
+    if not user:
+        return generate_error("usere not found")
+
+    all_tokens = lib.user.token.get_tokens_by_user_id(user.id)
+
+    did_delete_all = True
+    for token in all_tokens:
+        deleted_current = lib.user.token.delete_token(token)
+        if not deleted_current:
+            did_delete_all = False
+
+    if not did_delete_all:
         return generate_error("could not delete token")
 
     return flask.jsonify({"success": "user logged out"})
