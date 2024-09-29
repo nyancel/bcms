@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../ts/src/editor.ts", "../../ts/src/main.ts"],
+  "sourcesContent": ["export function test() {\r\n    console.log(\"this is a test\");\r\n}", "import { test } from \"./editor\";\r\n\r\ntest();"],
+  "mappings": "mBAAO,SAASA,GAAO,CACnB,QAAQ,IAAI,gBAAgB,CAChC,CCAAC,EAAK",
+  "names": ["test", "test"]
+}

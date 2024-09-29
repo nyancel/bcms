@@ -1,6 +1,7 @@
 /volume
 # test folder i use for some local scripts
 /local-only
+/node_modules
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
