@@ -1,4 +1,9 @@
-const C_EDITOR_ARTICLE = [];
+const C_EDITOR_ARTICLE = {
+  id: undefined,
+  author_id: undefined,
+  last_changed: undefined,
+  content: [],
+};
 
 // default objects and const reffs
 const C_EDITOR_BASE_PARAGRAPH = {
@@ -41,7 +46,7 @@ function editor_gallery_pop_up_select(index) {
   );
 
   window.receive_data = function (data) {
-    C_EDITOR_ARTICLE[index].image_id = data.image_id;
+    C_EDITOR_ARTICLE.content[index].image_id = data.image_id;
     editor_generate_preview();
   };
 }
@@ -63,7 +68,8 @@ function editor_image_upload(index) {
     formdata.append("media", file);
     let image = await util_fetch_post_formdata("/media/upload_media", formdata);
     let image_id = image.data.results[0].key;
-    C_EDITOR_ARTICLE[index].image_id = image_id;
+    C_EDITOR_ARTICLE.content[index].image_id = image_id;
+    C_EDITOR_ARTICLE.last_changed = util_epoch_seconds();
     editor_generate_preview();
   };
   input.click();
@@ -72,14 +78,14 @@ function editor_image_upload(index) {
 function editor_image_render(entry, index) {
   // if image_id is undefined we have not yet chosen an image.
   let display = entry.querySelector(".image-display");
-  if (!C_EDITOR_ARTICLE[index].image_id) {
+  if (!C_EDITOR_ARTICLE.content[index].image_id) {
     display.classList.toggle("hidden", true);
     return;
   }
   // else image_id is defined and we render the image
   const load = async () => {
     display.src = await util_get_media_src_by_width(
-      C_EDITOR_ARTICLE[index].image_id,
+      C_EDITOR_ARTICLE.content[index].image_id,
       entry.clientWidth
     );
     display.classList.toggle("hidden", false);
@@ -110,20 +116,20 @@ function editor_insert_image() {
 
 function editor_connect_paragraph(entry, index) {
   let textarea = entry.querySelector(".paragraph-input");
-  textarea.value = C_EDITOR_ARTICLE[index].text;
+  textarea.value = C_EDITOR_ARTICLE.content[index].text;
   textarea.onchange = () => {
-    C_EDITOR_ARTICLE[index].text = textarea.value;
+    C_EDITOR_ARTICLE.content[index].text = textarea.value;
   };
 }
 
 function editor_image_connect(entry, index) {
   // connect the alt-text and its relevant update
   let alt_text = entry.querySelector(".image-alt-text-input");
-  if (C_EDITOR_ARTICLE[index].alt_text) {
-    alt_text.value = C_EDITOR_ARTICLE[index].alt_text;
+  if (C_EDITOR_ARTICLE.content[index].alt_text) {
+    alt_text.value = C_EDITOR_ARTICLE.content[index].alt_text;
   }
   alt_text.onchange = () => {
-    C_EDITOR_ARTICLE[index].alt_text = alt_text.value;
+    C_EDITOR_ARTICLE.content[index].alt_text = alt_text.value;
   };
 
   // connect the upload buttons
@@ -164,8 +170,8 @@ function editor_generate_preview() {
   C_EDITOR_CONTAINER.innerHTML = null;
   let entry;
 
-  for (let index = 0; index < C_EDITOR_ARTICLE.length; index++) {
-    switch (C_EDITOR_ARTICLE[index].type) {
+  for (let index = 0; index < C_EDITOR_ARTICLE.content.length; index++) {
+    switch (C_EDITOR_ARTICLE.content[index].type) {
       case "paragraph":
         entry = editor_insert_paragraph();
         editor_connect_paragraph(entry, index);
@@ -183,7 +189,7 @@ function editor_generate_preview() {
       // skip to next item if we dont have a template for the type
       default:
         console.log("skipping, unkown type");
-        console.log(C_EDITOR_ARTICLE[index]);
+        console.log(C_EDITOR_ARTICLE.content[index]);
         continue;
     }
     editor_connect_generic(entry, index);
@@ -196,38 +202,44 @@ function editor_generate_preview() {
 
 // article functions
 function editor_add_item(item) {
-  let length = C_EDITOR_ARTICLE.length;
+  let length = C_EDITOR_ARTICLE.content.length;
   item.index = length;
-  C_EDITOR_ARTICLE.push(item);
+  C_EDITOR_ARTICLE.content.push(item);
+  C_EDITOR_ARTICLE.last_changed = util_epoch_seconds();
   editor_generate_preview();
 }
 
 function editor_remove_item(index) {
-  C_EDITOR_ARTICLE.splice(index, 1);
+  C_EDITOR_ARTICLE.content.splice(index, 1);
+  C_EDITOR_ARTICLE.last_changed = util_epoch_seconds();
 }
 
 function editor_move_item_down(index) {
-  if (index > C_EDITOR_ARTICLE.length - 2) {
+  if (index > C_EDITOR_ARTICLE.content.length - 2) {
     return;
   }
-  let item = C_EDITOR_ARTICLE[index];
-  C_EDITOR_ARTICLE[index] = C_EDITOR_ARTICLE[index + 1];
-  C_EDITOR_ARTICLE[index + 1] = item;
+  let item = C_EDITOR_ARTICLE.content[index];
+  C_EDITOR_ARTICLE.content[index] = C_EDITOR_ARTICLE.content[index + 1];
+  C_EDITOR_ARTICLE.content[index + 1] = item;
   // assign new indexes
-  C_EDITOR_ARTICLE[index].index = index;
-  C_EDITOR_ARTICLE[index + 1].index = index + 1;
+  C_EDITOR_ARTICLE.content[index].index = index;
+  C_EDITOR_ARTICLE.content[index + 1].index = index + 1;
+
+  C_EDITOR_ARTICLE.last_changed = util_epoch_seconds();
 }
 
 function editor_move_item_up(index) {
   if (index < 1) {
     return;
   }
-  let item = C_EDITOR_ARTICLE[index];
-  C_EDITOR_ARTICLE[index] = C_EDITOR_ARTICLE[index - 1];
-  C_EDITOR_ARTICLE[index - 1] = item;
+  let item = C_EDITOR_ARTICLE.content[index];
+  C_EDITOR_ARTICLE.content[index] = C_EDITOR_ARTICLE.content[index - 1];
+  C_EDITOR_ARTICLE.content[index - 1] = item;
   // assign new indexes
-  C_EDITOR_ARTICLE[index].index = index;
-  C_EDITOR_ARTICLE[index - 1].index = index - 1;
+  C_EDITOR_ARTICLE.content[index].index = index;
+  C_EDITOR_ARTICLE.content[index - 1].index = index - 1;
+
+  C_EDITOR_ARTICLE.last_changed = util_epoch_seconds();
 }
 
 function editor_add_paragraph() {
@@ -246,7 +258,7 @@ function editor_add_heading() {
 }
 
 function editor_log_article() {
-  console.log(C_EDITOR_ARTICLE);
+  console.log(C_EDITOR_ARTICLE.content);
 }
 
 // startup
@@ -268,14 +280,8 @@ function editor_init() {
     editor_add_item({
       ...C_EDITOR_BASE_HEADING,
     });
-
-  // temp for testing
-  // add_image_button.click();
 }
 
 window.addEventListener("load", (event) => {
   editor_init();
 });
-
-// temp for testing
-// editor_add_image();
