@@ -35,7 +35,22 @@
 </template>
 
 <template id="article-heading-template">
+    <div class="p-2 bg-green-400">
+        <p>Heading</p>
+        <button class="delete-button bg-red-600 text-white rounded-md p-2">DELETE</button>
+        <button class="move-up-button bg-blue-600 text-white rounded-md p-2">MOVE UP ⬆️</button>
+        <button class="move-down-button bg-blue-600 text-white rounded-md p-2">MOVE DOWN ⬇️</button>
+
+        {# image picker container #}
+        <input type="text" class="w-full editor-article-heading-input" />
+    </div>
 </template>
+
+<div class="pt-12 pb-6">
+    <div class="p-[4px] bg-green-200">
+        <input id="editor-article-title-input" type="text" class="p-2 border-b h-full w-full" placeholder="Title">
+    </div>
+</div>
 
 <ol id="editor-container" class="space-y-4">
 

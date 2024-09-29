@@ -630,6 +630,10 @@ video {
   height: fit-content;
 }
 
+.h-full {
+  height: 100%;
+}
+
 .w-full {
   width: 100%;
 }
@@ -662,6 +666,10 @@ video {
 
 .border {
   border-width: 1px;
+}
+
+.border-b {
+  border-bottom-width: 1px;
 }
 
 .bg-blue-400 {
@@ -719,6 +727,11 @@ video {
   background-color: rgb(253 224 71 / var(--tw-bg-opacity));
 }
 
+.bg-green-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(187 247 208 / var(--tw-bg-opacity));
+}
+
 .p-12 {
   padding: 3rem;
 }
@@ -727,8 +740,20 @@ video {
   padding: 0.5rem;
 }
 
+.p-\[2px\] {
+  padding: 2px;
+}
+
+.p-\[4px\] {
+  padding: 4px;
+}
+
 .pt-12 {
   padding-top: 3rem;
+}
+
+.pb-6 {
+  padding-bottom: 1.5rem;
 }
 
 .text-sm {

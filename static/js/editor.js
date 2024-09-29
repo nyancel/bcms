@@ -93,24 +93,11 @@ function editor_image_render(entry, index) {
   load();
 }
 
-// editor insertion functions
-function editor_insert_paragraph() {
-  // append the paragraph template to the DOM
+function editor_insert_template(template) {
   let entry = document.createElement("li");
-  let item = C_EDITOR_PARAGRAPH_TEMPLATE.cloneNode(true).content;
+  let item = template.cloneNode(true).content;
   entry.appendChild(item);
   C_EDITOR_CONTAINER.appendChild(entry);
-
-  return entry;
-}
-
-function editor_insert_image() {
-  // append the image template to the DOM
-  let entry = document.createElement("li");
-  let item = C_EDITOR_IMAGE_TEMPLATE.cloneNode(true).content;
-  entry.appendChild(item);
-  C_EDITOR_CONTAINER.appendChild(entry);
-
   return entry;
 }
 
@@ -173,17 +160,19 @@ function editor_generate_preview() {
   for (let index = 0; index < C_EDITOR_ARTICLE.content.length; index++) {
     switch (C_EDITOR_ARTICLE.content[index].type) {
       case "paragraph":
-        entry = editor_insert_paragraph();
+        entry = editor_insert_template(C_EDITOR_PARAGRAPH_TEMPLATE);
         editor_connect_paragraph(entry, index);
         break;
 
       case "image":
-        entry = editor_insert_image();
+        entry = editor_insert_template(C_EDITOR_IMAGE_TEMPLATE);
         editor_image_render(entry, index);
         editor_image_connect(entry, index);
         break;
 
       case "heading":
+        entry = editor_insert_template(C_EDITOR_HEADING_TEMPLATE);
+        editor_heading_connect(entry, index); // TODO fix the editor heading connector
         break;
 
       // skip to next item if we dont have a template for the type

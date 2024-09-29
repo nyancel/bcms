@@ -253,14 +253,16 @@ async function user_revalidate_token() {
     user_token: C_USER_STATE.token.id,
   });
 
-  console.log(validation_response);
   if (validation_response.error) {
     if (validation_response.error === "token invalid") {
       C_USER_STATE.meta = null;
       C_USER_STATE.token = null;
       user_save_local();
       user_status_init();
+      return;
     }
+    // todo handle the error
+    console.log(validation_response);
   }
 }
 
