@@ -273,7 +273,9 @@ function editor_init() {
   // add_image_button.click();
 }
 
-editor_init();
+window.addEventListener("load", (event) => {
+  editor_init();
+});
 
 // temp for testing
 // editor_add_image();

@@ -54,4 +54,6 @@ async function gallery_popup_load_all_media() {
   media_entries.forEach((entry) => C_GALLERY_IMAGE_DISPLAY.appendChild(entry));
 }
 
-gallery_popup_load_all_media();
+window.addEventListener("load", (event) => {
+  gallery_popup_load_all_media();
+});

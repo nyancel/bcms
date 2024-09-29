@@ -34,6 +34,19 @@ const C_USER_SIGNIN_INPUTS = {
   valid_inputs: false,
 };
 
+function user_get_token_id() {
+  if (!C_USER_STATE) {
+    return undefined;
+  }
+  if (!C_USER_STATE.token) {
+    return undefined;
+  }
+  if (!C_USER_STATE.token.id) {
+    return undefined;
+  }
+  return C_USER_STATE.token.id;
+}
+
 function user_load_local() {
   let meta = localStorage.getItem(C_USER_STATE.metadata_storage_key);
   if (meta) {
@@ -212,8 +225,50 @@ function user_function_init() {
   };
 }
 
+async function user_revalidate_token() {
+  if (!C_USER_STATE.token) {
+    return;
+  }
+
+  if (util_epoch_seconds() > C_USER_STATE.token.expires_at) {
+    C_USER_STATE.token = null;
+    return;
+  }
+
+  // refresh if less then 10 minutes left of the token
+  if (util_epoch_seconds() + 600 > C_USER_STATE.token.expires_at) {
+    let new_token_response = await util_fetch_post_json("/user/refresh_token", {
+      user_token: C_USER_STATE.token.id,
+    });
+    if (new_token_response.error) {
+      // TODO something went wrong here
+      console.log(new_token_response.error);
+      return;
+    }
+    C_USER_STATE.token = new_token_response;
+  }
+
+  // validate the current user token
+  let validation_response = await util_fetch_post_json("/user/who", {
+    user_token: C_USER_STATE.token.id,
+  });
+
+  console.log(validation_response);
+  if (validation_response.error) {
+    if (validation_response.error === "token invalid") {
+      C_USER_STATE.meta = null;
+      C_USER_STATE.token = null;
+      user_save_local();
+      user_status_init();
+    }
+  }
+}
+
 function user_status_init() {
   user_load_local();
+
+  user_revalidate_token();
+
   if (C_USER_ELEMENTS.details_container) {
     user_render_details();
   }
@@ -224,4 +279,6 @@ function user_status_init() {
   }
 }
 
-user_status_init();
+window.addEventListener("load", (event) => {
+  user_status_init();
+});

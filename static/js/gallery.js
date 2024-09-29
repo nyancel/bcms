@@ -77,4 +77,6 @@ function gallery_init() {
   gallery_popup_load_all_media();
 }
 
-gallery_init();
+window.addEventListener("load", (event) => {
+  gallery_init();
+});
