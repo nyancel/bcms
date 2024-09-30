@@ -1,3 +1,5 @@
+import { get_local_user_data } from "./user";
+
 import { time, post_formdata, get_smallest_res_from_src } from "./util";
 
 // types and declerations
@@ -48,7 +50,51 @@ type ControllButtons = {
     add_heading_button: HTMLButtonElement;
 }
 
+// constant values
+const LOCAL_ARTICLE_STORAGE_KEY = "editor-ts-local-article";
+
+// internal storage functions
+function load_local_article() {
+    let article_string = localStorage.getItem(LOCAL_ARTICLE_STORAGE_KEY);
+    if (!article_string) {
+        return null;
+    }
+
+    let article: Article = JSON.parse(article_string);
+    if (!article) {
+        throw new Error("could not parse the local article, you fucked up somehow");
+    }
+    return article;
+}
+
+function save_article_to_local(article: Article) {
+    let article_dump = JSON.stringify(article);
+    localStorage.setItem(LOCAL_ARTICLE_STORAGE_KEY, article_dump);
+}
+
+function clear_local_article() {
+    localStorage.removeItem(LOCAL_ARTICLE_STORAGE_KEY);
+}
+
 // internal init functions;
+function init_empty_article() {
+    let user_data = get_local_user_data();
+    if (!user_data) {
+        throw new Error("no user data found, not logged in");
+    }
+
+    let article: Article = {
+        author_id: user_data.user.id,
+        content: [],
+        description: "",
+        last_changed: time(),
+        id: undefined,
+        title: "",
+    };
+    save_article_to_local(article);
+    return article;
+}
+
 function get_controll_buttons() {
     let log_button = document.getElementById("log-article") as HTMLButtonElement | null;
     let add_paragraph_button = document.getElementById("add-paragraph") as HTMLButtonElement | null;
@@ -350,12 +396,17 @@ function editor_generate_preview() {
 
 // article functions
 function editor_add_item(item_type: ItemTypeEnum) {
-
-    if (!ARTICLE.content) {
-        ARTICLE.content = [];
+    let user_data = get_local_user_data();
+    if (!user_data) {
+        throw new Error("not logged in");
     }
 
-    let length = ARTICLE.content.length;
+    let article = load_local_article();
+    if (!article) {
+        throw new Error("article has not been initalized");
+    }
+
+    let length = article.content.length;
     let new_item: TextItem | MediaItem;
 
     switch (item_type) {
@@ -377,8 +428,9 @@ function editor_add_item(item_type: ItemTypeEnum) {
             break;
     }
 
-    ARTICLE.content.push(new_item);
-    ARTICLE.last_changed = time();
+    article.content.push(new_item);
+    article.last_changed = time();
+    save_article_to_local(article);
     editor_generate_preview();
 }
 
@@ -425,10 +477,24 @@ function editor_move_item_up(index_to_change: number) {
 }
 
 function editor_log_article() {
-    console.log(ARTICLE.content);
+    let article = load_local_article();
+    console.log(article);
 }
 
 export default function main() {
+    let user_data = get_local_user_data();
+    if (!user_data) {
+        // redirect out of editor if not logged in
+        window.location.href = "/";
+        return;
+    }
+
+    // load or initalize the article;
+    let article = load_local_article();
+    if (!article) {
+        article = init_empty_article();
+    }
+
     let controll_buttons = get_controll_buttons();
     if (!controll_buttons) {
         throw new Error("controll buttons not initialized");

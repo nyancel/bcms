@@ -48,8 +48,8 @@ type Elements = {
 const USER_LOCAL_TOKEN_STORAGE_KEY = "userts-local-user-token";
 const USER_LOCAL_DATA_STORAGE_KEY = "userts-local-user-data";
 
-// internal core functions
-function get_local_user_data() {
+// core functions
+export function get_local_user_data() {
     let token_string = localStorage.getItem(USER_LOCAL_TOKEN_STORAGE_KEY);
     let user_string = localStorage.getItem(USER_LOCAL_DATA_STORAGE_KEY)
     if (!token_string || !user_string) {
@@ -379,12 +379,4 @@ export default function main() {
     if (window.location.pathname === "/signin") {
         registration_init();
     }
-}
-
-export function get_current_user_token_id() {
-    let user_data = get_local_user_data();
-    if (!user_data) {
-        return null;
-    }
-    return user_data.token.id;
 }
