@@ -262,7 +262,13 @@ function insert_template_in_editor(template: HTMLTemplateElement, editor: HTMLEl
     return entry;
 }
 
-function editor_connect_paragraph(entry: HTMLElement, index: number, article: Article) {
+function editor_connect_paragraph(entry: HTMLElement, index: number) {
+    let article = load_local_article();
+    if (!article) {
+        throw new Error("could not load article");
+    }
+
+    // init the text-area
     let textarea = entry.querySelector(".paragraph-input") as HTMLTextAreaElement | null;
     if (!textarea) {
         throw new Error("Could not find textarea");
@@ -272,27 +278,54 @@ function editor_connect_paragraph(entry: HTMLElement, index: number, article: Ar
         throw new Error("Article item at index is not a paragraph");
     }
     textarea.value = text_item.text;
+
+    // commit changes when they occur
     textarea.onchange = () => {
+        let article = load_local_article();
+        if (!article) {
+            throw new Error("could not load article");
+        }
+        let text_item = article.content[index];
+        if (text_item.type != ItemTypeEnum.paragraph) {
+            throw new Error("Article item at index is not a paragraph");
+        }
         text_item.text = textarea.value;
+        save_article_to_local(article);
     };
 }
 
-function editor_image_connect(entry: HTMLElement, index: number, article: Article) {
+function editor_image_connect(entry: HTMLElement, index: number) {
     // connect the alt-text and its relevant update
+    let article = load_local_article();
+    if (!article) {
+        throw new Error("could not load article");
+    }
+
+    // init the image-item alt text
+    let image_item = article.content[index];
+    if (image_item.type != ItemTypeEnum.image) {
+        throw new Error("Article item at index is not a image");
+    }
+
     let alt_text = entry.querySelector(".image-alt-text-input") as HTMLInputElement | null;
     if (!alt_text) {
         throw new Error("could not find alt_text element");
     }
 
-    let image_item = article.content[index];
-    if (image_item.type != ItemTypeEnum.image) {
-        throw new Error("Article item at index is not a image");
-    }
-    if (image_item.alt_text) {
-        alt_text.value = image_item.alt_text;
-    }
+    alt_text.value = image_item.alt_text;
+
+    // commit alt text changes when they occurs
     alt_text.onchange = () => {
+        let article = load_local_article();
+        if (!article) {
+            throw new Error("could not load article");
+        }
+        let image_item = article.content[index];
+        if (image_item.type != ItemTypeEnum.image) {
+            throw new Error("Article item at index is not a image");
+        }
         image_item.alt_text = alt_text.value;
+        save_article_to_local(article);
     };
 
     // connect the upload buttons
@@ -363,13 +396,13 @@ function render_editor() {
         switch (article.content[index].type) {
             case ItemTypeEnum.paragraph:
                 entry = insert_template_in_editor(templates.paragraph, editor);
-                editor_connect_paragraph(entry, index, article);
+                editor_connect_paragraph(entry, index);
                 break;
 
             case ItemTypeEnum.image:
                 entry = insert_template_in_editor(templates.image, editor);
                 render_image(entry, index, article);
-                editor_image_connect(entry, index, article);
+                editor_image_connect(entry, index);
                 break;
 
             case ItemTypeEnum.heading:
