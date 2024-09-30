@@ -6,60 +6,68 @@ type CacheItem = {
 }
 
 // globals
-let CACHE: Array<CacheItem> = []; // cache for functions
-const CACHE_KEY = "C_CACHE_KEY";
+const CACHE_KEY = "utilts-cache-stroage-key";
 
 // internal functions
-function save_cache_to_localstorage() {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(CACHE));
+function save_cache_to_local(cache: CacheItem[]) {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
 }
 
-function load_cache_from_localstorage() {
+function load_local_cache() {
     let local = localStorage.getItem(CACHE_KEY);
     if (!local) {
-        return;
+        return null;
     }
-    let tmp = JSON.parse(local);
-    if (!tmp) {
-        return;
+    let cache = JSON.parse(local) as CacheItem[];
+    if (!cache) {
+        throw new Error("cache cant be parsed");
     }
-    CACHE = tmp;
+    return cache
 }
 
 function cache_get(key: string) {
     // load up the cache
-    load_cache_from_localstorage();
+    let cache = load_local_cache();
+    if (!cache) {
+        return null; // cache might not exist
+    }
 
     // remove stale keys
-    for (let index = 0; index < CACHE.length; index++) {
-        if (CACHE[index].expires_at < time()) {
-            CACHE.splice(index, 1);
+    for (let index = 0; index < cache.length; index++) {
+        if (cache[index].expires_at < time()) {
+            cache.splice(index, 1);
         }
     }
 
     // save any changes
-    save_cache_to_localstorage();
+    save_cache_to_local(cache);
 
     // find the item
-    for (let index = 0; index < CACHE.length; index++) {
-        if (CACHE[index].key == key) {
-            return CACHE[index].item;
+    for (let index = 0; index < cache.length; index++) {
+        if (cache[index].key == key) {
+            return cache[index].item;
         }
     }
+
+    // if no match, return the item
     return null;
 }
 
-function cache_add(key: string, value: string) {
-    load_cache_from_localstorage();
+function cache_add(key: string, value: string, lifetime: number = 3600) {
+    let cache = load_local_cache();
+    if (!cache) {
+        cache = [];
+    }
+
     let c: CacheItem = {
         key: key,
         item: value,
-        expires_at: time() + 3600, // valid for one hour
+        expires_at: time() + lifetime, // valid for one hour
     };
 
-    CACHE.push(c);
+    cache.push(c);
     console.log(c);
-    save_cache_to_localstorage();
+    save_cache_to_local(cache);
 }
 
 
@@ -99,10 +107,9 @@ export async function post_formdata(endpoint: string, data: FormData) {
 export async function get_smallest_res_from_src(image_id: string, min_width: number) {
     console.log("getting smallest item from res")
     // check the cache first
-    let key = `util_get_media_src_by_width${image_id}${min_width}`;
+    let key = `util_get_media_src_by_width-${image_id}-${min_width}`;
     let cached_value = cache_get(key);
     if (cached_value) {
-        console.log("cache hit");
         return cached_value;
     }
 
