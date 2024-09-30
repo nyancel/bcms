@@ -27,31 +27,82 @@ type MediaItem = {
 }
 
 type Article = {
-    id: undefined | number,
-    author_id: undefined | number;
-    last_changed: undefined | number;
+    id: undefined | string,
+    author_id: string;
+    title: string;
+    description: string;
     content: Array<TextItem | MediaItem>;
+    last_changed: number;
 }
 
-// global constants
-const ARTICLE: Article = {
-    id: undefined,
-    author_id: undefined,
-    last_changed: undefined,
-    content: [],
-};
-
-const TEMPLATES = {
-    paragraph: document.getElementById("article-paragraph-template") as HTMLTemplateElement | null,
-    image: document.getElementById("article-image-template") as HTMLTemplateElement | null,
-    heading: document.getElementById("article-heading-template") as HTMLTemplateElement | null,
+type Templates = {
+    paragraph: HTMLTemplateElement,
+    image: HTMLTemplateElement,
+    heading: HTMLTemplateElement,
 }
 
-const EDITOR = document.getElementById("editor-container");
+type ControllButtons = {
+    log_button: HTMLButtonElement;
+    add_paragraph_button: HTMLButtonElement;
+    add_image_button: HTMLButtonElement;
+    add_heading_button: HTMLButtonElement;
+}
+
+// internal init functions;
+function get_controll_buttons() {
+    let log_button = document.getElementById("log-article") as HTMLButtonElement | null;
+    let add_paragraph_button = document.getElementById("add-paragraph") as HTMLButtonElement | null;
+    let add_image_button = document.getElementById("add-image") as HTMLButtonElement | null;
+    let add_heading_button = document.getElementById("add-heading") as HTMLButtonElement | null;
+
+    if (
+        !log_button ||
+        !add_paragraph_button ||
+        !add_image_button ||
+        !add_heading_button
+    ) {
+        return null;
+    }
+
+    let controll_buttons: ControllButtons = {
+        log_button,
+        add_paragraph_button,
+        add_image_button,
+        add_heading_button
+    }
+
+    return controll_buttons;
+}
+
+function get_templates() {
+    let paragraph_templte = document.getElementById("article-paragraph-template") as HTMLTemplateElement | null;
+    let image_templte = document.getElementById("article-image-template") as HTMLTemplateElement | null;
+    let heading_templte = document.getElementById("article-heading-template") as HTMLTemplateElement | null;
+
+    if (
+        !paragraph_templte ||
+        !image_templte ||
+        !heading_templte
+    ) {
+        return null;
+    }
+
+    let templates: Templates = {
+        paragraph: paragraph_templte,
+        image: image_templte,
+        heading: heading_templte,
+    }
+
+    return templates;
+}
+
+function get_editor() {
+    return document.getElementById("editor-container") as HTMLElement | null;
+}
 
 
 // editor image functions
-function editor_gallery_pop_up_select(index: number) {
+function set_image_from_gallery_popup(index: number) {
     const popup = window.open(
         "/gallery-popup",
         "popupWindow",
@@ -72,7 +123,7 @@ function editor_gallery_pop_up_select(index: number) {
     };
 }
 
-function editor_image_upload(index: number) {
+function set_image_from_file_upload(index: number) {
     // select a file
     let input = document.createElement("input");
     input.type = "file";
@@ -108,7 +159,7 @@ function editor_image_upload(index: number) {
     input.click();
 }
 
-function editor_image_render(entry: HTMLElement, index: number) {
+function render_image(entry: HTMLElement, index: number) {
     let display = entry.querySelector(".image-display") as HTMLImageElement | null;
     if (!display) {
         throw new Error("media-display not found");
@@ -150,7 +201,7 @@ function editor_image_render(entry: HTMLElement, index: number) {
     load();
 }
 
-function editor_insert_template(template: HTMLTemplateElement) {
+function insert_template_in_editor(template: HTMLTemplateElement) {
     console.log(template);
     if (!EDITOR) {
         throw new Error("Editor has not been initalized");
@@ -208,7 +259,7 @@ function editor_image_connect(entry: HTMLElement, index: number) {
         image_select_button.onclick = () => editor_gallery_pop_up_select(index);
     }
     if (image_upload_button) {
-        image_upload_button.onclick = () => editor_image_upload(index);
+        image_upload_button.onclick = () => set_image_from_file_upload(index);
     }
 }
 
@@ -262,7 +313,7 @@ function editor_generate_preview() {
                 if (!TEMPLATES.paragraph) {
                     throw new Error("paragraph template not initialized");
                 }
-                entry = editor_insert_template(TEMPLATES.paragraph);
+                entry = insert_template_in_editor(TEMPLATES.paragraph);
                 editor_connect_paragraph(entry, index);
                 break;
 
@@ -271,7 +322,7 @@ function editor_generate_preview() {
                     throw new Error("image template not initialized");
                 }
                 console.log("inserting image");
-                entry = editor_insert_template(TEMPLATES.image);
+                entry = insert_template_in_editor(TEMPLATES.image);
                 editor_image_render(entry, index);
                 editor_image_connect(entry, index);
                 break;
@@ -280,7 +331,7 @@ function editor_generate_preview() {
                 if (!TEMPLATES.heading) {
                     throw new Error("image template not initialized");
                 }
-                entry = editor_insert_template(TEMPLATES.heading);
+                entry = insert_template_in_editor(TEMPLATES.heading);
                 // editor_heading_connect(entry, index); // TODO fix the editor heading connector
                 break;
 
@@ -378,23 +429,13 @@ function editor_log_article() {
 }
 
 export default function main() {
-    let log_button = document.getElementById("log-article");
-    if (log_button) {
-        log_button.onclick = () => editor_log_article();
+    let controll_buttons = get_controll_buttons();
+    if (!controll_buttons) {
+        throw new Error("controll buttons not initialized");
     }
 
-    let add_paragraph_button = document.getElementById("add-paragraph");
-    if (add_paragraph_button) {
-        add_paragraph_button.onclick = () => editor_add_item(ItemTypeEnum.paragraph);
-    }
-
-    let add_image_button = document.getElementById("add-image");
-    if (add_image_button) {
-        add_image_button.onclick = () => editor_add_item(ItemTypeEnum.image);
-    }
-
-    let add_heading_button = document.getElementById("add-heading");
-    if (add_heading_button) {
-        add_heading_button.onclick = () => editor_add_item(ItemTypeEnum.heading);
-    }
+    controll_buttons.log_button.onclick = () => editor_log_article();
+    controll_buttons.add_paragraph_button.onclick = () => editor_add_item(ItemTypeEnum.paragraph);
+    controll_buttons.add_image_button.onclick = () => editor_add_item(ItemTypeEnum.image);
+    controll_buttons.add_heading_button.onclick = () => editor_add_item(ItemTypeEnum.heading);
 }

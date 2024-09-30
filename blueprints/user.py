@@ -78,7 +78,7 @@ def logout():
 
     did_delete_all = True
     for token in all_tokens:
-        deleted_current = lib.user.token.delete_token(token)
+        deleted_current = lib.user.token.delete_token(token.id)
         if not deleted_current:
             did_delete_all = False
 
