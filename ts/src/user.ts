@@ -19,102 +19,146 @@ type User = {
 }
 
 type UserData = {
-    storage_key: string,
-    token: Token | undefined,
-    user: User | undefined
+    token: Token,
+    user: User
 }
 
 type Inputs = {
     registration: {
-        first_name: HTMLInputElement | null,
-        last_name: HTMLInputElement | null,
-        email: HTMLInputElement | null,
-        password: HTMLInputElement | null,
-        repeat_password: HTMLInputElement | null,
-        submit: HTMLButtonElement | null,
-        valid_inputs: boolean,
+        first_name: HTMLInputElement,
+        last_name: HTMLInputElement,
+        email: HTMLInputElement,
+        password: HTMLInputElement,
+        repeat_password: HTMLInputElement,
+        submit: HTMLButtonElement,
     },
     signin: {
-        email: HTMLInputElement | null,
-        password: HTMLInputElement | null,
-        submit: HTMLButtonElement | null,
-        valid_inputs: boolean,
+        email: HTMLInputElement,
+        password: HTMLInputElement,
+        submit: HTMLButtonElement,
     }
 }
 
 type Elements = {
-    login_template: HTMLTemplateElement | null,
-    profile_template: HTMLTemplateElement | null,
-    details_container: HTMLElement | null,
+    login_template: HTMLTemplateElement,
+    profile_template: HTMLTemplateElement,
+    details_container: HTMLElement,
 }
 
 // global constants
-const USER: UserData = {
-    storage_key: "userjs-user-local-metadata",
-    user: undefined,
-    token: undefined,
-};
+const USER_LOCAL_TOKEN_STORAGE_KEY = "userts-local-user-token";
+const USER_LOCAL_DATA_STORAGE_KEY = "userts-local-user-data";
 
-const ELEMENTS: Elements = {
-    login_template: document.querySelector(".user-details-login-template") as HTMLTemplateElement | null,
-    profile_template: document.querySelector(".user-details-profile-template") as HTMLTemplateElement | null,
-    details_container: document.querySelector(".user-details-container") as HTMLElement | null,
-};
-
-const INPUTS: Inputs = {
-    registration: {
-        first_name: document.querySelector("#user-register-first-name-input"),
-        last_name: document.querySelector("#user-register-last-name-input"),
-        email: document.querySelector("#user-register-email-input"),
-        password: document.querySelector("#user-register-password-input"),
-        repeat_password: document.querySelector("#user-register-password-repeat-input"),
-        submit: document.querySelector("#user-register-submitt-button"),
-        valid_inputs: false,
-    },
-    signin: {
-        email: document.querySelector("#user-signin-email-input"),
-        password: document.querySelector("#user-signin-password-input"),
-        submit: document.querySelector("#user-signin-submitt-button"),
-        valid_inputs: false,
-    }
-};
-
-// core functions
-function user_load_local() {
-    let local = localStorage.getItem(USER.storage_key);
-    if (!local) {
-        USER.token = undefined;
-        USER.user = undefined;
-        return;
+// internal core functions
+function get_local_user_data() {
+    let token_string = localStorage.getItem(USER_LOCAL_TOKEN_STORAGE_KEY);
+    let user_string = localStorage.getItem(USER_LOCAL_DATA_STORAGE_KEY)
+    if (!token_string || !user_string) {
+        return null;
     }
 
-    let tmp: UserData = JSON.parse(local);
-    if (!tmp) {
-        USER.token = undefined;
-        USER.user = undefined;
-        return;
+    let token = JSON.parse(token_string);
+    let user = JSON.parse(user_string);
+    if (!token || !user) {
+        return null;
     }
 
-    USER.user = tmp.user;
-    USER.token = tmp.token;
+    let userData: UserData = {
+        token: token,
+        user: user
+    }
+    return userData;
 }
 
-function user_save_local() {
-    localStorage.setItem(
-        USER.storage_key,
-        JSON.stringify(USER)
-    );
+function clear_local_user_data() {
+    localStorage.removeItem(USER_LOCAL_DATA_STORAGE_KEY);
+    localStorage.removeItem(USER_LOCAL_TOKEN_STORAGE_KEY);
 }
 
+function save_user_data_to_local(userdata: UserData) {
+    let token = JSON.stringify(userdata.token);
+    let data = JSON.stringify(userdata.user);
+    localStorage.setItem(USER_LOCAL_TOKEN_STORAGE_KEY, token);
+    localStorage.setItem(USER_LOCAL_DATA_STORAGE_KEY, data);
+    return true;
+}
+
+function get_html_elements() {
+    let login_template = document.querySelector(".user-details-login-template") as HTMLTemplateElement | null;
+    let profile_template = document.querySelector(".user-details-profile-template") as HTMLTemplateElement | null;
+    let details_container = document.querySelector(".user-details-container") as HTMLElement | null;
+
+    if (
+        !login_template ||
+        !profile_template ||
+        !details_container
+    ) {
+        return null;
+    }
+
+    let elements: Elements = {
+        login_template: login_template,
+        profile_template: profile_template,
+        details_container: details_container,
+    }
+    return elements;
+}
+
+function get_input_fields() {
+    let registration_first_name = document.querySelector("#user-register-first-name-input") as HTMLInputElement | null;
+    let registration_last_name = document.querySelector("#user-register-last-name-input") as HTMLInputElement | null;
+    let registration_email = document.querySelector("#user-register-email-input") as HTMLInputElement | null;
+    let registration_password = document.querySelector("#user-register-password-input") as HTMLInputElement | null;
+    let registration_repeat_password = document.querySelector("#user-register-password-repeat-input") as HTMLInputElement | null;
+    let registration_submit = document.querySelector("#user-register-submitt-button") as HTMLButtonElement | null;
+
+    let signin_email = document.querySelector("#user-signin-email-input") as HTMLInputElement | null;
+    let signin_password = document.querySelector("#user-signin-password-input") as HTMLInputElement | null;
+    let signin_submit = document.querySelector("#user-signin-submitt-button") as HTMLButtonElement | null;
+
+    if (
+        !registration_first_name ||
+        !registration_last_name ||
+        !registration_email ||
+        !registration_password ||
+        !registration_repeat_password ||
+        !registration_submit ||
+        !signin_email ||
+        !signin_password ||
+        !signin_submit
+    ) {
+        return null;
+    }
+
+    let inputs: Inputs = {
+        registration: {
+            email: registration_email,
+            first_name: registration_first_name,
+            last_name: registration_last_name,
+            password: registration_password,
+            repeat_password: registration_repeat_password,
+            submit: registration_submit
+        },
+        signin: {
+            email: signin_email,
+            password: signin_password,
+            submit: signin_submit
+        }
+    }
+
+    return inputs
+}
+
+// api coms functions - stuff that talks to the server
 function logout() {
-    if (USER.token) {
-        // invalidate the current token
-        post_json("/user/logout", { user_token: USER.token.id });
+    let userdata = get_local_user_data();
+    if (!userdata) {
+        throw new Error("No local user-data");
     }
 
-    USER.user = undefined;
-    USER.token = undefined;
-    user_save_local();
+    // tell the server to clear the token, the clear local data;
+    post_json("/user/logout", { user_token: userdata.token.id });
+    clear_local_user_data();
 
     // reload the user state etc.
     main();
