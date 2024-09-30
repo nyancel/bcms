@@ -1,5 +1,5 @@
 import main from "./editor";
-import { post_json } from "./util";
+import { post_json, time } from "./util";
 
 // types
 type Token = {
@@ -79,31 +79,6 @@ const INPUTS: Inputs = {
     }
 };
 
-
-// internal functions
-function inputs_initialized(inputs: Inputs) {
-    let registration = inputs.registration;
-    let registration_valid = (
-        registration.email &&
-        registration.first_name &&
-        registration.last_name &&
-        registration.password &&
-        registration.repeat_password &&
-        registration.submit
-    )
-
-    let signin = inputs.signin;
-    let signin_valid = (
-        signin.email &&
-        signin.password &&
-        signin.submit
-    )
-    if (signin_valid && registration_valid) {
-        return true;
-    }
-    return false;
-}
-
 // core functions
 function user_load_local() {
     let local = localStorage.getItem(USER.storage_key);
@@ -146,27 +121,27 @@ function logout() {
 }
 
 function user_render_details() {
+    if (!ELEMENTS.details_container) {
+        throw new Error("details container not initialized")
+    }
+
+    if (!ELEMENTS.login_template) {
+        throw new Error("logintemplate not initialized")
+    }
+
+    if (!ELEMENTS.profile_template) {
+        throw new Error("profile template not initialized")
+    }
+
     if (!USER.user) {
-        if (!ELEMENTS.details_container) {
-            throw new Error("details container not initalized");
-        }
-        if (!ELEMENTS.login_template) {
-            throw new Error("login_template not initialized");
-        }
         ELEMENTS.details_container.innerHTML = "";
         let clone = ELEMENTS.login_template.cloneNode(true) as HTMLTemplateElement;
         ELEMENTS.details_container.appendChild(clone.content);
         return;
     }
 
-
-    if (!ELEMENTS.details_container) {
-        throw new Error("details container not initalized");
-    }
     ELEMENTS.details_container.innerHTML = "";
-    if (!ELEMENTS.profile_template) {
-        throw new Error("profile template not initalized");
-    }
+
     let clone = ELEMENTS.profile_template.cloneNode(true) as HTMLTemplateElement;
     let profile = clone.content;
     let firstname_element = profile.querySelector("#user-profile-first-name") as HTMLElement | null;
@@ -262,7 +237,18 @@ function user_register_submit() {
     }
 
     const signin = async () => {
-
+        if (!INPUTS.registration.email) {
+            throw new Error("email value not supplied");
+        }
+        if (!INPUTS.registration.password) {
+            throw new Error("password value not supplied");
+        }
+        if (!INPUTS.registration.first_name) {
+            throw new Error("first name value not supplied");
+        }
+        if (!INPUTS.registration.last_name) {
+            throw new Error("last name value not supplied");
+        }
 
         const register_data = {
             email: INPUTS.registration.email.value,
@@ -291,33 +277,62 @@ function user_register_submit() {
             throw new Error(login_response.error);
         }
         USER.token = login_response;
+        user_save_local();
         window.location.href = "/";
     };
     signin();
 }
 
-function user_function_init() {
+function registration_init() {
+    if (!INPUTS.registration.email) {
+        throw new Error("email input for registration not initalized")
+    }
+
+    if (!INPUTS.registration.first_name) {
+        throw new Error("first_name input for registration not initalized")
+    }
+
+    if (!INPUTS.registration.last_name) {
+        throw new Error("last_name input for registration not initalized")
+    }
+
+    if (!INPUTS.registration.password) {
+        throw new Error("password input for registration not initalized")
+    }
+
+    if (!INPUTS.registration.repeat_password) {
+        throw new Error("repeate_password input for registration not initalized")
+    }
+
+    if (!INPUTS.registration.submit) {
+        throw new Error("submit input for registration not initalized")
+    }
+
     // hook up validation for registration form;
-    INPUTS.email.oninput = () => {
+    INPUTS.registration.email.oninput = () => {
         validate_registration_inputs();
     };
-    INPUTS.first_name.oninput = () => {
+    INPUTS.registration.first_name.oninput = () => {
         validate_registration_inputs();
     };
-    INPUTS.last_name.oninput = () => {
+    INPUTS.registration.last_name.oninput = () => {
         validate_registration_inputs();
     };
-    INPUTS.password.oninput = () => {
+    INPUTS.registration.password.oninput = () => {
         validate_registration_inputs();
     };
-    INPUTS.repeat_password.oninput = () => {
+    INPUTS.registration.repeat_password.oninput = () => {
         validate_registration_inputs();
     };
     validate_registration_inputs();
 
-    INPUTS.submit.onclick = () => {
+    INPUTS.registration.submit.onclick = () => {
         user_register_submit();
     };
+}
+
+function user_function_init() {
+    registration_init();
 }
 
 async function user_revalidate_token() {
@@ -325,45 +340,58 @@ async function user_revalidate_token() {
         return;
     }
 
-    if (util_epoch_seconds() > USER.token.expires_at) {
-        USER.token = null;
+    if (time() > USER.token.expires_at) {
+        USER.token = undefined;
+        USER.user = undefined;
+        user_save_local();
         return;
     }
 
     // refresh if less then 10 minutes left of the token
-    if (util_epoch_seconds() + 600 > USER.token.expires_at) {
+    if (time() + 600 > USER.token.expires_at) {
         let new_token_response = await post_json("/user/refresh_token", {
             user_token: USER.token.id,
         });
-        if (new_token_response.userr) undefined
-        // TODO something went wrongundefined
-        console.log(new_token_response.error);
-        return;
+        if (new_token_response.error) {
+            throw new Error(new_token_response.error)
+        }
+        USER.token = new_token_response;
     }
-    USER.token = mainse;
-}
 
-// validate the current user token
-let validation_response = await post_json("/user/who", {
-    user_token: USER.token.id,
-    user
-}); undefined
-if (valundefined.error) {
-    if (validation_response.error === "token invalid") {
-        USER.meta = null;
-        USER.token = null;
-        mainsave_local();
-        user_status_init();
-        return;
+    if (!USER.token) {
+        throw new Error("user token not found, i dont know how but you fucked up");
     }
-    // todo handle the error
-    console.log(validation_response);
-}
+
+    // validate the current user token
+    let validation_response = await post_json("/user/who", {
+        user_token: USER.token.id
+    });
+
+    if (validation_response.error) {
+        if (validation_response.error === "token invalid") {
+            USER.user = undefined;
+            USER.token = undefined;
+            user_save_local();
+            main();
+            return;
+        }
+        else {
+            throw new Error(validation_response.error)
+        }
+    }
+
+    USER.token = validation_response as Token;
+    // revalidate on expiration
+    let timeout = USER.token.expires_at - time(); // at expiration
+    timeout = timeout - 60; // 1 minute before expiration
+    timeout = timeout * 1000; // to milliseconds
+    window.setTimeout(() => {
+        user_revalidate_token();
+    }, timeout);
+    user_save_local();
 }
 
 export default function user_main() {
-    user_load_local();
-
     user_revalidate_token();
 
     if (ELEMENTS.details_container) {
@@ -377,6 +405,7 @@ export default function user_main() {
 }
 
 export function get_current_user_token_id() {
+    user_load_local();
     if (!USER) {
         return undefined;
     }
