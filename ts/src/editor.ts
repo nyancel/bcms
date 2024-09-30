@@ -1,4 +1,4 @@
-import { time, fetch_formdata, get_smallest_res_from_src } from "./util";
+import { time, post_formdata, get_smallest_res_from_src } from "./util";
 
 // types and declerations
 declare global {
@@ -30,7 +30,7 @@ type Article = {
     id: undefined | number,
     author_id: undefined | number;
     last_changed: undefined | number;
-    content: Array<TextItem | MediaItem> | undefined;
+    content: Array<TextItem | MediaItem>;
 }
 
 // global constants
@@ -42,9 +42,9 @@ const ARTICLE: Article = {
 };
 
 const TEMPLATES = {
-    paragraph: document.getElementById("article-paragraph-template"),
-    image: document.getElementById("article-paragraph-template"),
-    heading: document.getElementById("article-heading-template"),
+    paragraph: document.getElementById("article-paragraph-template") as HTMLTemplateElement | null,
+    image: document.getElementById("article-image-template") as HTMLTemplateElement | null,
+    heading: document.getElementById("article-heading-template") as HTMLTemplateElement | null,
 }
 
 const EDITOR = document.getElementById("editor-container");
@@ -98,7 +98,7 @@ function editor_image_upload(index: number) {
         // upload the file to the gallery
         let formdata = new FormData();
         formdata.append("media", file);
-        let image = await fetch_formdata("/media/upload_media", formdata);
+        let image = await post_formdata("/media/upload_media", formdata);
         let image_id = image.data.results[0].key;
         // set the item source
         media_item.src_id = image_id;
@@ -151,6 +151,7 @@ function editor_image_render(entry: HTMLElement, index: number) {
 }
 
 function editor_insert_template(template: HTMLTemplateElement) {
+    console.log(template);
     if (!EDITOR) {
         throw new Error("Editor has not been initalized");
     }
@@ -165,83 +166,118 @@ function editor_insert_template(template: HTMLTemplateElement) {
 }
 
 function editor_connect_paragraph(entry: HTMLElement, index: number) {
-    let textarea = entry.querySelector(".paragraph-input") as HTMLTextAreaElements;
-    textarea.value = ARTICLE.content[index].text;
+    let textarea = entry.querySelector(".paragraph-input") as HTMLTextAreaElement;
+    let text_item = ARTICLE.content[index];
+    if (text_item.type != ItemTypeEnum.paragraph) {
+        throw new Error("Article item at index is not a paragraph");
+    }
+    textarea.value = text_item.text;
     textarea.onchange = () => {
-        ARTICLE.content[index].text = textarea.value;
+        text_item.text = textarea.value;
     };
 }
 
-function editor_image_connect(entry, index) {
+function editor_image_connect(entry: HTMLElement, index: number) {
     // connect the alt-text and its relevant update
-    let alt_text = entry.querySelector(".image-alt-text-input");
-    if (C_EDITOR_ARTICLE.content[index].alt_text) {
-        alt_text.value = C_EDITOR_ARTICLE.content[index].alt_text;
+    let alt_text = entry.querySelector(".image-alt-text-input") as HTMLInputElement;
+    let image_item = ARTICLE.content[index];
+    if (image_item.type != ItemTypeEnum.image) {
+        throw new Error("Article item at index is not a image");
+    }
+    if (image_item.alt_text) {
+        alt_text.value = image_item.alt_text;
     }
     alt_text.onchange = () => {
-        C_EDITOR_ARTICLE.content[index].alt_text = alt_text.value;
+        image_item.alt_text = alt_text.value;
     };
 
     // connect the upload buttons
-    let image_select_button = entry.querySelector(".image-gallery-select");
-    let image_upload_button = entry.querySelector(".image-gallery-upload");
+    let image_select_button = entry.querySelector(".image-gallery-select") as HTMLElement | null;
+    let image_upload_button = entry.querySelector(".image-gallery-upload") as HTMLElement | null;
 
-    image_upload_button.onclick = () => editor_image_upload(index);
-    image_select_button.onclick = () => editor_gallery_pop_up_select(index);
+    if (image_select_button) {
+        image_select_button.onclick = () => editor_gallery_pop_up_select(index);
+    }
+    if (image_upload_button) {
+        image_upload_button.onclick = () => editor_image_upload(index);
+    }
 }
 
-function editor_connect_generic(entry, index) {
+function editor_connect_generic(entry: HTMLElement, index: number) {
     // generic delete
-    let delete_button = entry.querySelector(".delete-button");
-    delete_button.onclick = () => {
-        remove_item_from_article(index);
-        editor_generate_preview();
-    };
+    let delete_button = entry.querySelector(".delete-button") as HTMLElement | null;
+    if (delete_button) {
+        delete_button.onclick = () => {
+            remove_item_from_article(index);
+            editor_generate_preview();
+        };
+    }
 
     // generic move up
-    let move_up_button = entry.querySelector(".move-up-button");
-    move_up_button.onclick = () => {
-        editor_move_item_up(index);
-        editor_generate_preview();
-    };
+    let move_up_button = entry.querySelector(".move-up-button") as HTMLElement | null;
+    if (move_up_button) {
+        move_up_button.onclick = () => {
+            editor_move_item_up(index);
+            editor_generate_preview();
+        };
+    }
 
     // generic move down
-    let move_down_button = entry.querySelector(".move-down-button");
-    move_down_button.onclick = () => {
-        editor_move_item_down(index);
-        editor_generate_preview();
-    };
+    let move_down_button = entry.querySelector(".move-down-button") as HTMLElement | null;
+    if (move_down_button) {
+        move_down_button.onclick = () => {
+            editor_move_item_down(index);
+            editor_generate_preview();
+        };
+    }
 }
 
 // view functions
 function editor_generate_preview() {
     let y_pos = window.scrollY;
+    if (!EDITOR) {
+        throw new Error("Editor is not initialized");
+    }
 
-    C_EDITOR_CONTAINER.innerHTML = null;
+    if (!ARTICLE) {
+        throw new Error("Article is not initialized");
+    }
+
+    EDITOR.innerHTML = "";
+
     let entry;
 
-    for (let index = 0; index < C_EDITOR_ARTICLE.content.length; index++) {
-        switch (C_EDITOR_ARTICLE.content[index].type) {
-            case "paragraph":
-                entry = editor_insert_template(C_EDITOR_PARAGRAPH_TEMPLATE);
+    for (let index = 0; index < ARTICLE.content.length; index++) {
+        switch (ARTICLE.content[index].type) {
+            case ItemTypeEnum.paragraph:
+                if (!TEMPLATES.paragraph) {
+                    throw new Error("paragraph template not initialized");
+                }
+                entry = editor_insert_template(TEMPLATES.paragraph);
                 editor_connect_paragraph(entry, index);
                 break;
 
-            case "image":
-                entry = editor_insert_template(C_EDITOR_IMAGE_TEMPLATE);
+            case ItemTypeEnum.image:
+                if (!TEMPLATES.image) {
+                    throw new Error("image template not initialized");
+                }
+                console.log("inserting image");
+                entry = editor_insert_template(TEMPLATES.image);
                 editor_image_render(entry, index);
                 editor_image_connect(entry, index);
                 break;
 
-            case "heading":
-                entry = editor_insert_template(C_EDITOR_HEADING_TEMPLATE);
-                editor_heading_connect(entry, index); // TODO fix the editor heading connector
+            case ItemTypeEnum.heading:
+                if (!TEMPLATES.heading) {
+                    throw new Error("image template not initialized");
+                }
+                entry = editor_insert_template(TEMPLATES.heading);
+                // editor_heading_connect(entry, index); // TODO fix the editor heading connector
                 break;
 
             // skip to next item if we dont have a template for the type
             default:
-                console.log("skipping, unkown type");
-                console.log(C_EDITOR_ARTICLE.content[index]);
+                console.log("Item type in editor-render is unknown, skipping")
                 continue;
         }
         editor_connect_generic(entry, index);

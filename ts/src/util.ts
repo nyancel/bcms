@@ -23,7 +23,7 @@ function load_cache_from_localstorage() {
     if (!tmp) {
         return;
     }
-    CACHE = JSON.parse(tmp);
+    CACHE = tmp;
 }
 
 function cache_get(key: string) {
@@ -70,7 +70,7 @@ export function time() {
 }
 
 
-export async function fetch_json(endpoint: string, data: Object) {
+export async function post_json(endpoint: string, data: Object) {
     let response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -83,17 +83,21 @@ export async function fetch_json(endpoint: string, data: Object) {
     return response_json;
 }
 
-export async function fetch_formdata(endpoint: string, data: FormData) {
+export async function post_formdata(endpoint: string, data: FormData) {
+    console.log("called stuff")
     let response = await fetch(endpoint, {
         method: "POST",
         body: data,
     });
+    console.log(response)
 
     let json_response = await response.json();
+    console.log(json_response);
     return json_response;
 }
 
 export async function get_smallest_res_from_src(image_id: string, min_width: number) {
+    console.log("getting smallest item from res")
     // check the cache first
     let key = `util_get_media_src_by_width${image_id}${min_width}`;
     let cached_value = cache_get(key);
@@ -102,9 +106,10 @@ export async function get_smallest_res_from_src(image_id: string, min_width: num
         return cached_value;
     }
 
-    let image_metadata = await fetch_json("/media/fetch_media", {
+    let image_metadata = await post_json("/media/fetch_media", {
         media_ID: image_id,
     });
+
 
     let min = Math.pow(min_width, 2);
 
