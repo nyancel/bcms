@@ -109,7 +109,7 @@ function editor_image_upload(index: number) {
 }
 
 function editor_image_render(entry: HTMLElement, index: number) {
-    let display = entry.querySelector(".image-display") as HTMLImageElement;
+    let display = entry.querySelector(".image-display") as HTMLImageElement | null;
     if (!display) {
         throw new Error("media-display not found");
     }
@@ -157,7 +157,10 @@ function editor_insert_template(template: HTMLTemplateElement) {
     }
 
     let entry = document.createElement("li");
-    let clone = template.cloneNode(true) as HTMLTemplateElement;
+    let clone = template.cloneNode(true) as HTMLTemplateElement | null;
+    if (!clone) {
+        throw new Error("could not clone template");
+    }
     let item = clone.content;
 
     entry.appendChild(item);
@@ -166,7 +169,10 @@ function editor_insert_template(template: HTMLTemplateElement) {
 }
 
 function editor_connect_paragraph(entry: HTMLElement, index: number) {
-    let textarea = entry.querySelector(".paragraph-input") as HTMLTextAreaElement;
+    let textarea = entry.querySelector(".paragraph-input") as HTMLTextAreaElement | null;
+    if (!textarea) {
+        throw new Error("Could not find textarea");
+    }
     let text_item = ARTICLE.content[index];
     if (text_item.type != ItemTypeEnum.paragraph) {
         throw new Error("Article item at index is not a paragraph");
@@ -179,7 +185,10 @@ function editor_connect_paragraph(entry: HTMLElement, index: number) {
 
 function editor_image_connect(entry: HTMLElement, index: number) {
     // connect the alt-text and its relevant update
-    let alt_text = entry.querySelector(".image-alt-text-input") as HTMLInputElement;
+    let alt_text = entry.querySelector(".image-alt-text-input") as HTMLInputElement | null;
+    if (!alt_text) {
+        throw new Error("could not find alt_text element");
+    }
     let image_item = ARTICLE.content[index];
     if (image_item.type != ItemTypeEnum.image) {
         throw new Error("Article item at index is not a image");

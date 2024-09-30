@@ -56,7 +56,6 @@ class User(Driver.BASE):
         _dict["first_name"] = self.first_name
         _dict["last_name"] = self.last_name
         _dict["email"] = self.email
-        _dict["user_role"] = self.user_role.name
         _dict["last_edited"] = self.last_edited
         _dict["created_at"] = self.created_at
         return _dict
