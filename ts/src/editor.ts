@@ -1,3 +1,4 @@
+import { isAssertionExpression } from "typescript";
 import { get_local_user_data } from "./user";
 
 import { time, post_formdata, get_smallest_res_from_src } from "./util";
@@ -156,16 +157,17 @@ function set_image_from_gallery_popup(index: number) {
     );
 
     window.receive_data = function (data: string) {
-        if (!ARTICLE.content) {
-            return;
+        let article = load_local_article();
+        if (!article) {
+            throw new Error("could not load artilce");
         }
 
-        let item = ARTICLE.content[index];
+        let item = article.content[index];
         if (item.type != ItemTypeEnum.image) {
             return;
         }
         item.src_id = data;
-        editor_generate_preview();
+        render_editor();
     };
 }
 
@@ -176,10 +178,13 @@ function set_image_from_file_upload(index: number) {
     input.accept = "png, jpg, jpeg";
     input.multiple = false;
     input.onchange = async () => {
-        if (!ARTICLE.content) {
-            return;
+
+        let article = load_local_article();
+        if (!article) {
+            throw new Error("could not load artilce");
         }
-        let media_item = ARTICLE.content[index];
+
+        let media_item = article.content[index];
         if (media_item.type != ItemTypeEnum.image) {
             return;
         }
@@ -199,23 +204,21 @@ function set_image_from_file_upload(index: number) {
         let image_id = image.data.results[0].key;
         // set the item source
         media_item.src_id = image_id;
-        ARTICLE.last_changed = time();
-        editor_generate_preview();
+        article.last_changed = time();
+        save_article_to_local(article);
+        render_editor();
+
     };
     input.click();
 }
 
-function render_image(entry: HTMLElement, index: number) {
+function render_image(entry: HTMLElement, index: number, article: Article) {
     let display = entry.querySelector(".image-display") as HTMLImageElement | null;
     if (!display) {
         throw new Error("media-display not found");
     }
 
-    if (!ARTICLE.content) {
-        throw new Error("article content not initialized");
-    }
-
-    let media_item = ARTICLE.content[index];
+    let media_item = article.content[index];
     if (media_item.type != ItemTypeEnum.image) {
         throw new Error("item type is not image");
     }
@@ -228,10 +231,7 @@ function render_image(entry: HTMLElement, index: number) {
 
     // else image_id is defined and we render the image
     const load = async () => {
-        if (!ARTICLE.content) {
-            throw new Error("article content not initialized");
-        }
-        let media_item = ARTICLE.content[index];
+        let media_item = article.content[index];
         if (media_item.type != ItemTypeEnum.image) {
             throw new Error("item type is not image");
         }
@@ -247,11 +247,8 @@ function render_image(entry: HTMLElement, index: number) {
     load();
 }
 
-function insert_template_in_editor(template: HTMLTemplateElement) {
+function insert_template_in_editor(template: HTMLTemplateElement, editor: HTMLElement) {
     console.log(template);
-    if (!EDITOR) {
-        throw new Error("Editor has not been initalized");
-    }
 
     let entry = document.createElement("li");
     let clone = template.cloneNode(true) as HTMLTemplateElement | null;
@@ -261,16 +258,16 @@ function insert_template_in_editor(template: HTMLTemplateElement) {
     let item = clone.content;
 
     entry.appendChild(item);
-    EDITOR.appendChild(entry);
+    editor.appendChild(entry);
     return entry;
 }
 
-function editor_connect_paragraph(entry: HTMLElement, index: number) {
+function editor_connect_paragraph(entry: HTMLElement, index: number, article: Article) {
     let textarea = entry.querySelector(".paragraph-input") as HTMLTextAreaElement | null;
     if (!textarea) {
         throw new Error("Could not find textarea");
     }
-    let text_item = ARTICLE.content[index];
+    let text_item = article.content[index];
     if (text_item.type != ItemTypeEnum.paragraph) {
         throw new Error("Article item at index is not a paragraph");
     }
@@ -280,13 +277,14 @@ function editor_connect_paragraph(entry: HTMLElement, index: number) {
     };
 }
 
-function editor_image_connect(entry: HTMLElement, index: number) {
+function editor_image_connect(entry: HTMLElement, index: number, article: Article) {
     // connect the alt-text and its relevant update
     let alt_text = entry.querySelector(".image-alt-text-input") as HTMLInputElement | null;
     if (!alt_text) {
         throw new Error("could not find alt_text element");
     }
-    let image_item = ARTICLE.content[index];
+
+    let image_item = article.content[index];
     if (image_item.type != ItemTypeEnum.image) {
         throw new Error("Article item at index is not a image");
     }
@@ -302,8 +300,9 @@ function editor_image_connect(entry: HTMLElement, index: number) {
     let image_upload_button = entry.querySelector(".image-gallery-upload") as HTMLElement | null;
 
     if (image_select_button) {
-        image_select_button.onclick = () => editor_gallery_pop_up_select(index);
+        image_select_button.onclick = () => set_image_from_gallery_popup(index);
     }
+
     if (image_upload_button) {
         image_upload_button.onclick = () => set_image_from_file_upload(index);
     }
@@ -314,8 +313,8 @@ function editor_connect_generic(entry: HTMLElement, index: number) {
     let delete_button = entry.querySelector(".delete-button") as HTMLElement | null;
     if (delete_button) {
         delete_button.onclick = () => {
-            remove_item_from_article(index);
-            editor_generate_preview();
+            article_delete_item(index);
+            render_editor();
         };
     }
 
@@ -323,8 +322,8 @@ function editor_connect_generic(entry: HTMLElement, index: number) {
     let move_up_button = entry.querySelector(".move-up-button") as HTMLElement | null;
     if (move_up_button) {
         move_up_button.onclick = () => {
-            editor_move_item_up(index);
-            editor_generate_preview();
+            article_move_item(index, -1);
+            render_editor();
         };
     }
 
@@ -332,53 +331,50 @@ function editor_connect_generic(entry: HTMLElement, index: number) {
     let move_down_button = entry.querySelector(".move-down-button") as HTMLElement | null;
     if (move_down_button) {
         move_down_button.onclick = () => {
-            editor_move_item_down(index);
-            editor_generate_preview();
+            article_move_item(index, 1);
+            render_editor();
         };
     }
 }
 
 // view functions
-function editor_generate_preview() {
+function render_editor() {
+    let article = load_local_article();
+    if (!article) {
+        throw new Error("could not load article");
+    }
+
     let y_pos = window.scrollY;
-    if (!EDITOR) {
+    let editor = get_editor();
+    let templates = get_templates();
+
+    if (!editor) {
         throw new Error("Editor is not initialized");
     }
 
-    if (!ARTICLE) {
-        throw new Error("Article is not initialized");
+    if (!templates) {
+        throw new Error("templates did not load");
     }
 
-    EDITOR.innerHTML = "";
-
+    editor.innerHTML = "";
     let entry;
 
-    for (let index = 0; index < ARTICLE.content.length; index++) {
-        switch (ARTICLE.content[index].type) {
+    for (let index = 0; index < article.content.length; index++) {
+        switch (article.content[index].type) {
             case ItemTypeEnum.paragraph:
-                if (!TEMPLATES.paragraph) {
-                    throw new Error("paragraph template not initialized");
-                }
-                entry = insert_template_in_editor(TEMPLATES.paragraph);
-                editor_connect_paragraph(entry, index);
+                entry = insert_template_in_editor(templates.paragraph, editor);
+                editor_connect_paragraph(entry, index, article);
                 break;
 
             case ItemTypeEnum.image:
-                if (!TEMPLATES.image) {
-                    throw new Error("image template not initialized");
-                }
-                console.log("inserting image");
-                entry = insert_template_in_editor(TEMPLATES.image);
-                editor_image_render(entry, index);
-                editor_image_connect(entry, index);
+                entry = insert_template_in_editor(templates.image, editor);
+                render_image(entry, index, article);
+                editor_image_connect(entry, index, article);
                 break;
 
             case ItemTypeEnum.heading:
-                if (!TEMPLATES.heading) {
-                    throw new Error("image template not initialized");
-                }
-                entry = insert_template_in_editor(TEMPLATES.heading);
-                // editor_heading_connect(entry, index); // TODO fix the editor heading connector
+                entry = insert_template_in_editor(templates.heading, editor);
+                // editor_heading_connect(entry, index); TODO fix the editor heading connector
                 break;
 
             // skip to next item if we dont have a template for the type
@@ -389,21 +385,18 @@ function editor_generate_preview() {
         editor_connect_generic(entry, index);
     }
 
+    save_article_to_local(article);
+
     requestAnimationFrame(() => {
         window.scrollTo(0, y_pos);
     });
 }
 
 // article functions
-function editor_add_item(item_type: ItemTypeEnum) {
-    let user_data = get_local_user_data();
-    if (!user_data) {
-        throw new Error("not logged in");
-    }
-
+function article_add_item(item_type: ItemTypeEnum) {
     let article = load_local_article();
     if (!article) {
-        throw new Error("article has not been initalized");
+        throw new Error("could not load artilce");
     }
 
     let length = article.content.length;
@@ -430,56 +423,42 @@ function editor_add_item(item_type: ItemTypeEnum) {
 
     article.content.push(new_item);
     article.last_changed = time();
+
     save_article_to_local(article);
-    editor_generate_preview();
+    render_editor();
 }
 
-function remove_item_from_article(index: number) {
-    ARTICLE.content?.splice(index, 1);
-    ARTICLE.last_changed = time();
-}
-
-function editor_move_item_down(index_to_change: number) {
-    if (!ARTICLE.content) {
-        return;
-    }
-
-    if (index_to_change >= ARTICLE.content.length - 1) {
-        return;
-    }
-
-    let item = ARTICLE.content[index_to_change];
-    ARTICLE.content[index_to_change] = ARTICLE.content[index_to_change + 1];
-    ARTICLE.content[index_to_change + 1] = item;
-    // assign new indexes
-    ARTICLE.content[index_to_change].index = index_to_change;
-    ARTICLE.content[index_to_change + 1].index = index_to_change + 1;
-
-    ARTICLE.last_changed = time();
-}
-
-function editor_move_item_up(index_to_change: number) {
-    if (!ARTICLE.content) {
-        return;
-    }
-
-    if (index_to_change < 1) {
-        return;
-    }
-    let item = ARTICLE.content[index_to_change];
-    ARTICLE.content[index_to_change] = ARTICLE.content[index_to_change - 1];
-    ARTICLE.content[index_to_change - 1] = item;
-    // assign new indexes
-    ARTICLE.content[index_to_change].index = index_to_change;
-    ARTICLE.content[index_to_change - 1].index = index_to_change - 1;
-
-    ARTICLE.last_changed = time();
-}
-
-function editor_log_article() {
+function article_delete_item(index: number) {
     let article = load_local_article();
-    console.log(article);
+    if (!article) {
+        throw new Error("could not load article");
+    }
+
+    article.content.splice(index, 1);
+    article.last_changed = time();
+
+    save_article_to_local(article);
+    return article;
 }
+
+function article_move_item(index: number, move_by: number) {
+    let article = load_local_article();
+    if (!article) {
+        throw new Error("could not load article");
+    }
+
+    let target = index + move_by;
+    if (target < 0 || target >= article.content.length) {
+        throw new Error("target position is out of bounds");
+    }
+    let [item_to_move] = article.content.splice(index, 1);
+    article.content.splice(target, 0, item_to_move);
+    article.last_changed = time();
+
+    save_article_to_local(article);
+    return article;
+}
+
 
 export default function main() {
     let user_data = get_local_user_data();
@@ -500,8 +479,11 @@ export default function main() {
         throw new Error("controll buttons not initialized");
     }
 
-    controll_buttons.log_button.onclick = () => editor_log_article();
-    controll_buttons.add_paragraph_button.onclick = () => editor_add_item(ItemTypeEnum.paragraph);
-    controll_buttons.add_image_button.onclick = () => editor_add_item(ItemTypeEnum.image);
-    controll_buttons.add_heading_button.onclick = () => editor_add_item(ItemTypeEnum.heading);
+    controll_buttons.log_button.onclick = () => console.log(article);
+    // insertion buttons
+    controll_buttons.add_paragraph_button.onclick = () => article_add_item(ItemTypeEnum.paragraph);
+    controll_buttons.add_image_button.onclick = () => article_add_item(ItemTypeEnum.image);
+    controll_buttons.add_heading_button.onclick = () => article_add_item(ItemTypeEnum.heading);
+
+    render_editor();
 }
