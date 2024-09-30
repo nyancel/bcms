@@ -1,4 +1,3 @@
-import main from "./editor";
 import { post_json, time } from "./util";
 
 // types
@@ -164,43 +163,36 @@ function logout() {
     main();
 }
 
-function user_render_details() {
-    if (!ELEMENTS.details_container) {
-        throw new Error("details container not initialized")
+function render_user() {
+    let elements = get_html_elements();
+    if (!elements) {
+        throw new Error("could not load html elements");
     }
 
-    if (!ELEMENTS.login_template) {
-        throw new Error("logintemplate not initialized")
-    }
+    elements.details_container.innerHTML = "";
 
-    if (!ELEMENTS.profile_template) {
-        throw new Error("profile template not initialized")
-    }
-
-    if (!USER.user) {
-        ELEMENTS.details_container.innerHTML = "";
-        let clone = ELEMENTS.login_template.cloneNode(true) as HTMLTemplateElement;
-        ELEMENTS.details_container.appendChild(clone.content);
+    let userdata = get_local_user_data();
+    if (!userdata) {
+        let clone = elements.login_template.cloneNode(true) as HTMLTemplateElement;
+        elements.details_container.appendChild(clone.content);
         return;
     }
 
-    ELEMENTS.details_container.innerHTML = "";
-
-    let clone = ELEMENTS.profile_template.cloneNode(true) as HTMLTemplateElement;
-    let profile = clone.content;
-    let firstname_element = profile.querySelector("#user-profile-first-name") as HTMLElement | null;
+    let clone = elements.profile_template.cloneNode(true) as HTMLTemplateElement;
+    let profile_template = clone.content;
+    let firstname_element = profile_template.querySelector("#user-profile-first-name") as HTMLElement | null;
     if (!firstname_element) {
         throw new Error("fistname_element not found");
     }
-    firstname_element.innerHTML = USER.user.first_name;
+    firstname_element.innerHTML = userdata.user.first_name;
 
-    let lastname_element = profile.querySelector("#user-profile-last-name") as HTMLElement | null;
+    let lastname_element = profile_template.querySelector("#user-profile-last-name") as HTMLElement | null;
     if (!lastname_element) {
         throw new Error("lastname_element not found");
     }
-    lastname_element.innerHTML = USER.user.last_name;
+    lastname_element.innerHTML = userdata.user.last_name;
 
-    let logout_button = profile.querySelector("#user-profile-logout-button") as HTMLElement | null;
+    let logout_button = profile_template.querySelector("#user-profile-logout-button") as HTMLElement | null;
     if (!logout_button) {
         throw new Error("logout_button not found");
     }
@@ -208,108 +200,87 @@ function user_render_details() {
         logout();
     };
 
-    ELEMENTS.details_container.appendChild(profile);
+    elements.details_container.appendChild(profile_template);
     return;
 }
 
 function enable_register_submit_button(is_valid: boolean, reason: string | undefined) {
-    if (!INPUTS.registration.submit) {
-        throw new Error("registration-submit button not found");
+    let inputs = get_input_fields();
+    if (!inputs) {
+        throw new Error("input fields not initialized");
     }
+
     if (!is_valid) {
-        INPUTS.registration.submit.innerHTML = reason ?? "invalid registration_data";
-        INPUTS.registration.submit.classList.toggle("bg-green-600", false);
-        INPUTS.registration.submit.classList.toggle("bg-gray-600", true);
+        inputs.registration.submit.innerHTML = reason ?? "invalid registration-data";
+        inputs.registration.submit.classList.toggle("bg-green-600", false);
+        inputs.registration.submit.classList.toggle("bg-gray-600", true);
+        return;
     }
-    if (is_valid) {
-        INPUTS.registration.submit.innerHTML = "Register";
-        INPUTS.registration.submit.classList.toggle("bg-gray-600", false);
-        INPUTS.registration.submit.classList.toggle("bg-green-600", true);
-    }
+
+    inputs.registration.submit.innerHTML = "Register";
+    inputs.registration.submit.classList.toggle("bg-gray-600", false);
+    inputs.registration.submit.classList.toggle("bg-green-600", true);
 }
 
-function validate_registration_inputs() {
-    if (!INPUTS.registration.password) {
-        throw new Error("registration password field not found");
-    }
-    if (!INPUTS.registration.repeat_password) {
-        throw new Error("repeat_passowrd registration field not found");
-    }
-    if (!INPUTS.registration.email) {
-        throw new Error("email registration field not found");
-    }
-    if (!INPUTS.registration.first_name) {
-        throw new Error("first_name registration field not found");
-    }
-    if (!INPUTS.registration.last_name) {
-        throw new Error("last_name registration field not found");
-    }
-
+function validate_registration_inputs(inputs: Inputs) {
     let valid: boolean = true;
-    let reason: string | undefined = undefined;
-    if (
-        INPUTS.registration.password.value !=
-        INPUTS.registration.repeat_password.value
-    ) {
+    let reason: string = "";
+
+    if (inputs.registration.password.value != inputs.registration.repeat_password.value) {
         valid = false;
         reason = "passwords dont match";
     }
-    if (!INPUTS.registration.first_name.value) {
+
+    if (!inputs.registration.first_name.value) {
         valid = false;
         reason = "missing first name";
     }
-    if (!INPUTS.registration.email.value) {
+
+    if (!inputs.registration.email.value) {
         valid = false;
         reason = "missing email";
     }
-    if (!INPUTS.registration.last_name.value) {
+
+    if (!inputs.registration.last_name.value) {
         valid = false;
         reason = "missing last name";
     }
-    if (!INPUTS.registration.password.value) {
+
+    if (!inputs.registration.password.value) {
         valid = false;
         reason = "missing password";
     }
 
-    INPUTS.registration.valid_inputs = valid;
-    enable_register_submit_button(valid, reason);
+    return {
+        valid,
+        reason
+    };
 }
 
-function user_register_submit() {
-    if (!INPUTS.registration.valid_inputs) {
-        return;
+function submit_registration(inputs: Inputs) {
+    if (!validate_registration_inputs(inputs).valid) {
+        throw new Error("inputs are not valid");
     }
 
-    const signin = async () => {
-        if (!INPUTS.registration.email) {
-            throw new Error("email value not supplied");
+    const register_and_signin = async () => {
+        let inputs = get_input_fields();
+        if (!inputs) {
+            throw new Error("input fields not initialized");
         }
-        if (!INPUTS.registration.password) {
-            throw new Error("password value not supplied");
+        if (!validate_registration_inputs(inputs).valid) {
+            throw new Error("inputs are not valid");
         }
-        if (!INPUTS.registration.first_name) {
-            throw new Error("first name value not supplied");
-        }
-        if (!INPUTS.registration.last_name) {
-            throw new Error("last name value not supplied");
-        }
-
         const register_data = {
-            email: INPUTS.registration.email.value,
-            password: INPUTS.registration.password.value,
-            firstname: INPUTS.registration.first_name.value,
-            lastname: INPUTS.registration.last_name.value,
+            email: inputs.registration.email.value,
+            password: inputs.registration.password.value,
+            firstname: inputs.registration.first_name.value,
+            lastname: inputs.registration.last_name.value,
         };
 
-        let register_response = await post_json(
-            "/user/register_new_user",
-            register_data
-        )
-
+        let register_response = await post_json("/user/register_new_user", register_data)
         if (register_response.error) {
             throw new Error(register_response.error);
         }
-        USER.user = register_response;
 
         let login_data = {
             email: register_data.email,
@@ -320,102 +291,74 @@ function user_register_submit() {
         if (login_response.error) {
             throw new Error(login_response.error);
         }
-        USER.token = login_response;
-        user_save_local();
+
+        let token = login_response;
+        let user = register_response;
+
+        let user_data: UserData = {
+            user,
+            token
+        }
+        save_user_data_to_local(user_data);
         window.location.href = "/";
     };
-    signin();
+    register_and_signin();
+}
+
+function validate_registration_form(inputs: Inputs) {
+    let { valid, reason } = validate_registration_inputs(inputs);
+    enable_register_submit_button(valid, reason);
 }
 
 function registration_init() {
-    if (!INPUTS.registration.email) {
-        throw new Error("email input for registration not initalized")
+    let inputs = get_input_fields();
+    if (!inputs) {
+        throw new Error("inputs not initialized");
     }
-
-    if (!INPUTS.registration.first_name) {
-        throw new Error("first_name input for registration not initalized")
-    }
-
-    if (!INPUTS.registration.last_name) {
-        throw new Error("last_name input for registration not initalized")
-    }
-
-    if (!INPUTS.registration.password) {
-        throw new Error("password input for registration not initalized")
-    }
-
-    if (!INPUTS.registration.repeat_password) {
-        throw new Error("repeate_password input for registration not initalized")
-    }
-
-    if (!INPUTS.registration.submit) {
-        throw new Error("submit input for registration not initalized")
-    }
-
     // hook up validation for registration form;
-    INPUTS.registration.email.oninput = () => {
-        validate_registration_inputs();
-    };
-    INPUTS.registration.first_name.oninput = () => {
-        validate_registration_inputs();
-    };
-    INPUTS.registration.last_name.oninput = () => {
-        validate_registration_inputs();
-    };
-    INPUTS.registration.password.oninput = () => {
-        validate_registration_inputs();
-    };
-    INPUTS.registration.repeat_password.oninput = () => {
-        validate_registration_inputs();
-    };
-    validate_registration_inputs();
-
-    INPUTS.registration.submit.onclick = () => {
-        user_register_submit();
-    };
-}
-
-function user_function_init() {
-    registration_init();
+    inputs.registration.email.oninput = () => validate_registration_form(inputs);
+    inputs.registration.first_name.oninput = () => validate_registration_form(inputs);
+    inputs.registration.last_name.oninput = () => validate_registration_form(inputs);
+    inputs.registration.password.oninput = () => validate_registration_form(inputs);
+    inputs.registration.repeat_password.oninput = () => validate_registration_form(inputs);
+    inputs.registration.submit.onclick = () => submit_registration(inputs);
+    validate_registration_form(inputs);
 }
 
 async function user_revalidate_token() {
-    if (!USER.token) {
-        return;
+    let user_data = get_local_user_data();
+    if (!user_data) {
+        return null;
     }
 
-    if (time() > USER.token.expires_at) {
-        USER.token = undefined;
-        USER.user = undefined;
-        user_save_local();
+    if (time() > user_data.token.expires_at) {
+        // token expired, re-render after clearing local data
+        clear_local_user_data();
+        main();
         return;
     }
 
     // refresh if less then 10 minutes left of the token
-    if (time() + 600 > USER.token.expires_at) {
+    if ((time() + 600) > user_data.token.expires_at) {
         let new_token_response = await post_json("/user/refresh_token", {
-            user_token: USER.token.id,
+            user_token: user_data.token.id,
         });
         if (new_token_response.error) {
             throw new Error(new_token_response.error)
         }
-        USER.token = new_token_response;
-    }
-
-    if (!USER.token) {
-        throw new Error("user token not found, i dont know how but you fucked up");
+        user_data.token = new_token_response;
+        save_user_data_to_local(user_data);
     }
 
     // validate the current user token
     let validation_response = await post_json("/user/who", {
-        user_token: USER.token.id
+        user_token: user_data.token.id
     });
 
     if (validation_response.error) {
         if (validation_response.error === "token invalid") {
-            USER.user = undefined;
-            USER.token = undefined;
-            user_save_local();
+            // token invalid, re-render after clearing local data
+            clear_local_user_data();
             main();
             return;
         }
@@ -424,40 +367,24 @@ async function user_revalidate_token() {
         }
     }
 
-    USER.token = validation_response as Token;
-    // revalidate on expiration
-    let timeout = USER.token.expires_at - time(); // at expiration
-    timeout = timeout - 60; // 1 minute before expiration
-    timeout = timeout * 1000; // to milliseconds
-    window.setTimeout(() => {
-        user_revalidate_token();
-    }, timeout);
-    user_save_local();
+    user_data.user = validation_response;
+    save_user_data_to_local(user_data);
 }
 
-export default function user_main() {
+export default function main() {
     user_revalidate_token();
-
-    if (ELEMENTS.details_container) {
-        user_render_details();
-    }
+    render_user();
 
     // if signing call the other init as well for diff html dom stuff
     if (window.location.pathname === "/signin") {
-        user_function_init();
+        registration_init();
     }
 }
 
 export function get_current_user_token_id() {
-    user_load_local();
-    if (!USER) {
-        return undefined;
+    let user_data = get_local_user_data();
+    if (!user_data) {
+        return null;
     }
-    if (!USER.token) {
-        return undefined;
-    }
-    if (!USER.token.id) {
-        return undefined;
-    }
-    return USER.token.id;
+    return user_data.token.id;
 }
