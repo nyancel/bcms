@@ -24,6 +24,30 @@ type UserData = {
     user: User | undefined
 }
 
+type Inputs = {
+    registration: {
+        first_name: HTMLInputElement | null,
+        last_name: HTMLInputElement | null,
+        email: HTMLInputElement | null,
+        password: HTMLInputElement | null,
+        repeat_password: HTMLInputElement | null,
+        submit: HTMLButtonElement | null,
+        valid_inputs: boolean,
+    },
+    signin: {
+        email: HTMLInputElement | null,
+        password: HTMLInputElement | null,
+        submit: HTMLButtonElement | null,
+        valid_inputs: boolean,
+    }
+}
+
+type Elements = {
+    login_template: HTMLTemplateElement | null,
+    profile_template: HTMLTemplateElement | null,
+    details_container: HTMLElement | null,
+}
+
 // global constants
 const USER: UserData = {
     storage_key: "userjs-user-local-metadata",
@@ -31,43 +55,56 @@ const USER: UserData = {
     token: undefined,
 };
 
-const ELEMENTS = {
-    login_template: document.querySelector(".user-details-login-template") as HTMLElement | null,
-    profile_template: document.querySelector(".user-details-profile-template") as HTMLElement | null,
+const ELEMENTS: Elements = {
+    login_template: document.querySelector(".user-details-login-template") as HTMLTemplateElement | null,
+    profile_template: document.querySelector(".user-details-profile-template") as HTMLTemplateElement | null,
     details_container: document.querySelector(".user-details-container") as HTMLElement | null,
 };
 
-const INPUTS = {
+const INPUTS: Inputs = {
     registration: {
-        first_name: document.querySelector("#user-register-first-name-input") as HTMLElement | null,
-        last_name: document.querySelector("#user-register-last-name-input") as HTMLElement | null,
-        email: document.querySelector("#user-register-email-input") as HTMLElement | null,
-        password: document.querySelector("#user-register-password-input") as HTMLElement | null,
-        repeat_password: document.querySelector("#user-register-password-repeat-input") as HTMLElement | null,
-        submit: document.querySelector("#user-register-submitt-button") as HTMLElement | null,
-        valid_inputs: false as boolean,
+        first_name: document.querySelector("#user-register-first-name-input"),
+        last_name: document.querySelector("#user-register-last-name-input"),
+        email: document.querySelector("#user-register-email-input"),
+        password: document.querySelector("#user-register-password-input"),
+        repeat_password: document.querySelector("#user-register-password-repeat-input"),
+        submit: document.querySelector("#user-register-submitt-button"),
+        valid_inputs: false,
     },
     signin: {
-        email: document.querySelector("#user-signin-email-input") as HTMLElement | null,
-        password: document.querySelector("#user-signin-password-input") as HTMLElement | null,
-        submit: document.querySelector("#user-signin-submitt-button") as HTMLElement | null,
-        valid_inputs: false as boolean,
+        email: document.querySelector("#user-signin-email-input"),
+        password: document.querySelector("#user-signin-password-input"),
+        submit: document.querySelector("#user-signin-submitt-button"),
+        valid_inputs: false,
     }
 };
 
-export function get_current_user_token_id() {
-    if (!USER) {
-        return undefined;
+
+// internal functions
+function inputs_initialized(inputs: Inputs) {
+    let registration = inputs.registration;
+    let registration_valid = (
+        registration.email &&
+        registration.first_name &&
+        registration.last_name &&
+        registration.password &&
+        registration.repeat_password &&
+        registration.submit
+    )
+
+    let signin = inputs.signin;
+    let signin_valid = (
+        signin.email &&
+        signin.password &&
+        signin.submit
+    )
+    if (signin_valid && registration_valid) {
+        return true;
     }
-    if (!USER.token) {
-        return undefined;
-    }
-    if (!USER.token.id) {
-        return undefined;
-    }
-    return USER.token.id;
+    return false;
 }
 
+// core functions
 function user_load_local() {
     let local = localStorage.getItem(USER.storage_key);
     if (!local) {
@@ -156,75 +193,93 @@ function user_render_details() {
     return;
 }
 
-function user_enable_register_submit_button(is_valid, reason) {
+function enable_register_submit_button(is_valid: boolean, reason: string | undefined) {
+    if (!INPUTS.registration.submit) {
+        throw new Error("registration-submit button not found");
+    }
     if (!is_valid) {
-        INPUTS.submit.innerHTML = reason;
-        INPUTS.submit.classList.toggle("bg-green-600", false);
-        INPUTS.submit.classList.toggle("bg-gray-600", true);
+        INPUTS.registration.submit.innerHTML = reason ?? "invalid registration_data";
+        INPUTS.registration.submit.classList.toggle("bg-green-600", false);
+        INPUTS.registration.submit.classList.toggle("bg-gray-600", true);
     }
     if (is_valid) {
-        INPUTS.submit.innerHTML = "Register";
-        INPUTS.submit.classList.toggle("bg-gray-600", false);
-        INPUTS.submit.classList.toggle("bg-green-600", true);
+        INPUTS.registration.submit.innerHTML = "Register";
+        INPUTS.registration.submit.classList.toggle("bg-gray-600", false);
+        INPUTS.registration.submit.classList.toggle("bg-green-600", true);
     }
 }
 
-function user_register_validate_inputs() {
-    let valid = true;
-    let reason = undefined;
+function validate_registration_inputs() {
+    if (!INPUTS.registration.password) {
+        throw new Error("registration password field not found");
+    }
+    if (!INPUTS.registration.repeat_password) {
+        throw new Error("repeat_passowrd registration field not found");
+    }
+    if (!INPUTS.registration.email) {
+        throw new Error("email registration field not found");
+    }
+    if (!INPUTS.registration.first_name) {
+        throw new Error("first_name registration field not found");
+    }
+    if (!INPUTS.registration.last_name) {
+        throw new Error("last_name registration field not found");
+    }
+
+    let valid: boolean = true;
+    let reason: string | undefined = undefined;
     if (
-        INPUTS.password.value !=
-        INPUTS.repeat_password.value
+        INPUTS.registration.password.value !=
+        INPUTS.registration.repeat_password.value
     ) {
         valid = false;
         reason = "passwords dont match";
     }
-    if (!INPUTS.first_name.value) {
+    if (!INPUTS.registration.first_name.value) {
         valid = false;
         reason = "missing first name";
     }
-    if (!INPUTS.email.value) {
+    if (!INPUTS.registration.email.value) {
         valid = false;
         reason = "missing email";
     }
-    if (!INPUTS.last_name.value) {
+    if (!INPUTS.registration.last_name.value) {
         valid = false;
         reason = "missing last name";
     }
-    if (!INPUTS.password.value) {
+    if (!INPUTS.registration.password.value) {
         valid = false;
         reason = "missing password";
     }
 
-    INPUTS.valid_inputs = valid;
-    user_enable_register_submit_button(valid, reason);
+    INPUTS.registration.valid_inputs = valid;
+    enable_register_submit_button(valid, reason);
 }
 
 function user_register_submit() {
-    if (!INPUTS.valid_inputs) {
+    if (!INPUTS.registration.valid_inputs) {
         return;
     }
 
     const signin = async () => {
+
+
         const register_data = {
-            email: INPUTS.email.value,
-            password: INPUTS.password.value,
-            firstname: INPUTS.first_name.value,
-            lastname: INPUTS.last_name.value,
+            email: INPUTS.registration.email.value,
+            password: INPUTS.registration.password.value,
+            firstname: INPUTS.registration.first_name.value,
+            lastname: INPUTS.registration.last_name.value,
         };
 
         let register_response = await post_json(
             "/user/register_new_user",
             register_data
-user)undefundefined
+        )
 
         if (register_response.error) {
-            // TODO Alert user of error
-            maine.log("Something went wrong");
-            console.log(register_response.error);
-            return;
+            throw new Error(register_response.error);
         }
-        USER.meta = register_response;
+        USER.user = register_response;
 
         let login_data = {
             email: register_data.email,
@@ -233,13 +288,9 @@ user)undefundefined
 
         let login_response = await post_json("/user/login", login_data);
         if (login_response.error) {
-            // TODO Alert user of error
-            console.log("Something userwroundefined");
-            console.log(login_response.erundefined);
-            return;
+            throw new Error(login_response.error);
         }
         USER.token = login_response;
-        main();
         window.location.href = "/";
     };
     signin();
@@ -248,21 +299,21 @@ user)undefundefined
 function user_function_init() {
     // hook up validation for registration form;
     INPUTS.email.oninput = () => {
-        user_register_validate_inputs();
+        validate_registration_inputs();
     };
     INPUTS.first_name.oninput = () => {
-        user_register_validate_inputs();
+        validate_registration_inputs();
     };
     INPUTS.last_name.oninput = () => {
-        user_register_validate_inputs();
+        validate_registration_inputs();
     };
     INPUTS.password.oninput = () => {
-        user_register_validate_inputs();
+        validate_registration_inputs();
     };
     INPUTS.repeat_password.oninput = () => {
-        user_register_validate_inputs();
+        validate_registration_inputs();
     };
-    user_register_validate_inputs();
+    validate_registration_inputs();
 
     INPUTS.submit.onclick = () => {
         user_register_submit();
@@ -323,4 +374,17 @@ export default function user_main() {
     if (window.location.pathname === "/signin") {
         user_function_init();
     }
+}
+
+export function get_current_user_token_id() {
+    if (!USER) {
+        return undefined;
+    }
+    if (!USER.token) {
+        return undefined;
+    }
+    if (!USER.token.id) {
+        return undefined;
+    }
+    return USER.token.id;
 }

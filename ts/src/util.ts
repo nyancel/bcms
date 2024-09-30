@@ -62,7 +62,7 @@ function cache_add(key: string, value: string) {
     save_cache_to_localstorage();
 }
 
-// exposed functions
+
 export function time() {
     let d = new Date();
     let current_time = d.getTime() / 1000;
