@@ -38,7 +38,7 @@ def fetch_user_from_token(token_id: str) -> tuple[dict, int]:
         "content-type": "application/json"
     }
     data = {
-        "user_token": token_id
+        "auth_token": token_id
     }
     r = requests.post(target, headers=headers, json=data)
     j: dict = json.loads(r.text)

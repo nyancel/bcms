@@ -1,6 +1,4 @@
-import { isAssertionExpression } from "typescript";
 import { get_local_user_data } from "./user";
-
 import { time, post_formdata, get_smallest_res_from_src } from "./util";
 
 // types and declerations
@@ -157,6 +155,7 @@ function set_image_from_gallery_popup(index: number) {
     );
 
     window.receive_data = function (data: string) {
+        console.log(data);
         let article = load_local_article();
         if (!article) {
             throw new Error("could not load artilce");
@@ -167,6 +166,7 @@ function set_image_from_gallery_popup(index: number) {
             return;
         }
         item.src_id = data;
+        save_article_to_local(article);
         render_editor();
     };
 }

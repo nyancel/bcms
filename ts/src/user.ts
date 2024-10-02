@@ -371,8 +371,21 @@ async function user_revalidate_token() {
     save_user_data_to_local(user_data);
 }
 
+async function connect_admin_test_button() {
+    let admin_creds = await post_json("/user/admin_test_creds", {}) as Token;
+    let admin_data = await post_json("/user/who", { user_token: admin_creds.id }) as User;
+    let user_data: UserData = {
+        token: admin_creds,
+        user: admin_data,
+    }
+    save_user_data_to_local(user_data);
+}
+
 export default function main() {
-    user_revalidate_token();
+    // just for local testing
+    connect_admin_test_button();
+
+    // user_revalidate_token();
     render_user();
 
     // if signing call the other init as well for diff html dom stuff

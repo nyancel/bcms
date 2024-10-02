@@ -61,12 +61,12 @@ def login():
 @bp.post("logout")
 def logout():
     json: dict = flask.request.json
-    user_token = json.get("user_token")
+    auth_token = json.get("auth_token")
 
-    if not user_token:
+    if not auth_token:
         return generate_error("token not supplied")
 
-    token = lib.user.token.get_token(user_token)
+    token = lib.user.token.get_token(auth_token)
     if not token:
         return generate_error("token not found")
 
@@ -147,12 +147,12 @@ def edit_user_rights():
 @bp.post("who")
 def who():
     json: dict = flask.request.json
-    user_token = json.get("user_token")
+    auth_token = json.get("auth_token")
 
-    if not user_token:
+    if not auth_token:
         return generate_error("token not supplied")
 
-    token = lib.user.token.get_token(user_token)
+    token = lib.user.token.get_token(auth_token)
     if not token:
         return generate_error("token invalid")
 
@@ -216,13 +216,13 @@ def show_user():
 @bp.post("edit_user")
 def edit_user():
     json: dict = flask.request.json
-    user_token = json.get("user_token")
+    auth_token = json.get("auth_token")
     password = json.get("password")
 
-    if None in [user_token, password]:
+    if None in [auth_token, password]:
         return generate_error("token or password not supplied")
 
-    token = lib.user.token.get_token(user_token)
+    token = lib.user.token.get_token(auth_token)
     if not token:
         return generate_error("token invalid")
 
@@ -259,13 +259,13 @@ def edit_user():
 @bp.post("delete_user")
 def delete_user():
     json: dict = flask.request.json
-    user_token = json.get("user_token")
+    auth_token = json.get("auth_token")
     password = json.get("password")
 
-    if None in [user_token, password]:
+    if None in [auth_token, password]:
         return generate_error("token or password not supplied")
 
-    token = lib.user.token.get_token(user_token)
+    token = lib.user.token.get_token(auth_token)
     if not token:
         return generate_error("token invalid")
 
@@ -291,9 +291,9 @@ def delete_user():
 @bp.post("refresh_token")
 def refresh_token():
     json: dict = flask.request.json
-    user_token = json.get("user_token")
+    auth_token = json.get("auth_token")
 
-    token = lib.user.token.get_token(user_token)
+    token = lib.user.token.get_token(auth_token)
     if not token:
         return generate_error("token invalid")
 
@@ -309,3 +309,8 @@ def refresh_token():
     new_token = lib.user.token.create_new_token(user.id)
 
     return flask.jsonify(new_token.to_dict())
+
+
+@bp.post("admin_test_creds")
+def get_admin_test_creds():
+    return flask.jsonify(lib.util.req.get_admin_token())

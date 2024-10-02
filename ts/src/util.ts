@@ -1,3 +1,5 @@
+import { get_local_user_data } from "./user";
+
 // typing
 type CacheItem = {
     key: string,
@@ -78,7 +80,12 @@ export function time() {
 }
 
 
-export async function post_json(endpoint: string, data: Object) {
+export async function post_json(endpoint: string, data: any) {
+    let user_data = get_local_user_data();
+    if (user_data) {
+        data.auth_token = user_data.token.id;
+    }
+
     let response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -92,7 +99,12 @@ export async function post_json(endpoint: string, data: Object) {
 }
 
 export async function post_formdata(endpoint: string, data: FormData) {
-    console.log("called stuff")
+    // add our token if we have one
+    let user_data = get_local_user_data();
+    if (user_data) {
+        data.append("auth_token", user_data?.token.id);
+    }
+
     let response = await fetch(endpoint, {
         method: "POST",
         body: data,

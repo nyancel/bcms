@@ -596,10 +596,6 @@ video {
   grid-column: span 2 / span 2;
 }
 
-.m-2 {
-  margin: 0.5rem;
-}
-
 .my-auto {
   margin-top: auto;
   margin-bottom: auto;
@@ -648,10 +644,6 @@ video {
 
 .grid-cols-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.justify-between {
-  justify-content: space-between;
 }
 
 .gap-12 {
@@ -757,20 +749,12 @@ video {
   padding-bottom: 1rem;
 }
 
-.pb-6 {
-  padding-bottom: 1.5rem;
+.pb-4 {
+  padding-bottom: 1rem;
 }
 
 .pt-12 {
   padding-top: 3rem;
-}
-
-.pt-4 {
-  padding-top: 1rem;
-}
-
-.pb-4 {
-  padding-bottom: 1rem;
 }
 
 .text-sm {
