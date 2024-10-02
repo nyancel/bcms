@@ -31,8 +31,8 @@ class User(Driver.BASE):
     __tablename__ = "user"
     id: orm.Mapped[str] = orm.mapped_column(primary_key=True)
     email: orm.Mapped[str] = orm.mapped_column(unique=True)
-    first_name: orm.Mapped[opt[str]]
-    last_name: orm.Mapped[opt[str]]
+    firstname: orm.Mapped[opt[str]]
+    lastname: orm.Mapped[opt[str]]
     salt: orm.Mapped[str]
     hash: orm.Mapped[str]
     user_role: orm.Mapped[UserRole]
@@ -53,8 +53,8 @@ class User(Driver.BASE):
     def to_dict(self):
         _dict = {}
         _dict["id"] = self.id
-        _dict["first_name"] = self.first_name
-        _dict["last_name"] = self.last_name
+        _dict["firstname"] = self.firstname
+        _dict["lastname"] = self.lastname
         _dict["email"] = self.email
         _dict["last_edited"] = self.last_edited
         _dict["created_at"] = self.created_at

@@ -99,24 +99,24 @@ def logout():
     return generate_response(data="user logged out")
 
 
-@bp.post("register_new_user")
+@bp.post("register")
 def register_new_user():
     json: dict = flask.request.json
     new_user_email: str = json.get("email")
     new_user_password: str = json.get("password")
+    first_name = json.get("firstname")
+    last_name = json.get("lastname")
 
-    if None in [new_user_email, new_user_password]:
-        return generate_response(data=None, code=400, message="missing email or password")
+    if None in [new_user_email, new_user_password, first_name, last_name]:
+        return generate_response(data=None, code=400, message="missing inputs")
 
     user = lib.user.user.get_user_by_email(new_user_email)
     if user:
         return generate_response(data=None, code=400, message="email already registered")
 
     new_user = lib.user.user.create_new_user(new_user_email, new_user_password)
-    if json.get("firstname"):
-        new_user.first_name = json.get("firstname")
-    if json.get("lastname"):
-        new_user.last_name = json.get("lastname")
+    new_user.firstname = first_name
+    new_user.lastname = last_name
     lib.user.user.save_user(new_user)
 
     lib.user.rights.create_new_user_rights(new_user.id)
@@ -255,10 +255,10 @@ def edit_user():
             json.get("new_password"), user.salt)
 
     if json.get("firstname"):
-        user.first_name = json.get("firstname")
+        user.firstname = json.get("firstname")
 
     if json.get("lastname"):
-        user.last_name = json.get("lastname")
+        user.lastname = json.get("lastname")
 
     if json.get("new_email"):
         user.email = json.get("new_email")
