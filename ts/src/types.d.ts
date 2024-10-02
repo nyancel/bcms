@@ -17,9 +17,10 @@ type Media = {
 
 // Gallery types
 type GalleryHtmlElements = {
-    input_source: HTMLElement
-    image_preview_template: HTMLElement
+    input_source: HTMLInputElement
+    image_preview_template: HTMLTemplateElement
     image_display: HTMLElement
+    upload_button: HTMLButtonElement
 }
 
 // Article types
