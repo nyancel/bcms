@@ -1,17 +1,10 @@
 import { get_local_user_data } from "./user";
 
-// typing
-type CacheItem = {
-    key: string,
-    item: string,
-    expires_at: number
-}
-
 // globals
 const CACHE_KEY = "utilts-cache-stroage-key";
 
 // internal functions
-function save_cache_to_local(cache: CacheItem[]) {
+function save_cache_to_local(cache: UtilCacheItem[]) {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
 }
 
@@ -20,7 +13,7 @@ function load_local_cache() {
     if (!local) {
         return null;
     }
-    let cache = JSON.parse(local) as CacheItem[];
+    let cache = JSON.parse(local) as UtilCacheItem[];
     if (!cache) {
         throw new Error("cache cant be parsed");
     }
@@ -61,7 +54,7 @@ function cache_add(key: string, value: string, lifetime: number = 3600) {
         cache = [];
     }
 
-    let c: CacheItem = {
+    let c: UtilCacheItem = {
         key: key,
         item: value,
         expires_at: time() + lifetime, // valid for one hour

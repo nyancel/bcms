@@ -1,54 +1,6 @@
 import { get_local_user_data } from "./user";
 import { time, post_formdata, get_smallest_res_from_src } from "./util";
 
-// types and declerations
-declare global {
-    interface Window {
-        receive_data: (data: string) => void;
-    }
-}
-
-enum ItemTypeEnum {
-    paragraph,
-    image,
-    heading
-}
-
-type TextItem = {
-    type: ItemTypeEnum.heading | ItemTypeEnum.paragraph,
-    text: string,
-    index: number,
-}
-
-type MediaItem = {
-    type: ItemTypeEnum.image,
-    alt_text: string,
-    src_id: string | undefined,
-    index: number,
-}
-
-type Article = {
-    id: undefined | string,
-    author_id: string;
-    title: string;
-    description: string;
-    content: Array<TextItem | MediaItem>;
-    last_changed: number;
-}
-
-type Templates = {
-    paragraph: HTMLTemplateElement,
-    image: HTMLTemplateElement,
-    heading: HTMLTemplateElement,
-}
-
-type ControllButtons = {
-    log_button: HTMLButtonElement;
-    add_paragraph_button: HTMLButtonElement;
-    add_image_button: HTMLButtonElement;
-    add_heading_button: HTMLButtonElement;
-}
-
 // constant values
 const LOCAL_ARTICLE_STORAGE_KEY = "editor-ts-local-article";
 
@@ -59,14 +11,14 @@ function load_local_article() {
         return null;
     }
 
-    let article: Article = JSON.parse(article_string);
+    let article: ArticleData = JSON.parse(article_string);
     if (!article) {
         throw new Error("could not parse the local article, you fucked up somehow");
     }
     return article;
 }
 
-function save_article_to_local(article: Article) {
+function save_article_to_local(article: ArticleData) {
     let article_dump = JSON.stringify(article);
     localStorage.setItem(LOCAL_ARTICLE_STORAGE_KEY, article_dump);
 }
@@ -82,7 +34,7 @@ function init_empty_article() {
         throw new Error("no user data found, not logged in");
     }
 
-    let article: Article = {
+    let article: ArticleData = {
         author_id: user_data.user.id,
         content: [],
         description: "",
@@ -109,7 +61,7 @@ function get_controll_buttons() {
         return null;
     }
 
-    let controll_buttons: ControllButtons = {
+    let controll_buttons: ArticleEditorControllButtons = {
         log_button,
         add_paragraph_button,
         add_image_button,
@@ -132,7 +84,7 @@ function get_templates() {
         return null;
     }
 
-    let templates: Templates = {
+    let templates: ArticleHtmlTemplates = {
         paragraph: paragraph_templte,
         image: image_templte,
         heading: heading_templte,
@@ -162,7 +114,7 @@ function set_image_from_gallery_popup(index: number) {
         }
 
         let item = article.content[index];
-        if (item.type != ItemTypeEnum.image) {
+        if (item.type != ArticleItemTypeEnum.image) {
             return;
         }
         item.src_id = data;
@@ -185,7 +137,7 @@ function set_image_from_file_upload(index: number) {
         }
 
         let media_item = article.content[index];
-        if (media_item.type != ItemTypeEnum.image) {
+        if (media_item.type != ArticleItemTypeEnum.image) {
             return;
         }
         // retrieve the selected file
@@ -212,14 +164,14 @@ function set_image_from_file_upload(index: number) {
     input.click();
 }
 
-function render_image(entry: HTMLElement, index: number, article: Article) {
+function render_image(entry: HTMLElement, index: number, article: ArticleData) {
     let display = entry.querySelector(".image-display") as HTMLImageElement | null;
     if (!display) {
         throw new Error("media-display not found");
     }
 
     let media_item = article.content[index];
-    if (media_item.type != ItemTypeEnum.image) {
+    if (media_item.type != ArticleItemTypeEnum.image) {
         throw new Error("item type is not image");
     }
 
@@ -232,7 +184,7 @@ function render_image(entry: HTMLElement, index: number, article: Article) {
     // else image_id is defined and we render the image
     const load = async () => {
         let media_item = article.content[index];
-        if (media_item.type != ItemTypeEnum.image) {
+        if (media_item.type != ArticleItemTypeEnum.image) {
             throw new Error("item type is not image");
         }
         if (!media_item.src_id) {
@@ -274,7 +226,7 @@ function editor_connect_paragraph(entry: HTMLElement, index: number) {
         throw new Error("Could not find textarea");
     }
     let text_item = article.content[index];
-    if (text_item.type != ItemTypeEnum.paragraph) {
+    if (text_item.type != ArticleItemTypeEnum.paragraph) {
         throw new Error("Article item at index is not a paragraph");
     }
     textarea.value = text_item.text;
@@ -286,7 +238,7 @@ function editor_connect_paragraph(entry: HTMLElement, index: number) {
             throw new Error("could not load article");
         }
         let text_item = article.content[index];
-        if (text_item.type != ItemTypeEnum.paragraph) {
+        if (text_item.type != ArticleItemTypeEnum.paragraph) {
             throw new Error("Article item at index is not a paragraph");
         }
         text_item.text = textarea.value;
@@ -303,7 +255,7 @@ function editor_image_connect(entry: HTMLElement, index: number) {
 
     // init the image-item alt text
     let image_item = article.content[index];
-    if (image_item.type != ItemTypeEnum.image) {
+    if (image_item.type != ArticleItemTypeEnum.image) {
         throw new Error("Article item at index is not a image");
     }
 
@@ -321,7 +273,7 @@ function editor_image_connect(entry: HTMLElement, index: number) {
             throw new Error("could not load article");
         }
         let image_item = article.content[index];
-        if (image_item.type != ItemTypeEnum.image) {
+        if (image_item.type != ArticleItemTypeEnum.image) {
             throw new Error("Article item at index is not a image");
         }
         image_item.alt_text = alt_text.value;
@@ -394,18 +346,18 @@ function render_editor() {
 
     for (let index = 0; index < article.content.length; index++) {
         switch (article.content[index].type) {
-            case ItemTypeEnum.paragraph:
+            case ArticleItemTypeEnum.paragraph:
                 entry = insert_template_in_editor(templates.paragraph, editor);
                 editor_connect_paragraph(entry, index);
                 break;
 
-            case ItemTypeEnum.image:
+            case ArticleItemTypeEnum.image:
                 entry = insert_template_in_editor(templates.image, editor);
                 render_image(entry, index, article);
                 editor_image_connect(entry, index);
                 break;
 
-            case ItemTypeEnum.heading:
+            case ArticleItemTypeEnum.heading:
                 entry = insert_template_in_editor(templates.heading, editor);
                 // editor_heading_connect(entry, index); TODO fix the editor heading connector
                 break;
@@ -426,25 +378,25 @@ function render_editor() {
 }
 
 // article functions
-function article_add_item(item_type: ItemTypeEnum) {
+function article_add_item(item_type: ArticleItemTypeEnum) {
     let article = load_local_article();
     if (!article) {
         throw new Error("could not load artilce");
     }
 
     let length = article.content.length;
-    let new_item: TextItem | MediaItem;
+    let new_item: ArticleTextItem | ArticleMediaItem;
 
     switch (item_type) {
-        case ItemTypeEnum.paragraph:
-        case ItemTypeEnum.heading:
+        case ArticleItemTypeEnum.paragraph:
+        case ArticleItemTypeEnum.heading:
             new_item = {
                 type: item_type,
                 text: "",
                 index: length
             }
             break;
-        case ItemTypeEnum.image:
+        case ArticleItemTypeEnum.image:
             new_item = {
                 type: item_type,
                 alt_text: "",
@@ -514,9 +466,9 @@ export default function main() {
 
     controll_buttons.log_button.onclick = () => console.log(article);
     // insertion buttons
-    controll_buttons.add_paragraph_button.onclick = () => article_add_item(ItemTypeEnum.paragraph);
-    controll_buttons.add_image_button.onclick = () => article_add_item(ItemTypeEnum.image);
-    controll_buttons.add_heading_button.onclick = () => article_add_item(ItemTypeEnum.heading);
+    controll_buttons.add_paragraph_button.onclick = () => article_add_item(ArticleItemTypeEnum.paragraph);
+    controll_buttons.add_image_button.onclick = () => article_add_item(ArticleItemTypeEnum.image);
+    controll_buttons.add_heading_button.onclick = () => article_add_item(ArticleItemTypeEnum.heading);
 
     render_editor();
 }

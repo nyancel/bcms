@@ -1,48 +1,6 @@
 import { post_json, time } from "./util";
 
-// types
-type Token = {
-    id: string,
-    user_id: string,
-    created_at: number,
-    expires_at: number,
-}
 
-type User = {
-    id: string,
-    first_name: string,
-    last_name: string,
-    email: string,
-    last_edited: number,
-    created_at: number,
-}
-
-type UserData = {
-    token: Token,
-    user: User
-}
-
-type Inputs = {
-    registration: {
-        first_name: HTMLInputElement,
-        last_name: HTMLInputElement,
-        email: HTMLInputElement,
-        password: HTMLInputElement,
-        repeat_password: HTMLInputElement,
-        submit: HTMLButtonElement,
-    },
-    signin: {
-        email: HTMLInputElement,
-        password: HTMLInputElement,
-        submit: HTMLButtonElement,
-    }
-}
-
-type Elements = {
-    login_template: HTMLTemplateElement,
-    profile_template: HTMLTemplateElement,
-    details_container: HTMLElement,
-}
 
 // global constants
 const USER_LOCAL_TOKEN_STORAGE_KEY = "userts-local-user-token";
@@ -95,7 +53,7 @@ function get_html_elements() {
         return null;
     }
 
-    let elements: Elements = {
+    let elements: UserHtmlElements = {
         login_template: login_template,
         profile_template: profile_template,
         details_container: details_container,
@@ -129,7 +87,7 @@ function get_input_fields() {
         return null;
     }
 
-    let inputs: Inputs = {
+    let inputs: UserSigninHtmlInputs = {
         registration: {
             email: registration_email,
             first_name: registration_first_name,
@@ -222,7 +180,7 @@ function enable_register_submit_button(is_valid: boolean, reason: string | undef
     inputs.registration.submit.classList.toggle("bg-green-600", true);
 }
 
-function validate_registration_inputs(inputs: Inputs) {
+function validate_registration_inputs(inputs: UserSigninHtmlInputs) {
     let valid: boolean = true;
     let reason: string = "";
 
@@ -257,7 +215,7 @@ function validate_registration_inputs(inputs: Inputs) {
     };
 }
 
-function submit_registration(inputs: Inputs) {
+function submit_registration(inputs: UserSigninHtmlInputs) {
     if (!validate_registration_inputs(inputs).valid) {
         throw new Error("inputs are not valid");
     }
@@ -305,7 +263,7 @@ function submit_registration(inputs: Inputs) {
     register_and_signin();
 }
 
-function validate_registration_form(inputs: Inputs) {
+function validate_registration_form(inputs: UserSigninHtmlInputs) {
     let { valid, reason } = validate_registration_inputs(inputs);
     enable_register_submit_button(valid, reason);
 }
@@ -372,7 +330,7 @@ async function user_revalidate_token() {
 }
 
 async function connect_admin_test_button() {
-    let admin_creds = await post_json("/user/admin_test_creds", {}) as Token;
+    let admin_creds = await post_json("/user/admin_test_creds", {}) as UserAuthToken;
     let admin_data = await post_json("/user/who", { user_token: admin_creds.id }) as User;
     let user_data: UserData = {
         token: admin_creds,
