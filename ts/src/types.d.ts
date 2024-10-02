@@ -1,9 +1,4 @@
-type GalleryHtmlElements = {
-    input_source: HTMLElement
-    image_preview_template: HTMLElement
-    image_display: HTMLElement
-}
-
+// general types
 type Media = {
     id: string,
     uploader_user_id: string,
@@ -20,6 +15,14 @@ type Media = {
     deleted_state_update_time: number,
 }
 
+// Gallery types
+type GalleryHtmlElements = {
+    input_source: HTMLElement
+    image_preview_template: HTMLElement
+    image_display: HTMLElement
+}
+
+// Article types
 enum ArticleItemTypeEnum {
     paragraph,
     image,
@@ -61,7 +64,7 @@ type ArticleEditorControllButtons = {
     add_heading_button: HTMLButtonElement;
 }
 
-// types
+// User Types
 type UserAuthToken = {
     id: string,
     user_id: string,
@@ -105,6 +108,7 @@ type UserHtmlElements = {
     details_container: HTMLElement,
 }
 
+// util types
 type UtilCacheItem = {
     key: string,
     item: string,

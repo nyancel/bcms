@@ -1,20 +1,6 @@
 import { post_json, get_smallest_res_from_src } from "./util";
 
-type Media = {
-    id: string,
-    uploader_user_id: string,
-    filename: string,
-    file_extention: string,
-    file_mimetype: string,
-    file_hash: string,
-    alt_text: string,
-    content_type: string,
-    creation_time: number,
-    is_unlisted: boolean,
-    unlisted_state_update_time: number,
-    is_deleted: boolean,
-    deleted_state_update_time: number,
-}
+
 
 function get_gallery_elements() {
     let image_preview_template = document.getElementById("gallery-image-preview-template") as HTMLElement | null;
