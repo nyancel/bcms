@@ -126,6 +126,8 @@ def save_article(article: article_db.Article):
     return True
 
 
+# TODO: ENDRE FUNKSJON, slik at man får bilde, id til title, author_id
+# TENK PÅ ALT FRONTEND TRENGER FOR Å DISPLAYE <33
 def list_all_articles() -> list:
     """
     Retrieves all articles from the database and returns a list of dictionaries representing the articles.
@@ -145,6 +147,23 @@ def list_all_articles() -> list:
         if article.isDeleted or not article.isListed:
             continue
 
-        articles_list.append({"title": article.title, "desc": article.desc})
+        article_body = json.loads(article.body)
+
+        for item in article_body:
+            try:
+                if item.get("type") == "image":
+                    image = item
+            except:
+                pass
+
+        articles_list.append(
+            {
+                "id": article.id,
+                "title": article.title,
+                "desc": article.desc,
+                "user_id": article.user_id,
+                "image": image,
+            }
+        )
 
     return articles_list

@@ -32,3 +32,8 @@ def web_gallery():
 @bp.get("gallery-popup")
 def web_gallery_select():
     return flask.render_template("pages/gallery_popup.jinja")
+
+
+@bp.get("view")
+def web_render():
+    return flask.render_template("pages/view.jinja")

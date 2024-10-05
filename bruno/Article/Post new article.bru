@@ -5,18 +5,18 @@ meta {
 }
 
 post {
-  url: http://127.0.0.1:3000/article/new_article
+  url: http://127.0.0.1:3000/article/post_article
   body: json
   auth: none
 }
 
 body:json {
   {
-    "title": "Tittel 1",
+    "title": "Tittel 234",
     "body": [
           {"type": "paragraph", "content": "Dette er det andre paragrafet"},
           {"type": "paragraph", "content": "Dette er det første paragrafet"},
           {"type": "image", "src": "https://cdn.bifrost.com/media123.png", "alt": "bilde av en hund"}],
-    "user_id": "22324"
+    "user_id": "22324",
   }
 }

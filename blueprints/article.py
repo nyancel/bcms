@@ -14,6 +14,8 @@ def generate_error(reason: str, code: int = 400) -> flask.Response:
 bp = flask.Blueprint("article", __name__, url_prefix="/article/")
 
 
+# TODO: hente token, hent bruker fra token, hent rettigheter fra bruker
+# Sjekk om bruker kan poste artikkel
 @bp.post("post_article")
 def post_article() -> dict:
     # Get the JSON data from the request

@@ -1,0 +1,42 @@
+{% extends "pages/base.jinja" %}
+
+{% block body %}
+
+<template id="article-image">
+    <div class="mb-2">
+        <img class="article-image">
+    </div>
+</template>
+
+<template id="article-title">
+    <div class="flex items-center justify-center">
+        <h1 class="article-title mb-4 text-4xl font-extrabold leading-none tracking-light text-gray-900">
+        </h1>
+    </div>
+</template>
+
+<template id="article-metadata">
+    <div class="flex-row items-center mb-4 block max-w-sm p-6 rounded-lg bg-gray-100">
+        <p class="article-timestamp"></p>
+        <p class="article-update-timestamp"></p>
+        <p class="article-author"></p>
+    </div>
+</template>
+
+<template id="article-desc">
+    <div class="flex items-center justify-center mb-4">
+        <p class="article-desc font-normal text-gray-700 text-sm"></p>
+    </div>
+</template>
+
+<template id="article-text">
+    <div class="mb-2">
+        <p class="article-text"></p>
+    </div>
+</template>
+
+<ol id="article-display">
+</ol>
+
+
+{% endblock body %}

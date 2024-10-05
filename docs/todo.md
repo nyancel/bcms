@@ -6,11 +6,13 @@
 # TODO LIST
 
 Not Claimed
-- [ ] ❌ frontend article listing
-- [ ] ❌ frontend renderer
 - [ ] ❌ frontend user login
 - [ ] ❌ WEB route session login restriction
 - [ ] ❌ UTIL rate limiter
+- [ ] ❌ Event post
+- [ ] ❌ Event get by filter
+- [ ] ❌ Event subscribption
+- [ ] ❌ Event lookup
 
 
 Simon:
@@ -41,11 +43,13 @@ Emmie:
 - [ ] frontend metadata
 
 Marius:
-
-- [ ] Event post
-- [ ] Event get by filter
-- [ ] Event subscribption
-- [ ] Event lookup
+- [ ] 🟡 korrekt autentication in articles blueprint
+- [ ] 🟡 frontend article listing
+  - Ha med all dataen vi trengg
+- [ ] 🟡 frontend article renderer
+- [ ] 🟡 frontend unlisted article listing for redaksjon¨
+  - Liste alle unlisted article, med knapp for å gå inn i article og render
+  - Med knapp for å approve_article() blueprint function
 - [x] ✅ desk review
 - [x] ✅ Auth of functions for user roles
 - [x] ✅ article editing
