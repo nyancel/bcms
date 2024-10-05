@@ -1,4 +1,4 @@
-import { get_local_user_data } from "./user";
+import * as user_core from "./user/user_core";
 import { time, post_formdata, get_smallest_res_from_src } from "./util";
 
 // constant values
@@ -29,7 +29,7 @@ function clear_local_article() {
 
 // internal init functions;
 function init_empty_article() {
-    let user_data = get_local_user_data();
+    let user_data = user_core.get_local_user_data();
     if (!user_data) {
         throw new Error("no user data found, not logged in");
     }
@@ -446,7 +446,7 @@ function article_move_item(index: number, move_by: number) {
 
 
 export default function main() {
-    let user_data = get_local_user_data();
+    let user_data = user_core.get_local_user_data();
     if (!user_data) {
         // redirect out of editor if not logged in
         window.location.href = "/";

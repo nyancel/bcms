@@ -66,26 +66,6 @@ type ArticleEditorControllButtons = {
 }
 
 // User Types
-type UserAuthToken = {
-    id: string,
-    user_id: string,
-    created_at: number,
-    expires_at: number,
-}
-
-type User = {
-    id: string,
-    first_name: string,
-    last_name: string,
-    email: string,
-    last_edited: number,
-    created_at: number,
-}
-
-type UserData = {
-    token: UserAuthToken,
-    user: User
-}
 
 type UserSigninHtmlInputs = {
     registration: {

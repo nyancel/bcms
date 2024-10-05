@@ -174,7 +174,6 @@ def who():
     user = lib.user.user.get_user(token.user_id)
     if not user:
         return generate_response(data=None, code=400, message="no user data")
-
     return generate_response(data=user.to_dict())
 
 
@@ -199,8 +198,8 @@ def list_users():
     users = [u.to_dict() for u in users]
 
     for u in users:
-        u.pop("email", None)
-        u.pop("user_role", None)
+        u["email"] = None
+        u["user_role"] = None
 
     return generate_response(data=users)
 
@@ -218,8 +217,8 @@ def show_user():
         return generate_response(data=None, code=400, message="user not found")
 
     user_dict = user.to_dict()
-    user_dict.pop("email", None)
-    user_dict.pop("user_role", None)
+    user_dict["email"] = None
+    user_dict["user_role"] = None
 
     return generate_response(data=user_dict)
 
@@ -324,4 +323,4 @@ def refresh_token():
 
 @bp.post("admin_test_creds")
 def get_admin_test_creds():
-    return generate_response(data=lib.util.req.get_admin_token())
+    return generate_response(data=lib.util.req.get_admin_token()["data"])

@@ -1,4 +1,4 @@
-import { get_local_user_data } from "./user";
+import * as user_core from "./user/user_core";
 
 // globals
 const CACHE_KEY = "utilts-cache-stroage-key";
@@ -8,9 +8,9 @@ function save_cache_to_local(cache: UtilCacheItem[]) {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
 }
 
-async function create_response(resp: Response){
+async function create_response(resp: Response) {
     let json = await resp.json();
-    
+
 }
 
 function load_local_cache() {
@@ -79,7 +79,7 @@ export function time() {
 
 
 export async function post_json(endpoint: string, data: any) {
-    let user_data = get_local_user_data();
+    let user_data = user_core.get_local_user_data();
     if (user_data) {
         data.auth_token = user_data.token.id;
     }
@@ -98,7 +98,7 @@ export async function post_json(endpoint: string, data: any) {
 
 export async function post_formdata(endpoint: string, data: FormData) {
     // add our token if we have one
-    let user_data = get_local_user_data();
+    let user_data = user_core.get_local_user_data();
     if (user_data) {
         data.append("auth_token", user_data?.token.id);
     }
