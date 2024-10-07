@@ -1,10 +1,10 @@
-import editor_main from "./editor";
 import gallery_popup_main from "./gallery_popup";
 import gallery_main from "./gallery"
 import index_main from "./index"
 import view_main from "./view"
 import { user_header_main } from "./user/user_header";
 import { user_page_main } from "./user/user_page";
+import draft_view_main from "./editor/draft_page";
 
 declare global {
     interface Window {
@@ -19,7 +19,14 @@ window.addEventListener("load", (event) => {
     // page based init
     switch (window.location.pathname) {
         case "/editor":
-            editor_main();
+            let url_params = new URLSearchParams(window.location.search);
+            let draft_id = url_params.get("draft-id");
+            if (draft_id == null) {
+                console.log("no draft chosen")
+                draft_view_main();
+                break;
+            }
+            // render editor for specific draft
             break;
 
         case "/gallery-popup":

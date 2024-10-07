@@ -18,7 +18,6 @@ const ARTICLE_DISPLAY = document.querySelector("#list-article-display") as HTMLE
 
 export default function main() {
     list_all();
-
 }
 
 function render_articles(articles: Article[]) {

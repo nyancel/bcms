@@ -1,5 +1,22 @@
-import * as core from "./user_core";
-import * as api from "./webapi";
+import * as user_core from "./user_core";
+import * as user_api from "../bcms/user";
+
+
+type UserSigninHtmlInputs = {
+    registration: {
+        first_name: HTMLInputElement,
+        last_name: HTMLInputElement,
+        email: HTMLInputElement,
+        password: HTMLInputElement,
+        repeat_password: HTMLInputElement,
+        submit: HTMLButtonElement,
+    },
+    signin: {
+        email: HTMLInputElement,
+        password: HTMLInputElement,
+        submit: HTMLButtonElement,
+    }
+}
 
 function get_input_fields() {
     let registration_first_name = document.querySelector("#user-register-first-name-input") as HTMLInputElement | null;
@@ -114,7 +131,7 @@ function submit_registration(inputs: UserSigninHtmlInputs) {
             throw new Error("inputs are not valid");
         }
 
-        let registration_response = await api.register(
+        let registration_response = await user_api.register(
             inputs.registration.email.value,
             inputs.registration.password.value,
             inputs.registration.first_name.value,
@@ -124,7 +141,7 @@ function submit_registration(inputs: UserSigninHtmlInputs) {
             throw new Error(registration_response.response.message);
         }
 
-        let login_response = await api.login(
+        let login_response = await user_api.login(
             inputs.registration.email.value,
             inputs.registration.password.value
         );
@@ -132,12 +149,12 @@ function submit_registration(inputs: UserSigninHtmlInputs) {
             throw new Error(login_response.response.message);
         }
 
-        let userdata: core.UserStorageData = {
+        let userdata: user_core.UserStorageData = {
             token: login_response.token,
             user: registration_response.userdata,
         }
 
-        core.save_user_data_to_local(userdata);
+        user_core.save_user_data_to_local(userdata);
         window.location.href = "/";
     };
     register_and_signin();

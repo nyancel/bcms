@@ -1,6 +1,13 @@
-import * as util from "../util";
-import * as core from "./user_core";
-import * as api from "./webapi";
+import * as user_core from "./user_core";
+import * as user_api from "../bcms/user";
+
+
+
+type UserHtmlElements = {
+    login_template: HTMLTemplateElement,
+    profile_template: HTMLTemplateElement,
+    details_container: HTMLElement,
+}
 
 function get_html_elements() {
     let login_template = document.querySelector(".user-details-login-template") as HTMLTemplateElement | null;
@@ -25,13 +32,13 @@ function get_html_elements() {
 
 // api coms functions - stuff that talks to the server
 function logout() {
-    let userdata = core.get_local_user_data();
+    let userdata = user_core.get_local_user_data();
     if (!userdata) {
         throw new Error("No local user-data");
     }
 
-    api.logout(userdata.token.id);
-    core.clear_local_user_data();
+    user_api.logout(userdata.token.id);
+    user_core.clear_local_user_data();
 
     // reload the user state etc.
     user_header_main();
@@ -44,7 +51,7 @@ function render_user() {
     }
 
     elements.details_container.innerHTML = "";
-    let userdata = core.get_local_user_data();
+    let userdata = user_core.get_local_user_data();
     if (!userdata) {
         let clone = elements.login_template.cloneNode(true) as HTMLTemplateElement;
         elements.details_container.appendChild(clone.content);
@@ -80,7 +87,7 @@ function render_user() {
 
 export async function user_header_main() {
     // just for local testing
-    await core.get_admin_credenitals();
+    await user_core.get_admin_credenitals();
 
     // user_revalidate_token();
     render_user();

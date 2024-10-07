@@ -1,5 +1,14 @@
 import { get_smallest_res_from_src, post_formdata, post_json } from "./util";
 
+
+type GalleryHtmlElements = {
+    input_source: HTMLInputElement
+    image_preview_template: HTMLTemplateElement
+    image_display: HTMLElement
+    upload_button: HTMLButtonElement
+}
+
+
 function get_html_elements() {
     let input_source = document.getElementById("image-upload-source") as HTMLInputElement | null;
     let image_preview_template = document.getElementById("gallery-image-preview-template") as HTMLTemplateElement | null;

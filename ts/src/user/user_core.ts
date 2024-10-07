@@ -1,10 +1,10 @@
 
 import * as util from "../util";
-import * as api from "./webapi";
+import * as user_api from "../bcms/user";
 
 export type UserStorageData = {
-    user: api.UserData,
-    token: api.UserTokenData,
+    user: user_api.UserData,
+    token: user_api.UserTokenData,
 }
 
 const USER_TOKEN_KEY: string = "BCMS_USERTS_LOCALTOKEN";
@@ -60,7 +60,7 @@ export async function revalidate_token() {
 
     // refresh if less then 10 minutes left of the token
     if ((util.time() + 600) > user_data.token.expires_at) {
-        let token = await api.refresh_token(user_data.token.id);
+        let token = await user_api.refresh_token(user_data.token.id);
         if (!token.token) {
             throw new Error(token.response.message);
         }
@@ -70,7 +70,7 @@ export async function revalidate_token() {
     }
 
     // validate the current user token
-    let user = await api.who(user_data.token.id);
+    let user = await user_api.who(user_data.token.id);
     if (!user.userdata) {
         throw new Error(user.response.message);
     }
@@ -86,13 +86,13 @@ export async function revalidate_token() {
 }
 
 export async function get_admin_credenitals() {
-    let admin_creds = await api.testing_admin_credentials();
+    let admin_creds = await user_api.testing_admin_credentials();
     console.log(admin_creds);
     if (!admin_creds.admin) {
         throw new Error(admin_creds.response.message);
     }
 
-    let admin_data = await api.who(admin_creds.admin.id);
+    let admin_data = await user_api.who(admin_creds.admin.id);
     console.log(admin_data);
     if (!admin_data.userdata) {
         throw new Error(admin_data.response.message);

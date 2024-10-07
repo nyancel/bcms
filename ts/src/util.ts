@@ -8,11 +8,6 @@ function save_cache_to_local(cache: UtilCacheItem[]) {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
 }
 
-async function create_response(resp: Response) {
-    let json = await resp.json();
-
-}
-
 function load_local_cache() {
     let local = localStorage.getItem(CACHE_KEY);
     if (!local) {

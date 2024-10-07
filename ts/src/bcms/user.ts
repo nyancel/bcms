@@ -1,10 +1,4 @@
-export type UserApiResponse = {
-    time: number,
-    message: string,
-    data: any,
-    success: number,
-    status_code: number
-}
+import * as core_api from "./core";
 
 export type UserTokenData = {
     id: string,
@@ -39,32 +33,9 @@ export type UserRights = {
     can_submit_event: boolean,
 }
 
-
-async function post_json(endpoint: string, data: Object) {
-    let response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    });
-
-    let status_code = response.status;
-    let json = await response.json();
-    let result: UserApiResponse = {
-        time: json.time,
-        message: json.message,
-        data: json.data, // why data twice? i dont know...
-        success: json.success,
-        status_code: status_code,
-    }
-    return result;
-}
-
-
 export async function login(email: string, password: string) {
     let login_data = { email, password }
-    let response = await post_json("/user/login", login_data);
+    let response = await core_api.post_json("/user/login", login_data);
     if (response.success == 0) {
         return { response };
     }
@@ -74,13 +45,13 @@ export async function login(email: string, password: string) {
 
 export async function logout(auth_token: string) {
     let logout_data = { auth_token }
-    let response = await post_json("/user/login", logout_data);
+    let response = await core_api.post_json("/user/login", logout_data);
     return { response };
 }
 
 export async function register(email: string, password: string, firstname: string, lastname: string) {
     let register_data = { email, password, firstname, lastname }
-    let response = await post_json("user/register", register_data);
+    let response = await core_api.post_json("user/register", register_data);
     if (response.success == 0) {
         return { response }
     }
@@ -90,7 +61,7 @@ export async function register(email: string, password: string, firstname: strin
 
 export async function edit_rights(new_rights: UserRights, auth_token: string) {
     let request_data = { ...new_rights, auth_token };
-    let response = await post_json("user/edit_user_rights", request_data);
+    let response = await core_api.post_json("user/edit_user_rights", request_data);
     if (response.success == 0) {
         return { response }
     }
@@ -100,7 +71,7 @@ export async function edit_rights(new_rights: UserRights, auth_token: string) {
 
 export async function who(auth_token: string) {
     let token_data = { auth_token }
-    let response = await post_json("/user/who", token_data);
+    let response = await core_api.post_json("/user/who", token_data);
     console.log(response);
     if (response.success == 0) {
         throw new Error(response.message);
@@ -112,7 +83,7 @@ export async function who(auth_token: string) {
 
 export async function get_rights(user_id: string) {
     let user_data = { user_id }
-    let response = await post_json("/user/rights", user_data);
+    let response = await core_api.post_json("/user/rights", user_data);
     if (response.success == 0) {
         return { response }
     }
@@ -121,7 +92,7 @@ export async function get_rights(user_id: string) {
 }
 
 export async function list_users() {
-    let response = await post_json("/user/list_users", {});
+    let response = await core_api.post_json("/user/list_users", {});
     if (response.success == 0) {
         return { response }
     }
@@ -131,7 +102,7 @@ export async function list_users() {
 
 export async function show_user(user_id: string) {
     let user_data = { user_id }
-    let response = await post_json("/user/show_user", user_data);
+    let response = await core_api.post_json("/user/show_user", user_data);
     if (response.success == 0) {
         return { response }
     }
@@ -155,7 +126,7 @@ export async function edit_user_details(
         lastname,
         new_email
     };
-    let response = await post_json("/user/edit_user", request_data);
+    let response = await core_api.post_json("/user/edit_user", request_data);
     if (response.success == 0) {
         return { response }
     }
@@ -165,13 +136,13 @@ export async function edit_user_details(
 
 export async function delete_user(auth_token: string, password: string) {
     let request_data = { auth_token, password, };
-    let response = await post_json("/user/edit_user", request_data);
+    let response = await core_api.post_json("/user/edit_user", request_data);
     return { response };
 }
 
 export async function refresh_token(auth_token: string) {
     let request_data = { auth_token };
-    let response = await post_json("/user/edit_user", request_data);
+    let response = await core_api.post_json("/user/edit_user", request_data);
     if (response.success == 0) {
         return { response }
     }
@@ -180,7 +151,7 @@ export async function refresh_token(auth_token: string) {
 }
 
 export async function testing_admin_credentials() {
-    let response = await post_json("/user/admin_test_creds", {});
+    let response = await core_api.post_json("/user/admin_test_creds", {});
     if (response.success == 0) {
         throw new Error(response.message);
     }
