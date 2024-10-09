@@ -6,11 +6,13 @@ import lib.user.rights as rights
 
 def get_user_and_rights_from_auth_token(auth_id: str):
     t = token.get_token(auth_id)
-    if not t: return None
-    
+    if not t:
+        return (None, None)
+
     u = user.get_user(t.id)
-    if not u: return None
-    
+    if not u:
+        return (None, None)
+
     r = rights.get_user_rights(u.id)
     return (u, r)
 

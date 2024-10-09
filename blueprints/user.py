@@ -92,12 +92,15 @@ def register_new_user():
 @bp.post("edit_user_rights")
 def edit_user_rights():
     json: dict = flask.request.json
-    # determine if we are allowd to edit user rights
-    rights_or_error, is_valid = get_rights(json)
-    if not is_valid:
-        return rights_or_error
-
-    if not rights_or_error.can_edit_user_rights:
+    auth_token = json.get("auth_token")
+    if not auth_token: 
+        return flask_helper.generate_response(data=None, code=400, message="token not supplied")
+    
+    user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
+    if not user:
+        return flask_helper.generate_response(data=None, code=400, message="user not found")
+    
+    if not rights.can_edit_user_rights:
         return flask_helper.generate_response(data=None, code=401, message="Not allowed to edit")
 
     # fetch the relevant user
@@ -114,6 +117,7 @@ def edit_user_rights():
         return flask_helper.generate_response(data=None, code=400, message="no rights found")
 
     # assign the user rights we want to change
+    # this takes in a dict and then reads out the keys, asigning vallues if they
     updated_rights = lib.user.rights.update_rights(user_rights.id, json)
     if not updated_rights:
         return flask_helper.generate_response(data=None, code=400, message="could not update rights")
