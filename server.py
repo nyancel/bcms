@@ -1,7 +1,7 @@
 import flask
 
 import lib.util.env as env
-import lib.util.req as req
+import lib.util.user_api as user_api
 
 import blueprints.article
 import blueprints.media
@@ -26,7 +26,7 @@ if not env.IS_PROD:
 
     @server.get("/admin")
     def sanity_admin():
-        return flask.jsonify(req.get_admin_token())
+        return flask.jsonify(user_api.get_admin_token())
 
 
 if __name__ == "__main__":

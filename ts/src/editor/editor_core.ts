@@ -1,7 +1,6 @@
 import * as user_api from "../bcms/user";
 import * as user_core from "../user/user_core";
-import * as util from "../util";
-
+import * as util from "../lib/util"
 
 enum ArticleItemTypeEnum {
     paragraph,
@@ -22,8 +21,8 @@ type ArticleMediaItem = {
     index: number,
 }
 
-type ArticleData = {
-    id: undefined | string,
+export type DraftArticleData = {
+    draft_id: string,
     author_id: string;
     title: string;
     description: string;
@@ -39,43 +38,37 @@ export function load_local_drafts() {
         return null;
     }
 
-    let Drafts: ArticleData[] = JSON.parse(drafts_string);
+    let Drafts: DraftArticleData[] = JSON.parse(drafts_string);
     if (!Drafts) {
         throw new Error("could not parse the local drafts, you fucked up somehow");
     }
     return Drafts;
 }
 
-function save_drafts_to_local(drafts: ArticleData[]) {
+export function save_drafts_to_local(drafts: DraftArticleData[]) {
     let drafts_dump = JSON.stringify(drafts);
     localStorage.setItem(LOCAL_DRAFTS_STORAGE_KEY, drafts_dump);
 }
 
-function clear_local_article() {
+export function clear_local_drafts() {
     localStorage.removeItem(LOCAL_DRAFTS_STORAGE_KEY);
 }
 
-// internal init functions;
-function new_empty_article(userdata: user_api.UserData) {
-    let user_data = user_core.get_local_user_data();
-    if (!user_data) {
-        throw new Error("no user data found, not logged in");
-    }
-
-    let article: ArticleData = {
-        author_id: user_data.user.id,
+export function new_empty_draft(userdata: user_api.UserData) {
+    let article: DraftArticleData = {
+        author_id: userdata.id,
         content: [],
-        description: "",
+        description: "This is a draft article",
         last_changed: util.time(),
-        id: undefined,
-        title: "",
+        draft_id: util.random_id(),
+        title: "New article",
     };
     return article;
 }
 
 
 // article functions
-function article_add_item(article: ArticleData, item_type: ArticleItemTypeEnum) {
+function article_add_item(article: DraftArticleData, item_type: ArticleItemTypeEnum) {
     let length = article.content.length;
     let new_item: ArticleTextItem | ArticleMediaItem;
 
@@ -104,13 +97,13 @@ function article_add_item(article: ArticleData, item_type: ArticleItemTypeEnum) 
     return article;
 }
 
-function article_delete_item(article: ArticleData, index: number) {
+function article_delete_item(article: DraftArticleData, index: number) {
     article.content.splice(index, 1);
     article.last_changed = util.time();
     return article;
 }
 
-function article_move_item(article: ArticleData, index: number, move_by: number) {
+function article_move_item(article: DraftArticleData, index: number, move_by: number) {
     let target = index + move_by;
     if (target < 0 || target >= article.content.length) {
         throw new Error("target position is out of bounds");

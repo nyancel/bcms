@@ -46,35 +46,53 @@
     </div>
 </template>
 
-<div id="editor-app-view">
-
-</div>
-
-<div class="pb-4">
-    <div class="p-[4px] bg-green-200">
-        <input id="editor-article-title-input" type="text" class="p-2 border-b h-full w-full" placeholder="Title">
+<template id="draft-controlls-template">
+    <div class="draft-controlls">
+        <button class="new-draft-button">New Draft</button>
+        <ol class="draft-render-list">
+        </ol>
     </div>
+</template>
+
+<template id="draft-preview-template">
+    <button class="delete-draft-button bg-red-500 p-2">Delete draft</button>
+    <button class="edit-draft-button bg-green-500 p-2">Edit draft</button>
+    <h1 class="draft-render-title"></h1>
+    <p class="draft-render-description"></p>
+</template>
+
+
+<template id="draft-editor-controlls">
+    <div class="pb-4">
+        <div class="p-[4px] bg-green-200">
+            <input id="editor-article-title-input" type="text" class="p-2 border-b h-full w-full" placeholder="Title">
+        </div>
+    </div>
+
+    <ol id="editor-container" class="space-y-4">
+    </ol>
+
+    <button id="log-article" class="p-2 bg-blue-500 rounded-md text-white">
+        Log Article
+    </button>
+
+
+    <button id="add-paragraph" class="p-2 bg-slate-800 rounded-md text-white">
+        Add paragraph
+    </button>
+
+
+    <button id="add-image" class="p-2 bg-slate-800 rounded-md text-white">
+        Add media
+    </button>
+
+    <button id="add-heading" class="p-2 bg-slate-800 rounded-md text-white">
+        Add heading
+    </button>
+</template>
+
+<div id="editor-app-view">
 </div>
 
-<ol id="editor-container" class="space-y-4">
-</ol>
-
-<button id="log-article" class="p-2 bg-blue-500 rounded-md text-white">
-    Log Article
-</button>
-
-
-<button id="add-paragraph" class="p-2 bg-slate-800 rounded-md text-white">
-    Add paragraph
-</button>
-
-
-<button id="add-image" class="p-2 bg-slate-800 rounded-md text-white">
-    Add media
-</button>
-
-<button id="add-heading" class="p-2 bg-slate-800 rounded-md text-white">
-    Add heading
-</button>
 
 {% endblock body %}
