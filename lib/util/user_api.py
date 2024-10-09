@@ -4,6 +4,15 @@ import lib.user.token as token
 import lib.user.rights as rights
 
 
+def get_user_and_rights_from_auth_token(auth_id: str):
+    t = token.get_token(auth_id)
+    if not t:
+        return None
+    u = user.get_user(t.id)
+    r = rights.get_user_rights(u.id)
+    return (u, r)
+
+
 def fetch_user_from_token(token_id: str):
     t = token.get_token(token_id)
     u = user.get_user(t.id)
