@@ -6,46 +6,11 @@ import lib.user.user
 import lib.user.token
 
 import lib.util.crypt
-import lib.util.req
+import lib.util.user_api
+import lib.util.flask_helper as flask_helper
 
 bp = flask.Blueprint("user_bp", __name__)
 bp.url_prefix = "/user/"
-
-
-def generate_response(data, code: int = 200, message: str = None):
-    if message or code != 200:
-        return flask.jsonify({
-            "time": time.time(),
-            "message": message or "Server failed",
-            "data": data or {},
-            "success": 0
-        }), code
-
-    return flask.jsonify({
-        "time": time.time(),
-        "message": "OK",
-        "data": data or {},
-        "success": 1
-    }), code
-
-
-def get_rights(json: dict):
-    auth_token = json.get("auth_token")
-    if not auth_token:
-        return generate_response(data=None, code=400, message="auth_token not found"), False
-
-    if not auth_token:
-        return (generate_response(data=None, code=400, message="auth_token not found")), False
-
-    user, status_code = lib.util.req.fetch_user_from_token(auth_token)
-    if status_code != 200:
-        return (generate_response(data=None, code=400, message="user data not found")), False
-
-    rights, status_code = lib.util.req.fetch_rights_from_user(user.get("id"))
-    if status_code != 200:
-        return (generate_response(data=None, code=400, message="could not fetch user rights")), False
-
-    return rights, True
 
 
 @bp.post("login")
@@ -55,18 +20,18 @@ def login():
     password = json.get("password")
 
     if None in [email, password]:
-        return generate_response(data=None, code=400, message="missing email or password")
+        return flask_helper.generate_response(data=None, code=400, message="missing email or password")
 
     user = lib.user.user.get_user_by_email(email)
     if not user:
-        return generate_response(data=None, code=400, message="user not found")
+        return flask_helper.generate_response(data=None, code=400, message="user not found")
 
     pw_check = lib.util.crypt.hash_with_salt(password, user.salt)
     if pw_check != user.hash:
-        return generate_response(data=None, code=400, message="user not found")
+        return flask_helper.generate_response(data=None, code=400, message="user not found")
 
     user_token = lib.user.token.create_new_token(user.id)
-    return generate_response(data=user_token.to_dict())
+    return flask_helper.generate_response(data=user_token.to_dict())
 
 
 @bp.post("logout")
@@ -75,15 +40,15 @@ def logout():
     auth_token = json.get("auth_token")
 
     if not auth_token:
-        return generate_response(data=None, code=400, message="token not supplied")
+        return flask_helper.generate_response(data=None, code=400, message="token not supplied")
 
     token = lib.user.token.get_token(auth_token)
     if not token:
-        return generate_response(data=None, code=400, message="token not found")
+        return flask_helper.generate_response(data=None, code=400, message="token not found")
 
     user = lib.user.user.get_user(token.user_id)
     if not user:
-        return generate_response(data=None, code=400, message="usere not found")
+        return flask_helper.generate_response(data=None, code=400, message="usere not found")
 
     all_tokens = lib.user.token.get_tokens_by_user_id(user.id)
 
@@ -94,9 +59,9 @@ def logout():
             did_delete_all = False
 
     if not did_delete_all:
-        return generate_response(data=None, code=400, message="could not delete token")
+        return flask_helper.generate_response(data=None, code=400, message="could not delete token")
 
-    return generate_response(data="user logged out")
+    return flask_helper.generate_response(data="user logged out")
 
 
 @bp.post("register")
@@ -108,11 +73,11 @@ def register_new_user():
     last_name = json.get("lastname")
 
     if None in [new_user_email, new_user_password, first_name, last_name]:
-        return generate_response(data=None, code=400, message="missing inputs")
+        return flask_helper.generate_response(data=None, code=400, message="missing inputs")
 
     user = lib.user.user.get_user_by_email(new_user_email)
     if user:
-        return generate_response(data=None, code=400, message="email already registered")
+        return flask_helper.generate_response(data=None, code=400, message="email already registered")
 
     new_user = lib.user.user.create_new_user(new_user_email, new_user_password)
     new_user.firstname = first_name
@@ -121,7 +86,7 @@ def register_new_user():
 
     lib.user.rights.create_new_user_rights(new_user.id)
 
-    return generate_response(data=new_user.to_dict())
+    return flask_helper.generate_response(data=new_user.to_dict())
 
 
 @bp.post("edit_user_rights")
@@ -133,26 +98,26 @@ def edit_user_rights():
         return rights_or_error
 
     if not rights_or_error.can_edit_user_rights:
-        return generate_response(data=None, code=401, message="Not allowed to edit")
+        return flask_helper.generate_response(data=None, code=401, message="Not allowed to edit")
 
     # fetch the relevant user
     user_id: str = json.get("user_id")
     if not user_id:
-        return generate_response(data=None, code=400, message="no user id supplied")
+        return flask_helper.generate_response(data=None, code=400, message="no user id supplied")
 
     user = lib.user.user.get_user(user_id)
     if not user:
-        return generate_response(data=None, code=400, message="no user found")
+        return flask_helper.generate_response(data=None, code=400, message="no user found")
 
     user_rights = lib.user.rights.get_user_rights(user_id)
     if not user_rights:
-        return generate_response(data=None, code=400, message="no rights found")
+        return flask_helper.generate_response(data=None, code=400, message="no rights found")
 
     # assign the user rights we want to change
     updated_rights = lib.user.rights.update_rights(user_rights.id, json)
     if not updated_rights:
-        return generate_response(data=None, code=400, message="could not update rights")
-    return generate_response(data=updated_rights.to_dict())
+        return flask_helper.generate_response(data=None, code=400, message="could not update rights")
+    return flask_helper.generate_response(data=updated_rights.to_dict())
 
 
 @bp.post("who")
@@ -161,20 +126,20 @@ def who():
     auth_token = json.get("auth_token")
 
     if not auth_token:
-        return generate_response(data=None, code=400, message="token not supplied")
+        return flask_helper.generate_response(data=None, code=400, message="token not supplied")
 
     token = lib.user.token.get_token(auth_token)
     if not token:
-        return generate_response(data=None, code=400, message="token invalid")
+        return flask_helper.generate_response(data=None, code=400, message="token invalid")
 
     if time.time() > token.expires_at:
         lib.user.token.delete_token(token.id)
-        return generate_response(data=None, code=400, message="token expired")
+        return flask_helper.generate_response(data=None, code=400, message="token expired")
 
     user = lib.user.user.get_user(token.user_id)
     if not user:
-        return generate_response(data=None, code=400, message="no user data")
-    return generate_response(data=user.to_dict())
+        return flask_helper.generate_response(data=None, code=400, message="no user data")
+    return flask_helper.generate_response(data=user.to_dict())
 
 
 @bp.post("rights")
@@ -183,13 +148,13 @@ def rights():
     user_id = json.get("user_id")
 
     if not user_id:
-        return generate_response(data=None, code=400, message="user_id not supplied")
+        return flask_helper.generate_response(data=None, code=400, message="user_id not supplied")
 
     rights = lib.user.rights.get_user_rights(user_id)
     if not rights:
-        return generate_response(data=None, code=400, message="no data")
+        return flask_helper.generate_response(data=None, code=400, message="no data")
 
-    return generate_response(data=rights.to_dict())
+    return flask_helper.generate_response(data=rights.to_dict())
 
 
 @bp.post("list_users")
@@ -201,7 +166,7 @@ def list_users():
         u["email"] = None
         u["user_role"] = None
 
-    return generate_response(data=users)
+    return flask_helper.generate_response(data=users)
 
 
 @bp.post("show_user")
@@ -210,17 +175,17 @@ def show_user():
     user_id = json.get("user_id")
 
     if not user_id:
-        return generate_response(data=None, code=400, message="user_id not provided")
+        return flask_helper.generate_response(data=None, code=400, message="user_id not provided")
 
     user = lib.user.user.get_user(user_id)
     if not user:
-        return generate_response(data=None, code=400, message="user not found")
+        return flask_helper.generate_response(data=None, code=400, message="user not found")
 
     user_dict = user.to_dict()
     user_dict["email"] = None
     user_dict["user_role"] = None
 
-    return generate_response(data=user_dict)
+    return flask_helper.generate_response(data=user_dict)
 
 
 @bp.post("edit_user")
@@ -230,23 +195,23 @@ def edit_user():
     password = json.get("password")
 
     if None in [auth_token, password]:
-        return generate_response(data=None, code=400, message="token or password not supplied")
+        return flask_helper.generate_response(data=None, code=400, message="token or password not supplied")
 
     token = lib.user.token.get_token(auth_token)
     if not token:
-        return generate_response(data=None, code=400, message="token invalid")
+        return flask_helper.generate_response(data=None, code=400, message="token invalid")
 
     if time.time() > token.expires_at:
         lib.user.token.delete_token(token.id)
-        return generate_response(data=None, code=400, message="token expired")
+        return flask_helper.generate_response(data=None, code=400, message="token expired")
 
     user = lib.user.user.get_user(token.user_id)
     if not user:
-        return generate_response(data=None, code=400, message="no user data")
+        return flask_helper.generate_response(data=None, code=400, message="no user data")
 
     pw_check = lib.util.crypt.hash_with_salt(password, user.salt)
     if pw_check != user.hash:
-        return generate_response(data=None, code=400, message="invalid password")
+        return flask_helper.generate_response(data=None, code=400, message="invalid password")
 
     if json.get("new_password"):
         user.salt = lib.util.crypt.random_string(64)
@@ -263,7 +228,7 @@ def edit_user():
         user.email = json.get("new_email")
 
     lib.user.user.save_user(user)
-    return generate_response(data=user.to_dict())
+    return flask_helper.generate_response(data=user.to_dict())
 
 
 @bp.post("delete_user")
@@ -273,29 +238,29 @@ def delete_user():
     password = json.get("password")
 
     if None in [auth_token, password]:
-        return generate_response(data=None, code=400, message="token or password not supplied")
+        return flask_helper.generate_response(data=None, code=400, message="token or password not supplied")
 
     token = lib.user.token.get_token(auth_token)
     if not token:
-        return generate_response(data=None, code=400, message="token invalid")
+        return flask_helper.generate_response(data=None, code=400, message="token invalid")
 
     if time.time() > token.expires_at:
         lib.user.token.delete_token(token.id)
-        return generate_response(data=None, code=400, message="token expired")
+        return flask_helper.generate_response(data=None, code=400, message="token expired")
 
     user = lib.user.user.get_user(token.user_id)
     if not user:
-        return generate_response(data=None, code=400, message="no user data")
+        return flask_helper.generate_response(data=None, code=400, message="no user data")
 
     pw_check = lib.util.crypt.hash_with_salt(password, user.salt)
     if pw_check != user.hash:
-        return generate_response(data=None, code=400, message="invalid password")
+        return flask_helper.generate_response(data=None, code=400, message="invalid password")
 
     deleted = lib.user.user.delete_user(user.id)
     if not deleted:
-        return generate_response(data=None, code=400, message="could not delete")
+        return flask_helper.generate_response(data=None, code=400, message="could not delete")
 
-    return generate_response(data="user deleted")
+    return flask_helper.generate_response(data="user deleted")
 
 
 @bp.post("refresh_token")
@@ -305,22 +270,22 @@ def refresh_token():
 
     token = lib.user.token.get_token(auth_token)
     if not token:
-        return generate_response(data=None, code=400, message="token invalid")
+        return flask_helper.generate_response(data=None, code=400, message="token invalid")
 
     if time.time() > token.expires_at:
         lib.user.token.delete_token(token.id)
-        return generate_response(data=None, code=400, message="token expired")
+        return flask_helper.generate_response(data=None, code=400, message="token expired")
 
     user = lib.user.user.get_user(token.user_id)
     if not user:
-        return generate_response(data=None, code=400, message="no user data")
+        return flask_helper.generate_response(data=None, code=400, message="no user data")
 
     lib.user.token.delete_token(token.id)
     new_token = lib.user.token.create_new_token(user.id)
 
-    return generate_response(data=new_token.to_dict())
+    return flask_helper.generate_response(data=new_token.to_dict())
 
 
 @bp.post("admin_test_creds")
 def get_admin_test_creds():
-    return generate_response(data=lib.util.req.get_admin_token()["data"])
+    return flask_helper.generate_response(data=lib.util.user_api.get_admin_token()["data"])
