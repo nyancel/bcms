@@ -16,7 +16,9 @@ Not Claimed
 
 
 Simon:
-
+- [ ] ❌ Rewrite lib/util/req to avoid network calls
+- [ ] ❌ generalize generate_response()
+- [ ] ❌ add default journalist and editor accounts
 - [ ] 🟡 frontend editor
   - [ ] ❌ upload image direct to gallery
   - [ ] ❌ pop up select image from gallery
@@ -36,13 +38,15 @@ Simon:
 Alexander:
 
 Emmie:
-
 - [x] ✅ media uploads
 - [x] ✅ media thumbnails
-- [ ] media distribution
-- [ ] frontend metadata
+- [x] ✅ media distribution
+- [x] ✅ frontend metadata
+- [ ] add defaults to init db
 
 Marius:
+- [ ] add defaults to init db
+- [ ] generalize update_article / put_article
 - [ ] 🟡 korrekt autentication in articles blueprint
 - [ ] 🟡 frontend article listing
   - Ha med all dataen vi trengg
