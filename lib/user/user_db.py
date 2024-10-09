@@ -122,6 +122,7 @@ class UserRights(Driver.BASE):
 
     def to_dict(self):
         _dict = {}
+        _dict["user_id"] = self.user_id
         _dict["can_post_draft"] = self.can_post_draft
         _dict["can_approve_draft"] = self.can_approve_draft
         _dict["can_publish_article"] = self.can_publish_article

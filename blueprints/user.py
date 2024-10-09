@@ -93,18 +93,21 @@ def register_new_user():
 def edit_user_rights():
     json: dict = flask.request.json
     auth_token = json.get("auth_token")
-    if not auth_token: 
+    user_id: str = json.get("user_id")
+
+    if not auth_token:
         return flask_helper.generate_response(data=None, code=400, message="token not supplied")
-    
-    user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
+
+    user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(
+        auth_token
+    )
     if not user:
         return flask_helper.generate_response(data=None, code=400, message="user not found")
-    
+
     if not rights.can_edit_user_rights:
         return flask_helper.generate_response(data=None, code=401, message="Not allowed to edit")
 
     # fetch the relevant user
-    user_id: str = json.get("user_id")
     if not user_id:
         return flask_helper.generate_response(data=None, code=400, message="no user id supplied")
 
@@ -167,8 +170,8 @@ def list_users():
     users = [u.to_dict() for u in users]
 
     for u in users:
-        u["email"] = None
-        u["user_role"] = None
+        u["email"] = ""
+        u["user_role"] = ""
 
     return flask_helper.generate_response(data=users)
 
@@ -186,8 +189,8 @@ def show_user():
         return flask_helper.generate_response(data=None, code=400, message="user not found")
 
     user_dict = user.to_dict()
-    user_dict["email"] = None
-    user_dict["user_role"] = None
+    user_dict["email"] = ""
+    user_dict["user_role"] = ""
 
     return flask_helper.generate_response(data=user_dict)
 
