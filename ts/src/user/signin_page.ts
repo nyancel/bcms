@@ -77,7 +77,22 @@ function enable_register_submit_button(is_valid: boolean, reason: string | undef
     inputs.registration.submit.classList.toggle("bg-green-600", true);
 }
 
-function is_valid_inputs(inputs: SigninHtmlInputs) {
+function enable_signin_submit_button(is_valid: boolean, reason: string | undefined, inputs: SigninHtmlInputs) {
+    if (!is_valid) {
+        inputs.signin.submit.innerHTML = reason ?? "invalid registration-data";
+        inputs.signin.submit.classList.toggle("bg-blue-200", false);
+        inputs.signin.submit.classList.toggle("text-white", true);
+        inputs.signin.submit.classList.toggle("bg-gray-600", true);
+        return;
+    }
+
+    inputs.signin.submit.innerHTML = "Sign in";
+    inputs.signin.submit.classList.toggle("bg-gray-600", false);
+    inputs.signin.submit.classList.toggle("text-white", false);
+    inputs.signin.submit.classList.toggle("bg-blue-200", true);
+}
+
+function is_valid_registration_inputs(inputs: SigninHtmlInputs) {
     let valid: boolean = true;
     let reason: string = "";
 
@@ -112,8 +127,66 @@ function is_valid_inputs(inputs: SigninHtmlInputs) {
     };
 }
 
+function is_valid_signin_inputs(inputs: SigninHtmlInputs) {
+    let valid: boolean = true;
+    let reason: string = "";
+
+    if (!inputs.signin.password.value) {
+        valid = false;
+        reason = "Please enter your password";
+    }
+
+    if (!inputs.signin.email.value) {
+        valid = false;
+        reason = "Please enter your email";
+    }
+
+    return {
+        valid,
+        reason
+    };
+}
+
+function submit_signin(inputs: SigninHtmlInputs) {
+
+    const send_signin = async () => {
+        let login_request: user_api.LoginRequest = {
+            email: inputs.signin.email.value,
+            password: inputs.signin.password.value
+        }
+
+        // again, i really really hate this
+        let login_response;
+        try {
+            login_response = await user_api.login(login_request);
+        }
+        catch (err) {
+            alert(err);
+            return;
+        }
+
+        // also really hate this part
+        let user;
+        try {
+            user = await user_api.who(login_response.id);
+        }
+        catch (err) {
+            alert(err);
+            return;
+        }
+
+        let userdata: user_local.UserStorageData = {
+            token: login_response,
+            user: user,
+        }
+        user_local.save_user_data_to_local(userdata);
+        window.location.href = "/"; // redirect user to home
+    }
+    send_signin();
+}
+
 function submit_registration(inputs: SigninHtmlInputs) {
-    let { valid, reason } = is_valid_inputs(inputs);
+    let { valid, reason } = is_valid_registration_inputs(inputs);
     if (!valid) {
         alert(`could not submit registration beacuse ${reason}`);
         return;
@@ -166,9 +239,14 @@ function submit_registration(inputs: SigninHtmlInputs) {
 
 }
 
-function on_input_change(inputs: SigninHtmlInputs) {
-    let { valid, reason } = is_valid_inputs(inputs);
+function on_registration_input_change(inputs: SigninHtmlInputs) {
+    let { valid, reason } = is_valid_registration_inputs(inputs);
     enable_register_submit_button(valid, reason, inputs);
+}
+
+function on_signin_input_change(inputs: SigninHtmlInputs) {
+    let { valid, reason } = is_valid_signin_inputs(inputs);
+    enable_signin_submit_button(valid, reason, inputs);
 }
 
 export function init() {
@@ -178,15 +256,21 @@ export function init() {
     }
 
     // hook up validation for registration form;
-    inputs.registration.email.oninput = () => on_input_change(inputs);
-    inputs.registration.first_name.oninput = () => on_input_change(inputs);
-    inputs.registration.last_name.oninput = () => on_input_change(inputs);
-    inputs.registration.password.oninput = () => on_input_change(inputs);
-    inputs.registration.repeat_password.oninput = () => on_input_change(inputs);
+    inputs.registration.email.oninput = () => on_registration_input_change(inputs);
+    inputs.registration.first_name.oninput = () => on_registration_input_change(inputs);
+    inputs.registration.last_name.oninput = () => on_registration_input_change(inputs);
+    inputs.registration.password.oninput = () => on_registration_input_change(inputs);
+    inputs.registration.repeat_password.oninput = () => on_registration_input_change(inputs);
 
-    // hook up submit
+    // hook up login inputs
+    inputs.signin.email.oninput = () => on_signin_input_change(inputs);
+    inputs.signin.password.oninput = () => on_signin_input_change(inputs);
+
+    // hook up submits
     inputs.registration.submit.onclick = () => submit_registration(inputs);
+    inputs.signin.submit.onclick = () => submit_signin(inputs);
 
     // initial call just to set defaults
-    on_input_change(inputs);
+    on_registration_input_change(inputs);
+    on_signin_input_change(inputs);
 }

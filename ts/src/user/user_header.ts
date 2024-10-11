@@ -12,19 +12,10 @@ function get_html_elements() {
     let profile_template = document.querySelector(".user-details-profile-template") as HTMLTemplateElement | null;
     let details_container = document.querySelector(".user-details-container") as HTMLElement | null;
 
-    if (
-        !login_template ||
-        !profile_template ||
-        !details_container
-    ) {
+    if (!login_template || !profile_template || !details_container) {
         return null;
     }
-
-    let elements: UserHtmlElements = {
-        login_template: login_template,
-        profile_template: profile_template,
-        details_container: details_container,
-    }
+    let elements: UserHtmlElements = { login_template, profile_template, details_container, }
     return elements;
 }
 
@@ -36,7 +27,6 @@ function get_profile_elements(profile_template_clone: DocumentFragment) {
     if (!firstname_element || !lastname_element || !logout_button) {
         throw new Error("lastname_element not found");
     }
-
     return { firstname_element, lastname_element, logout_button };
 }
 
