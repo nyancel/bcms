@@ -295,4 +295,4 @@ def refresh_token():
 
 @bp.post("admin_test_creds")
 def get_admin_test_creds():
-    return flask_helper.generate_response(data=lib.util.user_api.get_admin_token()["data"])
+    return flask_helper.generate_response(data=lib.util.user_api.get_admin_token().to_dict())

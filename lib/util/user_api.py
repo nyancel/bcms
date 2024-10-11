@@ -29,7 +29,7 @@ def fetch_rights_from_user(user_id: str):
     return r
 
 
-def get_admin_token() -> tuple[dict, int]:
+def get_admin_token():
     u = user.get_user_by_email(env.SERVER_ADMIN_EMAIL)
     t = token.create_new_token(u.id)
     return t
