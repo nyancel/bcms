@@ -25,6 +25,7 @@ def run():
         lib.util.env.SERVER_ADMIN_EMAIL,
         lib.util.env.SERVER_ADMIN_PASSWORD
     )
+
     admin_rights = lib.user.rights.create_new_user_rights(admin_user.id)
     admin_rights = lib.user.rights.update_rights(
         admin_rights.id, get_all_rights_as_true()

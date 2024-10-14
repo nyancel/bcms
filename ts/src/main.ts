@@ -19,16 +19,15 @@ window.addEventListener("load", (_) => {
 
     // page based init
     switch (window.location.pathname) {
-        // case "/editor":
-        //     let url_params = new URLSearchParams(window.location.search);
-        //     let draft_id = url_params.get("draft-id");
-        //     if (draft_id == null) {
-        //         console.log("no draft chosen")
-        //         draft_view_main();
-        //         break;
-        //     }
-        //     // render editor for specific draft
-        //     break;
+        case "/editor":
+            let url_params = new URLSearchParams(window.location.search);
+            let draft_id = url_params.get("draft-id");
+            if (draft_id == null) {
+                console.log("no draft chosen")
+                break;
+            }
+            // render editor for specific draft
+            break;
 
         // case "/gallery-popup":
         //     gallery_popup_main();

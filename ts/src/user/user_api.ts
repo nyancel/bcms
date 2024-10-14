@@ -37,6 +37,7 @@ export type RightsResponse = {
     can_change_other_password: boolean,
     can_change_other_details: boolean,
     can_submit_event: boolean,
+    can_edit_article: boolean,
 }
 
 export type LoginRequest = {

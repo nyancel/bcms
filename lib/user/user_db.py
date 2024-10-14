@@ -94,6 +94,7 @@ class UserRights(Driver.BASE):
     # article privs
     can_post_draft: orm.Mapped[bool] = orm.mapped_column(default=False)
     can_approve_draft: orm.Mapped[bool] = orm.mapped_column(default=False)
+    can_edit_article: orm.Mapped[bool] = orm.mapped_column(default=False)
     can_read_all_drafts: orm.Mapped[bool] = orm.mapped_column(default=False)
     can_publish_article: orm.Mapped[bool] = orm.mapped_column(default=False)
     can_delete_article: orm.Mapped[bool] = orm.mapped_column(default=False)
@@ -137,4 +138,5 @@ class UserRights(Driver.BASE):
         _dict["can_change_other_password"] = self.can_change_other_password
         _dict["can_change_other_details"] = self.can_change_other_details
         _dict["can_submit_event"] = self.can_submit_event
+        _dict["can_edit_article"] = self.can_edit_article
         return _dict

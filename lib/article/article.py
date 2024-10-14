@@ -5,6 +5,15 @@ import json
 from typing import Optional
 
 
+class ArticleSummary:
+    def __init__(self) -> None:
+        self.id: str
+        self.title: str
+        self.desc: str
+        self.user_id: str
+        self.image: str
+
+
 def create_article(
     title: str, body: str, user_id: str, draft: bool, desc: Optional[str]
 ) -> article_db.Article:
@@ -128,20 +137,15 @@ def save_article(article: article_db.Article):
 
 # TODO: ENDRE FUNKSJON, slik at man får bilde, id til title, author_id
 # TENK PÅ ALT FRONTEND TRENGER FOR Å DISPLAYE <33
-def list_all_articles() -> list:
-    """
-    Retrieves all articles from the database and returns a list of dictionaries representing the articles.
-
-    The function truncates the total paragraphs of each article to 200 characters.
-
-    Returns:
-    list: A list of dictionaries, each representing an article with its attributes.
-    """
-    articles_list = []
-
+def list_all_articles() -> list[article_db.Article]:
     # Get all articles from table
     with article_db.Driver.SessionMaker() as db_session:
-        articles: list = db_session.query(article_db.Article).all()
+        articles = db_session.query(article_db.Article).all()
+    return articles
+
+
+def to_summary(articles: list[article_db.Article]) -> list[dict]:
+    articles_list = []
 
     for article in articles:
         if article.isDeleted or not article.isListed:
@@ -165,5 +169,4 @@ def list_all_articles() -> list:
                 "image": image,
             }
         )
-
     return articles_list
