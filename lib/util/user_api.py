@@ -8,7 +8,7 @@ def get_user_and_rights_from_auth_token(auth_id: str):
     t = token.get_token(auth_id)
     if not t:
         return (None, None)
-    
+
     u = user.get_user(t.user_id)
     if not u:
         return (None, None)
@@ -33,3 +33,13 @@ def get_admin_token():
     u = user.get_user_by_email(env.SERVER_ADMIN_EMAIL)
     t = token.create_new_token(u.id)
     return t
+
+
+def get_admin_user():
+    u = user.get_user_by_email(env.SERVER_ADMIN_EMAIL)
+    return u
+
+
+def get_journalist_user():
+    u = user.get_user_by_email(env.TEST_JOURNALIST_EMAIL)
+    return u

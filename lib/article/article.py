@@ -5,15 +5,6 @@ import json
 from typing import Optional
 
 
-class ArticleSummary:
-    def __init__(self) -> None:
-        self.id: str
-        self.title: str
-        self.desc: str
-        self.user_id: str
-        self.image: str
-
-
 def create_article(
     title: str, body: str, user_id: str, draft: bool, desc: Optional[str]
 ) -> article_db.Article:
@@ -84,6 +75,83 @@ def delete_article(article_id: str) -> bool:
     return True
 
 
+def update_article(
+    article_id: str, user_id: str, rights: str, title: str, body: str, desc: str
+) -> article_db.Article:
+    """
+    Update an article in the database.
+
+    Args:
+        article_id (str): The ID of the article to update.
+        user_id (str): The ID of the user attempting to update the article.
+        rights (str): The rights of the user (e.g., admin rights).
+        title (str): The new title for the article.
+        body (str): The new body content for the article.
+        desc (str): The new description for the article.
+
+    Returns:
+        article_db.Article: The updated article object if the update was successful.
+        None: If the article does not exist or the user does not have the rights to update it.
+    """
+    with article_db.Driver.SessionMaker() as db_session:
+        article: article_db.Article = db_session.query(article_db.Article).get(
+            article_id
+        )
+        if not article:
+            return None
+
+        # Additonal check if user owns article
+        if not rights:
+            if user_id != article.user_id:
+                return None
+
+        if title:
+            article.title = title
+
+        if body:
+            article.body = body
+
+        if desc:
+            article.desc = desc
+
+        db_session.add(article)
+        db_session.commit()
+
+    return article
+
+
+def approve_article(article_id: str, approved_id: str) -> article_db.Article:
+    """
+    Approve an article by updating its status and setting the approved ID.
+
+    This function marks an article as accepted, listed, and no longer a draft.
+    It also sets the `accepted_id` to the provided `approved_id`.
+
+    Args:
+        article_id (str): The ID of the article to approve.
+        approved_id (str): The ID to set as the approved ID for the article.
+
+    Returns:
+        article_db.Article: The updated article object if the approval was successful.
+        None: If the article does not exist.
+    """
+    with article_db.Driver.SessionMaker() as db_session:
+        article: article_db.Article = db_session.query(article_db.Article).get(
+            article_id
+        )
+        if not article:
+            return None
+
+        article.isDraft = False
+        article.isAccepted = True
+        article.isListed = True
+        article.accepted_id = approved_id
+        db_session.add(article)
+        db_session.commit()
+
+    return article
+
+
 def get_article(article_id: str) -> article_db.Article:
     """
     Retrieves an article from the database by its ID.
@@ -135,8 +203,6 @@ def save_article(article: article_db.Article):
     return True
 
 
-# TODO: ENDRE FUNKSJON, slik at man får bilde, id til title, author_id
-# TENK PÅ ALT FRONTEND TRENGER FOR Å DISPLAYE <33
 def list_all_articles() -> list[article_db.Article]:
     # Get all articles from table
     with article_db.Driver.SessionMaker() as db_session:
@@ -147,7 +213,7 @@ def list_all_articles() -> list[article_db.Article]:
 def to_summary(articles: list[article_db.Article]) -> list[dict]:
     articles_list = []
 
-    for article in articles:        
+    for article in articles:
         article_body = json.loads(article.body)
 
         image = ""
