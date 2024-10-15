@@ -117,6 +117,32 @@ async function new_empty_draft(user: user_local.UserStorageData) {
     return article;
 }
 
+async function delete_draft(draft_id: string, user: user_local.UserStorageData) {
+    console.log("Not implemented yet");
+}
+
+function render_draft_list(drafts: article_api.ArticleSummary[], html_elements: DraftHtmlElements, user: user_local.UserStorageData) {
+    let app_view = html_elements.editor_app_view;
+
+    drafts.forEach((draft) => {
+        let template_clone = html_elements.draft_preview_template.cloneNode(true) as HTMLTemplateElement;
+        let content = template_clone.content;
+        let template_elements = get_draft_template_elements(content);
+        if (!template_elements) {
+            throw new Error("could not instantiate draft template");
+        }
+        template_elements.draft_render_title.innerHTML = draft.title;
+        template_elements.draft_render_description.innerHTML = draft.desc;
+        template_elements.edit_draft_button.onclick = () => {
+            window.location.href = `/editor?article-id=${draft.id}`;
+        }
+        template_elements.delete_draft_button.onclick = () => {
+            delete_draft(draft.id, user)
+        }
+        app_view.appendChild(content);
+    })
+}
+
 export default async function main() {
     let user = user_local.get_local_user_data();
     if (!user) {
@@ -130,6 +156,8 @@ export default async function main() {
 
     let all_drafts = await load_all_drafts(user);
     console.log(all_drafts);
+
+    render_draft_list(all_drafts, html_elements, user);
 
     html_elements.new_draft_button.onclick = async () => {
         let new_draft = await new_empty_draft(user);
