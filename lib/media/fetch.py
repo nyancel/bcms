@@ -62,6 +62,30 @@ def get_media_full(media_id: str) -> Exception | dict[str: media_db.Media, str: 
     
     return media_content
 
+def get_media_instance_for_resolution(media_id: str, dimension: str, minimum_value: int) -> dict | None:
+    if dimension not in ["x_dimension", "y_dimension"]:
+        msg = "get_media_instance_for_resolution() was supplied an invalid dimension, please use a wrapper functions instead"
+        print(msg)
+        return {"message": msg}
+
+    media_data = get_media_full(media_id)
+    
+    if not isinstance(media_data, dict):
+        return
+    
+    media_instances: dict = media_data.get("instances")
+    
+    if not media_instances:
+        return
+    
+    media_instances = sorted(media_instances, key=lambda instance: instance.get(dimension, 0))
+    
+    for media_instance in media_instances:
+        if media_instance.get(dimension, 0) >= minimum_value:
+            return media_instance
+    
+    # return the biggest image if none of the images are big enough
+    return media_instances[-1]
 
 if __name__ == "__main__":
     import json
