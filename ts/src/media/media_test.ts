@@ -2,12 +2,13 @@ import { update_media_metadata, UpdateMediaMetadataRequest, MediaMetadata } from
 
 export async function twig_test_function() {
     let metadata: MediaMetadata = {
-        alt_text: "hi:3",
+        alt_text: "cool comic",
+        is_unlisted: false,
     }
     
     let media_request: UpdateMediaMetadataRequest = {
         auth_token: "hi",
-        media_ID: "test",
+        media_ID: "FRVl6RhTeT5i-17290289321233373",
         metadata: metadata
     }
 

@@ -3,77 +3,73 @@ if __name__ == "__main__":
     sys.path.append(".")
     
 import lib.media.media_db as media_db
-
+from lib.media.media_db import MediaParent, MediaInstance, MediaJointParentInstances
 
 # get the metadata for a media piece and only the metadata
-def get_media_metadata(media_id: str) -> dict | None:
+def get_media_parent(media_id: str) -> MediaParent | None:
     with media_db.Driver.SessionMaker() as db_session:
-        media_query = db_session.query(media_db.Media)
-        media_query = media_query.where(media_db.Media.id == media_id)
-        media_query = media_query.where(media_db.Media.is_deleted == False)
-        media_metadata = media_query.first()
+        media_query = db_session.query(MediaParent)
+        media_query = media_query.where(MediaParent.id == media_id)
+        media_query = media_query.where(MediaParent.is_deleted == False)
+        media_parent = media_query.first()
     
-    if media_metadata:
-        return media_metadata.to_dict()
+    return media_parent or None
 
-def get_all_media_metadata() -> list[dict] | None:
+def get_all_media_parents() -> list[MediaParent] | None:
     with media_db.Driver.SessionMaker() as db_session:
-        media_query = db_session.query(media_db.Media)
-        media_query = media_query.where(media_db.Media.is_unlisted == False)
-        media_query = media_query.where(media_db.Media.is_deleted == False)
-        media_metadata = media_query.all()
+        media_query = db_session.query(MediaParent)
+        media_query = media_query.where(MediaParent.is_unlisted == False)
+        media_query = media_query.where(MediaParent.is_deleted == False)
+        media_parents = media_query.all()
     
     returnlist = []
     
-    for media in media_metadata:
-        returnlist.append(media.to_dict())
+    for media in media_parents:
+        returnlist.append(media)
     
     return returnlist
 
 # get a specific resolution
-def get_specific_media_instance(instance_id: str) -> dict | None:
+def get_specific_media_instance(instance_id: str) -> MediaInstance | None:
     with media_db.Driver.SessionMaker() as db_session:
-        media_query = db_session.query(media_db.MediaInstance)
-        media_query = media_query.where(media_db.MediaInstance.instance_id == instance_id)
+        media_query = db_session.query(MediaInstance)
+        media_query = media_query.where(MediaInstance.instance_id == instance_id)
         media_instance = media_query.first()
     
-    if media_instance:
-        return media_instance.to_dict()
+    return media_instance or None
 
 
-def get_media_full(media_id: str) -> Exception | dict[str: media_db.Media, str: list[media_db.MediaInstance]]:
-    media_content = {}
-    media_content["metadata"] = get_media_metadata(media_id)
+def get_media_full(media_id: str) -> MediaJointParentInstances | Exception:
+    joint_object = MediaJointParentInstances()
+    joint_object.parent = get_media_parent(media_id)
     
-    if not media_content["metadata"]:
+    if not joint_object.parent:
         return KeyError("invalid media_ID given")
 
-    if media_content["metadata"].get("is_deleted", True):
+    if joint_object.parent.is_deleted:
         return PermissionError("the content you're looking for has been marked as deleted")
     
     with media_db.Driver.SessionMaker() as db_session:
-        media_query = db_session.query(media_db.MediaInstance)
-        media_query = media_query.where(media_db.MediaInstance.parent_id == media_id)
-        media_content["instances"] = []
+        media_query = db_session.query(MediaInstance)
+        media_query = media_query.where(MediaInstance.parent_id == media_id)
+        joint_object.instances = []
         for instance in media_query.all():
-            instance_dict = instance.to_dict()
-            if instance_dict:
-                media_content["instances"].append(instance_dict)
+            joint_object.instances.append(instance)
     
-    return media_content
+    return joint_object
 
-def get_media_instance_for_resolution(media_id: str, dimension: str, minimum_value: int) -> dict | None:
+def get_media_instance_for_resolution(media_id: str, dimension: str, minimum_value: int) -> MediaInstance | None:
     if dimension not in ["x_dimension", "y_dimension"]:
         msg = "get_media_instance_for_resolution() was supplied an invalid dimension, please use a wrapper functions instead"
         print(msg)
         return {"message": msg}
 
-    media_data = get_media_full(media_id)
+    full_media_data = get_media_full(media_id)
     
-    if not isinstance(media_data, dict):
+    if not isinstance(full_media_data, MediaJointParentInstances):
         return
     
-    media_instances: dict = media_data.get("instances")
+    media_instances: list[MediaInstance] = full_media_data.instances
     
     if not media_instances:
         return

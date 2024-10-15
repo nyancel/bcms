@@ -34,7 +34,7 @@ class MediaInstance(Driver.BASE):
         
         return _dict
 
-class Media(Driver.BASE):
+class MediaParent(Driver.BASE):
     __tablename__ = "media"
     id: orm.Mapped[str] = orm.mapped_column(primary_key=True)
     uploader_user_id: orm.Mapped[str]
@@ -71,5 +71,16 @@ class Media(Driver.BASE):
         _dict["unlisted_state_update_time"] = self.unlisted_state_update_time
         _dict["is_deleted"] = self.is_deleted
         _dict["deleted_state_update_time"] = self.deleted_state_update_time
+        
+        return _dict
+
+class MediaJointParentInstances():
+    parent: MediaParent
+    instances: list[MediaInstance]
+    
+    def to_dict(self):
+        _dict = {}
+        _dict["parent"] = self.parent
+        _dict["instances"] = self.instances
         
         return _dict

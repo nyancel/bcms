@@ -9,6 +9,8 @@ import lib.util.env
 import lib.util.user_api
 import lib.util.flask_helper
 
+from lib.media.media_db import MediaParent, MediaInstance, MediaJointParentInstances
+
 bp = flask.Blueprint("media", __name__)
 
 # don't mind me :3
@@ -71,14 +73,14 @@ def update_media_metadata():
     for key in valid_metadata_morph_keys:
         new_metadata[key] = desired_metadata_update.get(key)
     
-    data = lib.media.morph.update_media_metadata(media_ID, new_metadata)
+    updated_metadata = lib.media.morph.update_media_metadata(media_ID, new_metadata)
 
-    if isinstance(data, dict):
-        return lib.util.flask_helper.generate_response(data)
-
-    if isinstance(data, Exception):
-        return lib.util.flask_helper.generate_response(message=f"an exception occured, {data.args[0]}", code=400)
+    if isinstance(updated_metadata, Exception):
+        return lib.util.flask_helper.generate_response(message=f"an exception occured, {updated_metadata.args[0]}", code=400)
     
+    if isinstance(updated_metadata, MediaParent):
+        return lib.util.flask_helper.generate_response(updated_metadata.to_dict())
+
     return lib.util.flask_helper.generate_response(message="an unhandled exception occured", code=400)
 
 @bp.post("/media/fetch_media")
@@ -97,12 +99,15 @@ def fetch_media():
         return lib.util.flask_helper.generate_response(message="no media_ID given", code=400)
 
     data = lib.media.fetch.get_media_full(media_ID)
-    
 
     if isinstance(data, Exception):
         return lib.util.flask_helper.generate_response(message=f"an exception occured, {data.args[0]}", code=500)
     
-    return lib.util.flask_helper.generate_response(data)
+    if isinstance(data, MediaJointParentInstances):
+        data.parent.to_dict()
+        data.instances.to_dict()
+        data = data.to_dict()
+        return lib.util.flask_helper.generate_response(data)
 
 
 @bp.post("/media/fetch_all_media_metadata")
@@ -115,15 +120,19 @@ def fetch_all_media_metadata():
     if rights.can_update_media != True:
         return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
 
-    data = lib.media.fetch.get_all_media_metadata()
+    media_parents = lib.media.fetch.get_all_media_parents()
 
-    if data == []:
+    if media_parents == []:
         return lib.util.flask_helper.generate_response(message="the server does not have any public media on it", code=400)
 
-    if not data:
+    if not media_parents:
         return lib.util.flask_helper.generate_response(message="no metadata could be found", code=400)
 
-    return lib.util.flask_helper.generate_response(data)
+    if isinstance(media_parents[0], MediaParent):
+        return_list = []
+        for media_parent in media_parents:
+            return_list.append(media_parent.to_dict())
+        return lib.util.flask_helper.generate_response(return_list)
 
 
 @bp.get("/media/fetch_media_instance")
@@ -139,13 +148,13 @@ def fetch_media_instance():
         return lib.util.flask_helper.generate_response(message="an unhandled error occured whilst fetching instance data", code=500)
 
     parent_ID = data["parent_id"]
-    metadata = lib.media.fetch.get_media_metadata(parent_ID)
+    media_parent = lib.media.fetch.get_media_parent(parent_ID)
 
-    if not metadata:
+    if not media_parent:
         return lib.util.flask_helper.generate_response(message="an unhandled error occured whilst fetching metadata", code=500)
 
-    file_extention = metadata["file_extention"]
-    filename = metadata["filename"]
+    file_extention = media_parent.file_extention
+    filename = media_parent.filename
 
     filepath = f"volume/media/files/{parent_ID}/{instance_ID}.{file_extention}"
     return flask.send_file(filepath, download_name=f"{filename}.{file_extention}")

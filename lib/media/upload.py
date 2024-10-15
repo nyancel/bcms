@@ -9,6 +9,8 @@ import werkzeug.datastructures as flask_datastructures
 
 import lib.util.crypt
 import lib.media.media_db as media_db
+from lib.media.media_db import MediaParent, MediaInstance, MediaJointParentInstances
+
 
 # resolutions of the smallest axies every uploaded image should be available in
 desired_image_resolutions = [
@@ -67,7 +69,7 @@ def save_file(file: io.BytesIO, raw_filename: str, mimetype: str, file_ID: str, 
     file_hash: str = hashlib.md5(file.read()).hexdigest()
     file_extention: str = raw_filename.split(".")[-1]
 
-    db_entry = media_db.Media()
+    db_entry = media_db.MediaParent()
     db_entry.id = file_ID
     db_entry.uploader_user_id = lib.util.crypt.new_uid()
     db_entry.filename = raw_filename.rsplit(".")[0]

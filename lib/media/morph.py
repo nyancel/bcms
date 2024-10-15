@@ -5,9 +5,9 @@ if __name__ == "__main__":
     sys.path.append(".")
     
 import lib.media.media_db as media_db
+from lib.media.media_db import MediaParent, MediaInstance, MediaJointParentInstances
 
-
-def update_media_metadata(media_ID: str, metadata: dict[str: str]) -> dict[str: str] | Exception:
+def update_media_metadata(media_ID: str, metadata: dict[str: str]) -> MediaParent | Exception:
     if not media_ID:
         return ValueError("no media_ID was supplied")
     
@@ -15,8 +15,8 @@ def update_media_metadata(media_ID: str, metadata: dict[str: str]) -> dict[str: 
         return ValueError("invalid metadata was supplied")
     
     with media_db.Driver.SessionMaker() as db_session:
-        media_query = db_session.query(media_db.Media)
-        media_query = media_query.where(media_db.Media.id == media_ID)
+        media_query = db_session.query(MediaParent)
+        media_query = media_query.where(MediaParent.id == media_ID)
         
         media = media_query.first()
         
@@ -37,7 +37,6 @@ def update_media_metadata(media_ID: str, metadata: dict[str: str]) -> dict[str: 
             media.is_deleted = metadata["is_deleted"]
             media.deleted_state_update_time = time.time()
         
-        
         db_session.commit()
         
-        return media.to_dict()
+        return media

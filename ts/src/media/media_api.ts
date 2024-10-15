@@ -5,7 +5,7 @@ type Response = {
     time: number,
 }
 
-type Media = {
+export type MediaParent = {
     id: string
     uploader_user_id: string,
     filename: string,
@@ -21,18 +21,31 @@ type Media = {
     deleted_state_update_time: number,
 }
 
-type UpdateMediaMetadataRequest = {
+export type MediaInstance = {
+    instance_id: string,
+    parent_id: string,
+    x_dimension: number,
+    y_dimension: number,
+}
+
+export type MediaJointParentInstances = {
+    parent: MediaParent,
+    instances: Array<MediaInstance>,
+}
+
+export type MediaMetadata = {
+    alt_text?: string,
+    filename?: string,
+    is_unlisted?: boolean,
+    is_deleted?: boolean,
+}
+
+export type UpdateMediaMetadataRequest = {
     auth_token: string,
     media_ID: string,
     metadata: MediaMetadata,
 }
 
-type MediaMetadata = {
-    alt_text: string,
-    is_unlisted: string,
-    is_deleted: string,
-    filename: string,
-}
 
 async function make_request(endpoint: string, request_data: any) {
     let request = await fetch(endpoint, {
