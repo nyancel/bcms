@@ -24,7 +24,6 @@ window.addEventListener("load", (_) => {
             let url_params = new URLSearchParams(window.location.search);
             let draft_id = url_params.get("draft-id");
             if (draft_id == null) {
-                console.log("no draft chosen")
                 draft_page.default();
                 break;
             }

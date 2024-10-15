@@ -100,12 +100,9 @@ function render_drafts(html_elements: DraftHtmlElements, all_drafts: editor_core
 
 async function load_all_drafts(user: user_local.UserStorageData) {
     let all_drafts = await article_api.list_all_articles(user.token.id);
-    console.log(all_drafts);
     if (all_drafts.length > 0) {
         all_drafts = all_drafts.filter((a) => a.user_id == user.user.id);
     }
-    console.log("test");
-    console.log(all_drafts);
     return all_drafts;
 }
 
@@ -138,6 +135,4 @@ export default async function main() {
         let new_draft = await new_empty_draft(user);
         window.location.href = `/editor?article-id=${new_draft.id}`
     }
-
-    console.log("editor draft view");
 }

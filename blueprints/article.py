@@ -24,7 +24,6 @@ def post_article() -> dict:
     body: str = data.get("body")
     desc: str = data.get("desc")
     auth_token: str = data.get("auth_token")
-    print(auth_token)
 
     (user, rights) = user_api.get_user_and_rights_from_auth_token(auth_token)
     if not user:

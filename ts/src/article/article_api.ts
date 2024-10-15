@@ -72,7 +72,6 @@ export async function list_all_articles(auth_token: string) {
     if (res.status_code != 200) {
         throw new Error(res.body.message)
     }
-    console.log(res);
     let articles = res.body.data as ArticleSummary[];
     return articles;
 }
