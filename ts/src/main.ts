@@ -4,6 +4,7 @@
 // import view_main from "./view"
 import * as user_header from "./user/user_header";
 import * as sigin_page from "./user/signin_page";
+import * as draft_page from "./editor/draft_page";
 // import { user_page_main } from "./user/user_page";
 // import draft_view_main from "./editor/draft_page";
 
@@ -24,6 +25,7 @@ window.addEventListener("load", (_) => {
             let draft_id = url_params.get("draft-id");
             if (draft_id == null) {
                 console.log("no draft chosen")
+                draft_page.default();
                 break;
             }
             // render editor for specific draft

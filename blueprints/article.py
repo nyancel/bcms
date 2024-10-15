@@ -19,13 +19,13 @@ def post_article() -> dict:
         return helper.generate_response(data=None, code=400, message="Invalid JSON data")
 
     # Get relevant fields for creation
+    draft = True  # should always be a draft
     title: str = data.get("title")
     body: str = data.get("body")
-    # TODO maybe this should always be a draft by default?
-    draft: bool = data.get("isdraft", True)
     desc: str = data.get("desc")
-
     auth_token: str = data.get("auth_token")
+    print(auth_token)
+
     (user, rights) = user_api.get_user_and_rights_from_auth_token(auth_token)
     if not user:
         return helper.generate_response(data=None, code=400, message="User Not found")
@@ -125,7 +125,7 @@ def list_all_articles() -> dict:
 
     article_list = article.list_all_articles()
     if len(article_list) == 0:
-        return helper.generate_response(data=None, code=400, message="No articles to list!")
+        return helper.generate_response(data=[])
 
     if not user:
         # only show public
@@ -187,7 +187,7 @@ def approve_article() -> dict:
     # First, check if user can approve
     auth_token = data.get("auth_token")
     article_id: str = data.get("article_id")
-    
+
     if not auth_token:
         return helper.generate_response(data=None, code=400, message="auth_token not found")
     (user, rights) = user_api.get_user_and_rights_from_auth_token(auth_token)
@@ -197,7 +197,6 @@ def approve_article() -> dict:
     if not rights.can_approve_draft:
         return helper.generate_response(data=None, code=400, message="Not allowed to approve articles")
 
-    
     if not article_id:
         return helper.generate_response(data=None, code=400, message="Article ID is empty!")
 

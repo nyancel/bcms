@@ -8,8 +8,8 @@ def get_user_and_rights_from_auth_token(auth_id: str):
     t = token.get_token(auth_id)
     if not t:
         return (None, None)
-
-    u = user.get_user(t.id)
+    
+    u = user.get_user(t.user_id)
     if not u:
         return (None, None)
 
@@ -19,7 +19,7 @@ def get_user_and_rights_from_auth_token(auth_id: str):
 
 def fetch_user_from_token(token_id: str):
     t = token.get_token(token_id)
-    u = user.get_user(t.id)
+    u = user.get_user(t.user_id)
     return u
 
 

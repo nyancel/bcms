@@ -1,6 +1,5 @@
-import { get_local_user_data } from "../user/user_core";
-import * as editor_core from "./editor_core";
-import * as events from "../lib/events";
+import * as user_local from "../user/user_local";
+import * as article_api from "../article/article_api";
 
 type DraftHtmlElements = {
     draft_preview_template: HTMLTemplateElement,
@@ -99,8 +98,29 @@ function render_drafts(html_elements: DraftHtmlElements, all_drafts: editor_core
     }
 }
 
-export default function main() {
-    let user = get_local_user_data();
+async function load_all_drafts(user: user_local.UserStorageData) {
+    let all_drafts = await article_api.list_all_articles(user.token.id);
+    if (all_drafts.length > 0) {
+        all_drafts = all_drafts.filter((a) => a.user_id == user.user.id);
+    }
+    console.log("test");
+    console.log(all_drafts);
+    return all_drafts;
+}
+
+async function new_empty_draft(user: user_local.UserStorageData) {
+    let post_request_data: article_api.PostArticleRequest = {
+        auth_token: user.token.id,
+        body: [],
+        desc: "New draft",
+        title: "New draft",
+    }
+    let article = await article_api.post_new_article(post_request_data);
+    return article;
+}
+
+export default async function main() {
+    let user = user_local.get_local_user_data();
     if (!user) {
         throw new Error("User not logged in");
     }
@@ -110,25 +130,13 @@ export default function main() {
         throw new Error("Draft items not found, cant render page");
     }
 
-    events.EVENTBUS.on(events.EventTypeEnum.DraftsChanged, (data: any) => {
-        render_drafts(html_elements, data)
-    })
+    let all_drafts = await load_all_drafts(user);
+    console.log(all_drafts);
 
-    let all_drafts = editor_core.load_local_drafts();
-    if (!all_drafts) {
-        all_drafts = [];
-        editor_core.save_drafts_to_local(all_drafts);
+    html_elements.new_draft_button.onclick = async () => {
+        let new_draft = await new_empty_draft(user);
+        window.location.href = `/editor?article-id=${new_draft.id}`
     }
-    events.EVENTBUS.emit(events.EventTypeEnum.DraftsChanged, all_drafts)
-
-    html_elements.new_draft_button.onclick = () => {
-        let new_draft = editor_core.new_empty_draft(user.user);
-        all_drafts.push(new_draft);
-        editor_core.save_drafts_to_local(all_drafts);
-        events.EVENTBUS.emit(events.EventTypeEnum.DraftsChanged, all_drafts)
-    }
-
-
 
     console.log("editor draft view");
 }
