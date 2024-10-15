@@ -157,7 +157,10 @@ export default async function main() {
     let all_drafts = await load_all_drafts(user);
     console.log(all_drafts);
 
-    render_draft_list(all_drafts, html_elements, user);
+    if (all_drafts.length > 0) {
+        render_draft_list(all_drafts, html_elements, user);
+    }
+
 
     html_elements.new_draft_button.onclick = async () => {
         let new_draft = await new_empty_draft(user);
