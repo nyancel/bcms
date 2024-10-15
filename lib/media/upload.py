@@ -23,9 +23,9 @@ desired_image_resolutions = [
 ]
 
 
-def save_files(files: list[flask_datastructures.FileStorage]) -> list[str, Exception]:
+def save_flask_files(files: list[flask_datastructures.FileStorage]) -> list[str, Exception]:
     """
-        takes in a file and saves it using a suite of different functions
+        takes in a list of files and saves them using a suite of different functions
     """
 
     task_ID = lib.util.crypt.new_uid()
@@ -38,7 +38,8 @@ def save_files(files: list[flask_datastructures.FileStorage]) -> list[str, Excep
     for file in files:
         file_ID = lib.util.crypt.new_uid()
 
-        success = save_file(file, file_ID)
+        file_bytes = io.BytesIO(file.stream.read())
+        success = save_file(file_bytes, file.filename, file.mimetype, file_ID)
 
         filename = file.filename.replace(" ", "_")
 
@@ -60,23 +61,23 @@ def save_files(files: list[flask_datastructures.FileStorage]) -> list[str, Excep
     return return_payload
 
 
-def save_file(file: flask_datastructures.FileStorage, file_ID: str, uploader=None) -> str | Exception:
+def save_file(file: io.BytesIO, raw_filename: str, mimetype: str, file_ID: str, uploader=None) -> str | Exception:
     success = 0
 
-    file_bytes = io.BytesIO(file.stream.read())
-    file_hash = hashlib.md5(file_bytes.read()).hexdigest()
+    file_hash: str = hashlib.md5(file.read()).hexdigest()
+    file_extention: str = raw_filename.split(".")[-1]
 
     db_entry = media_db.Media()
     db_entry.id = file_ID
     db_entry.uploader_user_id = lib.util.crypt.new_uid()
-    db_entry.filename = file.filename.rsplit(".")[0]
-    db_entry.file_extention = file.filename.split(".")[-1]
-    db_entry.file_mimetype = file.mimetype
+    db_entry.filename = raw_filename.rsplit(".")[0]
+    db_entry.file_extention = file_extention
+    db_entry.file_mimetype = mimetype
     db_entry.file_hash = file_hash
     db_entry.creation_time = time.time()
 
-    if file.mimetype in ["image/jpeg", "image/png", "image/webp"]:
-        available_resolutions = _save_image(file, file_ID, file_bytes)
+    if mimetype in ["image/jpeg", "image/png", "image/webp"]:
+        available_resolutions = _save_image(file_ID, file, file_extention)
 
         db_entry.content_type = "image"
         db_entry.available_resolutions = available_resolutions
@@ -93,9 +94,8 @@ def save_file(file: flask_datastructures.FileStorage, file_ID: str, uploader=Non
     return Exception("an unknown error occured")
 
 
-def _save_image(uploaded_image: flask_datastructures.FileStorage, image_ID: str, image_bytes: io.BytesIO) -> list[int]:
+def _save_image(image_ID: str, image_bytes: io.BytesIO, file_extention: str) -> list[int]:
     image_path = f"volume/media/files/{image_ID}"
-    file_extention = uploaded_image.filename.split(".")[-1]
 
     available_image_resolutions = []
 

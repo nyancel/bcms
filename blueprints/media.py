@@ -30,7 +30,7 @@ def upload_media():
         return lib.util.flask_helper.generate_response(message="post request is missing a file labeled 'media'", code=400)
 
     files = flask.request.files.getlist("media")
-    data = lib.media.upload.save_files(files)
+    data = lib.media.upload.save_flask_files(files)
 
     if data:
         return lib.util.flask_helper.generate_response(data)
