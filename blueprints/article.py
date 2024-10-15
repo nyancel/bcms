@@ -1,8 +1,7 @@
 import flask
 
-from typing import Any, Dict, Optional
-
 import lib.article.article as article
+
 import lib.util.flask_helper as helper
 import lib.util.user_api as user_api
 
@@ -181,45 +180,37 @@ def get_article() -> dict:
 @bp.post("approve_article")
 def approve_article() -> dict:
     # Get the JSON data from the request
-    data: Optional[Dict[str, Any]] = flask.request.get_json()
+    data: dict = flask.request.json
     if data is None:
         return helper.generate_response(data=None, code=400, message="Invalid JSON data!")
 
     # First, check if user can approve
     auth_token = data.get("auth_token")
+    article_id: str = data.get("article_id")
+    
     if not auth_token:
         return helper.generate_response(data=None, code=400, message="auth_token not found")
-
-    user, status_code = user_api.fetch_user_from_token(auth_token)
-    if status_code != 200:
+    (user, rights) = user_api.get_user_and_rights_from_auth_token(auth_token)
+    if not user:
         return helper.generate_response(data=None, code=400, message="user data not found")
 
-    user_id = user.get("id")
+    if not rights.can_approve_draft:
+        return helper.generate_response(data=None, code=400, message="Not allowed to approve articles")
 
-    rights, status_code = user_api.fetch_rights_from_user(user_id)
-    if status_code != 200:
-        return helper.generate_response(data=None, code=400, message="could not fetch user rights")
-
-    if rights.can_approve_draft != True:
-        return helper.generate_response(data=None, code=400, message="Not allowed to approve articles", 401)
-
-    # Get relevant fields from JSON
-    id: str = data.get("id")
-
-    if not id:
+    
+    if not article_id:
         return helper.generate_response(data=None, code=400, message="Article ID is empty!")
 
-    fetched_article = article.get_article(id)
+    fetched_article = article.get_article(article_id)
     if not fetched_article:
         return helper.generate_response(data=None, code=400, message="Article is not found!")
 
     fetched_article.isDraft = False
     fetched_article.isAccepted = True
     fetched_article.isListed = True
-    fetched_article.accepted_id = user_id
+    fetched_article.accepted_id = user.id
 
-    save_code = article.save_article(fetched_article)
-    if not save_code:
+    if not article.save_article(fetched_article):
         return helper.generate_response(data=None, code=400, message="Could not save article!")
 
-    return flask.jsonify(fetched_article.to_dict()), 200
+    return helper.generate_response(data=fetched_article.to_dict())
