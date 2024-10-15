@@ -9,11 +9,11 @@ from lib.media.media_db import MediaParent, MediaInstance, MediaJointParentInsta
 
 
 def get_all_media_parents() -> list[MediaParent]:
-    media_list = lib.media.fetch.get_all_media_metadata()
+    media_list = lib.media.fetch.get_all_media_parents()
     return media_list or []
 
 def get_all_media_parents_and_intances() -> list[MediaJointParentInstances]:
-    parent_list = lib.media.fetch.get_all_media_metadata()
+    parent_list = lib.media.fetch.get_all_media_parents()
     
     full_media_list = []
     for parent in parent_list:
