@@ -11,6 +11,12 @@ import lib.util.flask_helper
 
 bp = flask.Blueprint("media", __name__)
 
+# don't mind me :3
+@bp.get("/media/media_test")
+def media_test():
+    return flask.render_template("pages/base.jinja")
+
+
 
 @bp.post("/media/upload_media")
 def upload_media():
@@ -36,16 +42,21 @@ def upload_media():
 def update_media_metadata():
     json_body_data: dict = flask.request.json
     
-    auth_token = json_body_data.get("auth_token")
-    user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
+    # auth_token = json_body_data.get("auth_token")
+    # user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
     
-    if rights.can_update_media != True:
-        return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
+    # if rights.can_update_media != True:
+    #     return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
     
     media_ID = json_body_data.get("media_ID")
-
+    desired_metadata_update = json_body_data.get("metadata")
+    
     if not media_ID:
         return lib.util.flask_helper.generate_response(message="no media_ID value was supplied", code=400)
+        
+    if not desired_metadata_update:
+        return lib.util.flask_helper.generate_response(message="no new metadata was supplied", code=400)
+    
     
     # ensure only certain values can be changed with this endpoint
     valid_metadata_morph_keys = [
@@ -58,7 +69,7 @@ def update_media_metadata():
     new_metadata = {}
     
     for key in valid_metadata_morph_keys:
-        new_metadata[key] = json_body_data.get(key)
+        new_metadata[key] = desired_metadata_update.get(key)
     
     data = lib.media.morph.update_media_metadata(media_ID, new_metadata)
 

@@ -42,7 +42,7 @@ class Media(Driver.BASE):
     file_extention: orm.Mapped[str]
     file_mimetype: orm.Mapped[str]
     file_hash: orm.Mapped[str]
-    alt_text: orm.Mapped[opt[str]]
+    alt_text: orm.Mapped[str] = orm.mapped_column(default="")
     content_type: orm.Mapped[str]
     creation_time: orm.Mapped[float]
     is_unlisted: orm.Mapped[bool] = orm.mapped_column(default=False)

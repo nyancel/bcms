@@ -5,6 +5,7 @@
 import * as user_header from "./user/user_header";
 import * as sigin_page from "./user/signin_page";
 import * as draft_page from "./editor/draft_page";
+import * as media_test_endpoint from "./media/media_test";
 // import { user_page_main } from "./user/user_page";
 // import draft_view_main from "./editor/draft_page";
 
@@ -48,6 +49,12 @@ window.addEventListener("load", (_) => {
 
         case "/signin":
             sigin_page.init();
+            break;
+        
+        // endpoint for testing media function via frontend
+        // ask if you can remove if this still exists in december 2024 or something
+        case "/media/media_test":
+            media_test_endpoint.twig_test_function()
             break;
 
         default:
