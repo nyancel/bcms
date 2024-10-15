@@ -147,12 +147,10 @@ def list_all_articles() -> list[article_db.Article]:
 def to_summary(articles: list[article_db.Article]) -> list[dict]:
     articles_list = []
 
-    for article in articles:
-        if article.isDeleted or not article.isListed:
-            continue
-
+    for article in articles:        
         article_body = json.loads(article.body)
 
+        image = ""
         for item in article_body:
             try:
                 if item.get("type") == "image":

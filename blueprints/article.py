@@ -132,9 +132,10 @@ def list_all_articles() -> dict:
         article_list = [
             a for a in article_list if not a.isDeleted and a.isListed]
     if not rights.can_read_all_drafts:
-        article_list = [a for a in article_list if (
-            # only show public and personal
-            not a.isDeleted and a.isListed) or a.user_id == user.id]
+        # only show public and personal
+        article_list = [
+            a for a in article_list if (not a.isDeleted and a.isListed)
+        ] + [a for a in article_list if a.user_id == user.id]        
     # else we show all articles, which requires no conditionals
     articles = article.to_summary(article_list)
     return helper.generate_response(data=articles)

@@ -100,6 +100,7 @@ function render_drafts(html_elements: DraftHtmlElements, all_drafts: editor_core
 
 async function load_all_drafts(user: user_local.UserStorageData) {
     let all_drafts = await article_api.list_all_articles(user.token.id);
+    console.log(all_drafts);
     if (all_drafts.length > 0) {
         all_drafts = all_drafts.filter((a) => a.user_id == user.user.id);
     }
