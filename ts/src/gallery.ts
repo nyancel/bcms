@@ -1,3 +1,5 @@
+import { MediaUploadRequest, upload_media } from "./media/media_api";
+import { get_local_user_data } from "./user/user_local";
 import { get_smallest_res_from_src, post_formdata, post_json } from "./util";
 
 
@@ -76,12 +78,13 @@ async function upload_files(input_element: HTMLInputElement) {
         throw new Error("no files attached to input source")
     }
 
-    let formdata = new FormData();
-    for (let index = 0; index <= files.length; index++) {
-        formdata.append("media", files[index]);
-    }
+    let upload_request = {
+        auth_token: get_local_user_data()?.token.id,
+        files: files,
+    } as Object as MediaUploadRequest
 
-    await post_formdata("/media/upload_media", formdata);
+    await upload_media(upload_request)
+
     main();
     input_element.value = "";
 }
