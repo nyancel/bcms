@@ -25,6 +25,9 @@ def upload_media():
     auth_token = flask.request.form.get("auth_token")
     user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
     
+    if not rights:
+        return lib.util.flask_helper.generate_response(message=f"no auth_token was supplied with the request", code=401)
+    
     if rights.can_post_media != True:
         return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
 

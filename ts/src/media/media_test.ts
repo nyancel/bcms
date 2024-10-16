@@ -8,7 +8,7 @@ export async function twig_test_function() {
     
     let media_request: UpdateMediaMetadataRequest = {
         auth_token: "hi",
-        media_ID: "FRVl6RhTeT5i-17290289321233373",
+        media_ID: "muG523y5o1tR-17290772079567983",
         metadata: metadata
     }
 

@@ -33,6 +33,8 @@ export type MediaJointParentInstances = {
     instances: Array<MediaInstance>,
 }
 
+
+
 export type MediaMetadata = {
     alt_text?: string,
     filename?: string,
@@ -40,20 +42,26 @@ export type MediaMetadata = {
     is_deleted?: boolean,
 }
 
-export type UpdateMediaMetadataRequest = {
+
+export type MediaUploadRequest = {
+    auth_token: string,
+    files: Array<File>,
+}
+
+export type MediaUpdateRequest = {
     auth_token: string,
     media_ID: string,
     metadata: MediaMetadata,
 }
 
 
-async function make_request(endpoint: string, request_data: any) {
+async function make_post_request(endpoint: string, body: any) {
     let request = await fetch(endpoint, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify( request_data )
+        body: body,
     });
 
     return {
@@ -62,15 +70,42 @@ async function make_request(endpoint: string, request_data: any) {
     }
 }
 
-export async function update_media_metadata(request_data: UpdateMediaMetadataRequest) {
-    let response = await make_request(
+export async function upload_media(request_data: MediaUploadRequest) {
+    let formdata = new FormData()
+
+    formdata.append("auth_token", request_data.auth_token)
+    for (let i = 0; i < request_data.files.length; i++) {
+        formdata.append("media", request_data.files[i])
+    }
+
+    let request = await fetch("/media/upload_media", {
+        method: "POST",
+        body: formdata,
+    })
+
+    if (request.status === 200) {
+        return await request.json() as Response
+    } else {
+        let jsondata = await request.json() as Response
+        throw new Error(jsondata.message)
+    }
+}
+
+export async function update_media_metadata(request_data: MediaUpdateRequest) {
+    let response = await make_post_request(
         "/media/update_media_metadata",
-        request_data
+        JSON.stringify( request_data )
     )
 
     if (response.status_code != 200) {
         throw new Error(response.body.message)
     }
 
-    return response.body.data as Media
+    return response.body.data as MediaParent
 }
+
+export async function fetch_media() {}
+
+export async function fetch_all_media_metadata() {}
+
+export async function fetch_media_instance() {}
