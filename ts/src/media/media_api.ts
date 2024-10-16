@@ -54,6 +54,11 @@ export type MediaUpdateRequest = {
     metadata: MediaMetadata,
 }
 
+export type MediaFetchRequest = {
+    auth_token: string,
+    media_ID: string,
+}
+
 
 async function make_post_request(endpoint: string, body: any) {
     let request = await fetch(endpoint, {
@@ -61,7 +66,7 @@ async function make_post_request(endpoint: string, body: any) {
         headers: {
             "Content-Type": "application/json",
         },
-        body: body,
+        body: JSON.stringify( body ),
     });
 
     return {
@@ -74,27 +79,27 @@ export async function upload_media(request_data: MediaUploadRequest) {
     let formdata = new FormData()
 
     formdata.append("auth_token", request_data.auth_token)
-    for (let i = 0; i < request_data.files.length; i++) {
-        formdata.append("media", request_data.files[i])
-    }
+    request_data.files.forEach((file) => {
+        formdata.append("media", file)
+    })
 
     let request = await fetch("/media/upload_media", {
         method: "POST",
         body: formdata,
     })
 
-    if (request.status === 200) {
-        return await request.json() as Response
-    } else {
-        let jsondata = await request.json() as Response
-        throw new Error(jsondata.message)
+    if (request.status != 200) {
+        let request_json = await request.json() as Response
+        throw new Error(request_json.message)
     }
+
+    return await request.json() as Response
 }
 
 export async function update_media_metadata(request_data: MediaUpdateRequest) {
     let response = await make_post_request(
         "/media/update_media_metadata",
-        JSON.stringify( request_data )
+        request_data
     )
 
     if (response.status_code != 200) {
@@ -104,7 +109,18 @@ export async function update_media_metadata(request_data: MediaUpdateRequest) {
     return response.body.data as MediaParent
 }
 
-export async function fetch_media() {}
+export async function fetch_media_full(request_data: MediaFetchRequest) {
+    let response = await make_post_request(
+        "/media/fetch_media_full",
+        request_data
+    )
+
+    if (response.status_code != 200) {
+        throw new Error(response.body.message)
+    }
+
+    return response.body.data as MediaJointParentInstances
+}
 
 export async function fetch_all_media_metadata() {}
 

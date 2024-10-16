@@ -47,11 +47,14 @@ def upload_media():
 def update_media_metadata():
     json_body_data: dict = flask.request.json
     
-    # auth_token = json_body_data.get("auth_token")
-    # user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
+    auth_token = json_body_data.get("auth_token")
+    user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
     
-    # if rights.can_update_media != True:
-    #     return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
+    if not rights:
+        return lib.util.flask_helper.generate_response(message=f"no auth_token was supplied with the request", code=401)
+    
+    if rights.can_update_media != True:
+        return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
     
     media_ID = json_body_data.get("media_ID")
     desired_metadata_update = json_body_data.get("metadata")
@@ -86,17 +89,21 @@ def update_media_metadata():
 
     return lib.util.flask_helper.generate_response(message="an unhandled exception occured", code=400)
 
-@bp.post("/media/fetch_media")
+@bp.post("/media/fetch_media_full")
 def fetch_media():
     json_body_data: dict = flask.request.json
     
     auth_token = json_body_data.get("auth_token")
     user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
     
+    if not rights:
+        return lib.util.flask_helper.generate_response(message=f"no auth_token was supplied with the request", code=401)
+    
     if rights.can_update_media != True:
         return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
     
     media_ID = json_body_data.get("media_ID")
+    
 
     if not media_ID:
         return lib.util.flask_helper.generate_response(message="no media_ID given", code=400)
@@ -107,10 +114,7 @@ def fetch_media():
         return lib.util.flask_helper.generate_response(message=f"an exception occured, {data.args[0]}", code=500)
     
     if isinstance(data, MediaJointParentInstances):
-        data.parent.to_dict()
-        data.instances.to_dict()
-        data = data.to_dict()
-        return lib.util.flask_helper.generate_response(data)
+        return lib.util.flask_helper.generate_response(data.to_dict())
 
 
 @bp.post("/media/fetch_all_media_metadata")
@@ -119,6 +123,9 @@ def fetch_all_media_metadata():
     
     auth_token = json_body_data.get("auth_token")
     user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
+        
+    if not rights:
+        return lib.util.flask_helper.generate_response(message=f"no auth_token was supplied with the request", code=401)
     
     if rights.can_update_media != True:
         return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)

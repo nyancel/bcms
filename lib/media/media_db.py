@@ -80,7 +80,7 @@ class MediaJointParentInstances():
     
     def to_dict(self):
         _dict = {}
-        _dict["parent"] = self.parent
-        _dict["instances"] = self.instances
+        _dict["parent"] = self.parent.to_dict()
+        _dict["instances"] = [instance.to_dict() for instance in self.instances]
         
         return _dict
