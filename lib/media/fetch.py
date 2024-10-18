@@ -42,7 +42,7 @@ def get_specific_media_instance(instance_id: str) -> MediaInstance | None:
 def get_media_full(media_id: str) -> MediaJointParentInstances | Exception:
     joint_object = MediaJointParentInstances()
     joint_object.parent = get_media_parent(media_id)
-    
+        
     if not joint_object.parent:
         return KeyError("invalid media_ID given")
 

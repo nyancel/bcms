@@ -1,6 +1,6 @@
 import { isStringLiteral } from "typescript";
 import { get_local_user_data } from "../user/user_local";
-import { update_media_metadata, MediaUpdateRequest, MediaMetadata, fetch_media_full, MediaFetchRequest } from "./media_api";
+import { update_media_metadata, MediaUpdateRequest, MediaMetadata, fetch_media_parent_and_instances, MediaFetchRequest, fetch_all_media_parents } from "./media_api";
 
 let auth_token = get_local_user_data()?.token.id as string
 if (typeof auth_token != "string") {
@@ -12,7 +12,8 @@ async function get_largest_instance_id() {return (await test_fetch_media_full())
 export async function twig_test_function() {
     // await test_update_metadata()
     await test_fetch_media_full()
-    console.log(await get_largest_instance_id())
+    console.log(await fetch_all_media_parents(auth_token))
+    // console.log(await get_largest_instance_id())
 }
 
 async function test_fetch_media_full() {
@@ -21,7 +22,7 @@ async function test_fetch_media_full() {
         media_ID
     }
 
-    return await fetch_media_full(media_request)
+    return await fetch_media_parent_and_instances(media_request)
 }
 
 async function test_update_metadata() {

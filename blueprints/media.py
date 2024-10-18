@@ -89,8 +89,8 @@ def update_media_metadata():
 
     return lib.util.flask_helper.generate_response(message="an unhandled exception occured", code=400)
 
-@bp.post("/media/fetch_media_full")
-def fetch_media():
+@bp.post("/media/fetch_media_parent_and_instances")
+def fetch_media_parent_and_instances():
     json_body_data: dict = flask.request.json
     
     auth_token = json_body_data.get("auth_token")
@@ -103,7 +103,6 @@ def fetch_media():
         return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
     
     media_ID = json_body_data.get("media_ID")
-    
 
     if not media_ID:
         return lib.util.flask_helper.generate_response(message="no media_ID given", code=400)
@@ -115,10 +114,12 @@ def fetch_media():
     
     if isinstance(data, MediaJointParentInstances):
         return lib.util.flask_helper.generate_response(data.to_dict())
+    
+    return lib.util.flask_helper.generate_response(message="an unhandled error occured", code=500)
 
 
-@bp.post("/media/fetch_all_media_metadata")
-def fetch_all_media_metadata():
+@bp.post("/media/fetch_all_media_parents")
+def fetch_all_media_parents():
     json_body_data: dict = flask.request.json
     
     auth_token = json_body_data.get("auth_token")
@@ -139,10 +140,7 @@ def fetch_all_media_metadata():
         return lib.util.flask_helper.generate_response(message="no metadata could be found", code=400)
 
     if isinstance(media_parents[0], MediaParent):
-        return_list = []
-        for media_parent in media_parents:
-            return_list.append(media_parent.to_dict())
-        return lib.util.flask_helper.generate_response(return_list)
+        return lib.util.flask_helper.generate_response([parent.to_dict() for parent in media_parents])
 
 
 @bp.get("/media/fetch_media_instance")

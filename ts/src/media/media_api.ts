@@ -109,9 +109,9 @@ export async function update_media_metadata(request_data: MediaUpdateRequest) {
     return response.body.data as MediaParent
 }
 
-export async function fetch_media_full(request_data: MediaFetchRequest) {
+export async function fetch_media_parent_and_instances(request_data: MediaFetchRequest) {
     let response = await make_post_request(
-        "/media/fetch_media_full",
+        "/media/fetch_media_parent_and_instances",
         request_data
     )
 
@@ -122,6 +122,21 @@ export async function fetch_media_full(request_data: MediaFetchRequest) {
     return response.body.data as MediaJointParentInstances
 }
 
-export async function fetch_all_media_metadata() {}
+export async function fetch_all_media_parents(auth_token: string) {
+    let response = await make_post_request(
+        "/media/fetch_all_media_parents",
+        { auth_token: auth_token }
+    )
+
+    if (response.status_code != 200) {
+        throw new Error(response.body.message)
+    }
+
+    return response.body.data as Array<MediaParent>
+}
 
 export async function fetch_media_instance() {}
+
+export function get_media_instance_url(media_instance_id: string) {
+    return `"/media/fetch_media_instance?instance_ID=${media_instance_id}`
+}
