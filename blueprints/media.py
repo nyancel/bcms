@@ -8,6 +8,8 @@ import lib.media.morph
 import lib.util.env
 import lib.util.user_api
 import lib.util.flask_helper
+import lib.util.media_api
+
 
 from lib.media.media_db import MediaParent, MediaInstance, MediaJointParentInstances
 
@@ -25,8 +27,11 @@ def upload_media():
     auth_token = flask.request.form.get("auth_token")
     user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
     
-    if not rights:
+    if not auth_token:
         return lib.util.flask_helper.generate_response(message=f"no auth_token was supplied with the request", code=401)
+    
+    if not rights:
+        return lib.util.flask_helper.generate_response(message=f"could not fetch the rights for the supplied user", code=401)
     
     if rights.can_post_media != True:
         return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
@@ -50,9 +55,12 @@ def update_media_metadata():
     auth_token = json_body_data.get("auth_token")
     user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
     
-    if not rights:
+    if not auth_token:
         return lib.util.flask_helper.generate_response(message=f"no auth_token was supplied with the request", code=401)
     
+    if not rights:
+        return lib.util.flask_helper.generate_response(message=f"could not fetch the rights for the supplied user", code=401)
+        
     if rights.can_update_media != True:
         return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
     
@@ -96,10 +104,13 @@ def fetch_media_parent_and_instances():
     auth_token = json_body_data.get("auth_token")
     user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
     
-    if not rights:
+    if not auth_token:
         return lib.util.flask_helper.generate_response(message=f"no auth_token was supplied with the request", code=401)
     
-    if rights.can_update_media != True:
+    if not rights:
+        return lib.util.flask_helper.generate_response(message=f"could not fetch the rights for the supplied user", code=401)
+        
+    if rights.can_request_media_IDs != True:
         return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
     
     media_ID = json_body_data.get("media_ID")
@@ -124,11 +135,14 @@ def fetch_all_media_parents():
     
     auth_token = json_body_data.get("auth_token")
     user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
-        
-    if not rights:
+    
+    if not auth_token:
         return lib.util.flask_helper.generate_response(message=f"no auth_token was supplied with the request", code=401)
     
-    if rights.can_update_media != True:
+    if not rights:
+        return lib.util.flask_helper.generate_response(message=f"could not fetch the rights for the supplied user", code=401)
+        
+    if rights.can_request_media_IDs != True:
         return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
 
     media_parents = lib.media.fetch.get_all_media_parents()
@@ -141,6 +155,86 @@ def fetch_all_media_parents():
 
     if isinstance(media_parents[0], MediaParent):
         return lib.util.flask_helper.generate_response([parent.to_dict() for parent in media_parents])
+    
+    return lib.util.flask_helper.generate_response(message="an unhandled error occured", code=500)
+
+@bp.post("/media/fetch_all_media_parents_and_instances")
+def fetch_all_media_parents_and_instances():
+    json_body_data: dict = flask.request.json
+    
+    auth_token = json_body_data.get("auth_token")
+    user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
+    
+    if not auth_token:
+        return lib.util.flask_helper.generate_response(message=f"no auth_token was supplied with the request", code=401)
+    
+    if not rights:
+        return lib.util.flask_helper.generate_response(message=f"could not fetch the rights for the supplied user", code=401)
+        
+    if rights.can_request_media_IDs != True:
+        return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
+
+    media_parents = lib.media.fetch.get_all_media_parents()
+    
+    full_media_list: list[MediaJointParentInstances] = []
+    for parent in media_parents:
+        full_media_list.append(lib.util.media_api.get_media_parent_and_instances(parent.id))
+    
+    if full_media_list == []:
+        return lib.util.flask_helper.generate_response(message="the server does not have any public media on it", code=400)
+
+    if not full_media_list:
+        return lib.util.flask_helper.generate_response(message="no metadata could be found", code=400)
+
+    if isinstance(full_media_list[0], MediaJointParentInstances):
+        return lib.util.flask_helper.generate_response([joint.to_dict() for joint in full_media_list])
+
+# generic function for the two endpoints underneath
+def fetch_media_instance_for_resolution_bureaucracy(flask_request: flask.request, dimension_check: str):
+    if dimension_check not in ["height", "width"]:
+        return lib.util.flask_helper.generate_response(message=f"tried fetching instance for invalid dimension", code=401)
+    
+    json_body_data: dict = flask.request.json
+    
+    auth_token = json_body_data.get("auth_token")
+    user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)
+    
+    if not auth_token:
+        return lib.util.flask_helper.generate_response(message=f"no auth_token was supplied with the request", code=401)
+    
+    if not rights:
+        return lib.util.flask_helper.generate_response(message=f"could not fetch the rights for the supplied user", code=401)
+        
+    if rights.can_request_media_IDs != True:
+        return lib.util.flask_helper.generate_response(message=f"you lack the permissions for this action", code=401)
+
+    media_ID = json_body_data.get("media_ID")
+    if not media_ID:
+        return lib.util.flask_helper.generate_response(message=f"no media_ID was supplied", code=401)
+    
+    desired_size = json_body_data.get("desired_size")
+    if not desired_size:
+        return lib.util.flask_helper.generate_response(message=f"no desired_size was supplied", code=401)
+    
+    if dimension_check == "height":
+        media_instance = lib.util.media_api.get_media_instance_for_resolution_height(media_ID, desired_size)
+    else:
+        media_instance = lib.util.media_api.get_media_instance_for_resolution_width(media_ID, desired_size)
+    
+    if isinstance(media_instance, MediaInstance):
+        return lib.util.flask_helper.generate_response(media_instance.to_dict())
+    
+    return lib.util.flask_helper.generate_response(message="an unhandled error occured", code=500)
+
+@bp.post("/media/fetch_media_instance_for_resolution_height")
+def fetch_media_instance_for_resolution_height():
+    response: flask.Response = fetch_media_instance_for_resolution_bureaucracy(flask.request, "height")
+    return response
+
+@bp.post("/media/fetch_media_instance_for_resolution_width")
+def fetch_media_instance_for_resolution_width():
+    response: flask.Response = fetch_media_instance_for_resolution_bureaucracy(flask.request, "width")
+    return response
 
 
 @bp.get("/media/fetch_media_instance")
@@ -155,7 +249,7 @@ def fetch_media_instance():
     if not data:
         return lib.util.flask_helper.generate_response(message="an unhandled error occured whilst fetching instance data", code=500)
 
-    parent_ID = data["parent_id"]
+    parent_ID = data.parent_id
     media_parent = lib.media.fetch.get_media_parent(parent_ID)
 
     if not media_parent:
@@ -166,3 +260,4 @@ def fetch_media_instance():
 
     filepath = f"volume/media/files/{parent_ID}/{instance_ID}.{file_extention}"
     return flask.send_file(filepath, download_name=f"{filename}.{file_extention}")
+

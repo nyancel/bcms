@@ -101,6 +101,7 @@ class UserRights(Driver.BASE):
     # media privs
     can_post_media: orm.Mapped[bool] = orm.mapped_column(default=False)
     can_update_media: orm.Mapped[bool] = orm.mapped_column(default=False)
+    can_request_media_IDs: orm.Mapped[bool] = orm.mapped_column(default=False)
     # user privs
     can_assign_journalist: orm.Mapped[bool] = orm.mapped_column(default=False)
     can_assign_editorial: orm.Mapped[bool] = orm.mapped_column(default=False)
@@ -130,6 +131,7 @@ class UserRights(Driver.BASE):
         _dict["can_delete_article"] = self.can_delete_article
         _dict["can_post_media"] = self.can_post_media
         _dict["can_update_media"] = self.can_update_media
+        _dict["can_request_media_IDs"] = self.can_request_media_IDs
         _dict["can_assign_journalist"] = self.can_assign_journalist
         _dict["can_assign_editorial"] = self.can_assign_editorial
         _dict["can_assign_admin"] = self.can_assign_admin

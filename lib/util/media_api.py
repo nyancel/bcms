@@ -23,7 +23,7 @@ def get_all_media_parents_and_intances() -> list[MediaJointParentInstances]:
 
 def get_media_parent_and_instances(media_id: str) -> MediaJointParentInstances | None:
     response = lib.media.fetch.get_media_full(media_id)
-    if isinstance(response, dict):
+    if isinstance(response, MediaJointParentInstances):
         return response
     else:
         return None
@@ -34,11 +34,35 @@ def get_media_instance(media_instance_id: str) -> MediaInstance | None:
 def get_media_instance_url(media_instance_id: str) -> str:
     return f"{lib.util.env.SERVER_ADRESS}/media/fetch_media_instance?instance_ID={media_instance_id}"
 
-def get_media_instance_for_resolution_height(media_id: str, min_height: int) -> MediaInstance | None:
-    return lib.media.fetch.get_media_instance_for_resolution(media_id, "y_dimension", min_height)
+def get_media_instance_for_resolution_height(media_id: str, desired_height: int) -> MediaInstance | None:
+    full_media_data = get_media_parent_and_instances(media_id)
     
-def get_media_instance_for_resolution_width(media_id: str, min_width: int) -> MediaInstance | None:
-    return lib.media.fetch.get_media_instance_for_resolution(media_id, "x_dimension", min_width)
+    if not isinstance(full_media_data, MediaJointParentInstances):
+        return
+    
+    media_instances: list[MediaInstance] = sorted(full_media_data.instances, key=lambda instance: instance.y_dimension)
+    
+    for media_instance in media_instances:
+        if media_instance.y_dimension >= desired_height:
+            return media_instance
+    
+    # return the biggest image if none of the images are big enough
+    return media_instances[-1]
+    
+def get_media_instance_for_resolution_width(media_id: str, desired_width: int) -> MediaInstance | None:
+    full_media_data = get_media_parent_and_instances(media_id)
+    
+    if not isinstance(full_media_data, MediaJointParentInstances):
+        return
+    
+    media_instances: list[MediaInstance] = sorted(full_media_data.instances, key=lambda instance: instance.x_dimension)
+    
+    for media_instance in media_instances:
+        if media_instance.x_dimension >= desired_width:
+            return media_instance
+    
+    # return the biggest image if none of the images are big enough
+    return media_instances[-1]
 
     
 if __name__ == "__main__":

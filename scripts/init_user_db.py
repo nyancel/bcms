@@ -44,6 +44,7 @@ def run():
     editor_rights.can_delete_article = True
     editor_rights.can_post_media = True
     editor_rights.can_update_media = True
+    editor_rights.can_request_media_IDs = True
     editor_rights.can_assign_journalist = True
     editor_rights.can_assign_editorial = False
     editor_rights.can_assign_admin = False
@@ -72,6 +73,7 @@ def run():
     journalist_rights.can_delete_article = False
     journalist_rights.can_post_media = True
     journalist_rights.can_update_media = True
+    journalist_rights.can_request_media_IDs = True
     journalist_rights.can_assign_journalist = False
     journalist_rights.can_assign_editorial = False
     journalist_rights.can_assign_admin = False

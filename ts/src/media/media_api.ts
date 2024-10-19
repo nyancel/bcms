@@ -59,6 +59,12 @@ export type MediaFetchRequest = {
     media_ID: string,
 }
 
+export type MediaMinimumResolutionRequest = {
+    auth_token: string,
+    media_ID: string,
+    desired_size: number,
+}
+
 
 async function make_post_request(endpoint: string, body: any) {
     let request = await fetch(endpoint, {
@@ -135,8 +141,60 @@ export async function fetch_all_media_parents(auth_token: string) {
     return response.body.data as Array<MediaParent>
 }
 
-export async function fetch_media_instance() {}
+export async function fetch_all_media_parents_and_instances(auth_token: string) {
+    let response = await make_post_request(
+        "/media/fetch_all_media_parents_and_instances",
+        { auth_token }
+    )
 
-export function get_media_instance_url(media_instance_id: string) {
-    return `"/media/fetch_media_instance?instance_ID=${media_instance_id}`
+    if (response.status_code != 200) {
+        throw new Error(response.body.message)
+    }
+
+    return response.body.data as Array<MediaJointParentInstances>
+}
+
+export async function fetch_media_instance_for_resolution_height(request_data: MediaMinimumResolutionRequest) {
+    let response = await make_post_request(
+        "/media/fetch_media_instance_for_resolution_height",
+        request_data
+    )
+
+    if (response.status_code != 200) {
+        throw new Error(response.body.message)
+    }
+
+    return response.body.data as MediaInstance
+}
+
+
+export async function fetch_media_instance_for_resolution_width(request_data: MediaMinimumResolutionRequest) {
+    let response = await make_post_request(
+        "/media/fetch_media_instance_for_resolution_width",
+        request_data
+    )
+
+    if (response.status_code != 200) {
+        throw new Error(response.body.message)
+    }
+
+    return response.body.data as MediaInstance
+}
+
+export async function fetch_media_instance_file(instance_ID: string) {
+    let request = await fetch("/media/fetch_media_instance", {
+        method: "GET",
+        body: JSON.stringify({ instance_ID }),
+    });
+
+    if (request.status != 200) {
+        let request_json: Response = await request.json()
+        throw new Error(request_json.message)
+    }
+
+    return await request.blob() as File
+}
+
+export function fetch_media_instance_url(media_instance_id: string) {
+    return `/media/fetch_media_instance?instance_ID=${media_instance_id}` as string
 }
