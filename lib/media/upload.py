@@ -11,62 +11,55 @@ import lib.util.crypt
 import lib.media.media_db as media_db
 from lib.media.media_db import MediaParent, MediaInstance, MediaJointParentInstances
 
+import threading
 
 # resolutions of the smallest axies every uploaded image should be available in
 desired_image_resolutions = [
-    2160,
+    # 4320,
+    # 2880,
+    # 2160,
+    1440,
     1080,  # will resize 2560x1440 to 1920x1080, and 1204x1514 to 1080x1358
     720,
+    650,
     540,
     360,
+    240,
     180,
+    144,
     96,
-    64
+    64,
+    32
 ]
 
 
 def save_flask_files(files: list[flask_datastructures.FileStorage]) -> list[str, Exception]:
-    """
-        takes in a list of files and saves them using a suite of different functions
-    """
-
-    task_ID = lib.util.crypt.new_uid()
-
-    return_payload = {
-        "task_ID": task_ID,
-        "results": []
-    }
+    threads = []
+    results = []
 
     for file in files:
-        file_ID = lib.util.crypt.new_uid()
-
         file_bytes = io.BytesIO(file.stream.read())
-        success = save_file(file_bytes, file.filename, file.mimetype, file_ID)
-
-        filename = file.filename.replace(" ", "_")
-
-        if isinstance(success, Exception):
-            return_payload["results"].append({
-                "success": 0,
-                "original_filename": filename,
-                "key": file_ID,
-                "message": success.args,
-            })
-
+        
+        thread = threading.Thread(target=save_file, args=(
+            file_bytes, file.filename, file.mimetype, results
+        ))
+        
+        threads.append(thread)
+        thread.start()
+    
+    while True:
+        if len(threads) == len(results):
+            time.sleep(0.05)
         else:
-            return_payload["results"].append({
-                "success": 1,
-                "original_filename": filename,
-                "key": file_ID
-            })
-
-    return return_payload
+            return results
 
 
-def save_file(file: io.BytesIO, raw_filename: str, mimetype: str, file_ID: str, uploader=None) -> str | Exception:
+def save_file(file: io.BytesIO, raw_filename: str, mimetype: str, results, uploader=None) -> str | Exception:
     success = 0
 
     file_hash: str = hashlib.md5(file.read()).hexdigest()
+    file_ID = lib.util.crypt.new_uid()
+    
     file_extention: str = raw_filename.split(".")[-1]
 
     db_entry = media_db.MediaParent()
@@ -91,9 +84,18 @@ def save_file(file: io.BytesIO, raw_filename: str, mimetype: str, file_ID: str, 
             db_session.add(db_entry)
             db_session.commit()
 
-        return file_ID
+        results.append({
+            "original_filename": raw_filename,
+            "success": 1,
+            "file_ID": file_ID
+        })
+        return
 
-    return Exception("an unknown error occured")
+    results.append({
+        "original_filename": raw_filename,
+        "success": 0,
+        "file_ID": ""
+    })
 
 
 def _save_image(image_ID: str, image_bytes: io.BytesIO, file_extention: str) -> list[int]:
