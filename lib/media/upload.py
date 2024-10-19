@@ -97,7 +97,7 @@ def save_file(file: io.BytesIO, raw_filename: str, mimetype: str, file_ID: str, 
 
 
 def _save_image(image_ID: str, image_bytes: io.BytesIO, file_extention: str) -> list[int]:
-    image_path = f"volume/media/files/{image_ID}"
+    image_path = f"volume/media/{image_ID}"
 
     available_image_resolutions = []
 

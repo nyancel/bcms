@@ -12,8 +12,6 @@ import scripts.init_user_db
 import scripts.init_folders
 import scripts.init_event_db
 
-import lib.util.env
-
 if __name__ == "__main__":
     scripts.init_folders.run()
     scripts.init_user_db.run()  # USER is the first DB, to init test users that others depend on.

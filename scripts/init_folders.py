@@ -6,8 +6,6 @@ def run():
         "volume",
         "volume/db",
         "volume/media",
-        "volume/media/metadata",
-        "volume/media/files",
     ]
 
     for folder in folders:

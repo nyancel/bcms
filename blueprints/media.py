@@ -258,6 +258,6 @@ def fetch_media_instance():
     file_extention = media_parent.file_extention
     filename = media_parent.filename
 
-    filepath = f"volume/media/files/{parent_ID}/{instance_ID}.{file_extention}"
+    filepath = f"volume/media/{parent_ID}/{instance_ID}.{file_extention}"
     return flask.send_file(filepath, download_name=f"{filename}.{file_extention}")
 
