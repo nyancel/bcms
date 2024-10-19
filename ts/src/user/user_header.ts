@@ -55,8 +55,8 @@ function render_user(userdata: user_local.UserStorageData, elements: UserHtmlEle
     let profile_elements = get_profile_elements(profile_template);
 
 
-    profile_elements.firstname_element.innerHTML = userdata.user.firstname;
-    profile_elements.lastname_element.innerHTML = userdata.user.lastname;
+    profile_elements.firstname_element.innerHTML = userdata.user.firstname || "firstname";
+    profile_elements.lastname_element.innerHTML = userdata.user.lastname || " lastname";
     profile_elements.logout_button.onclick = () => logout();
 
     elements.details_container.appendChild(profile_template);
