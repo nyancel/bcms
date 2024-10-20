@@ -54,6 +54,27 @@ export type PostArticleRequest = {
     auth_token: string,
 }
 
+export type EditArticleRequest = {
+    id: string,
+    title: string,
+    body: Array<ArticleTextItem | ArticleMediaItem>,
+    desc: string,
+    user_id: string,
+    auth_token: string,
+}
+
+export type DeleteArticleRequest = {
+    id: string,
+    auth_token: string,
+}
+
+export type ApproveArticleRequest = {
+    id: string;
+    auth_token: string;
+}
+
+export type ArticleRequest = PostArticleRequest | EditArticleRequest | DeleteArticleRequest | ApproveArticleRequest;
+
 async function req(endpoint: string, payload: any) {
     let response = await fetch(endpoint, {
         method: "POST",
@@ -76,11 +97,20 @@ export async function list_all_articles(auth_token: string) {
     return articles;
 }
 
-export async function post_new_article(request: PostArticleRequest) {
+export async function post_new_article(request: ArticleRequest) {
     let res = await req("/article/post_article", request);
     if (res.status_code != 200) {
         throw new Error(res.body.message)
     }
     let article = res.body.data as Article;
     return article;
+}
+
+export async function get_article(auth_token: string, article_id: string) {
+    let res = await req("/article/get_article", { auth_token, article_id });
+    if (res.status_code != 200) {
+        throw new Error(res.body.message)
+    }
+    let articles = res.body.data as Article;
+    return articles;
 }
