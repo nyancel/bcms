@@ -21,8 +21,8 @@ def get_all_media_parents_and_intances() -> list[MediaJointParentInstances]:
     
     return full_media_list or []
 
-def get_media_parent_and_instances(media_id: str) -> MediaJointParentInstances | None:
-    response = lib.media.fetch.get_media_full(media_id)
+def get_media_parent_and_instances(media_parent_id: str) -> MediaJointParentInstances | None:
+    response = lib.media.fetch.get_media_full(media_parent_id)
     if isinstance(response, MediaJointParentInstances):
         return response
     else:
@@ -34,8 +34,8 @@ def get_media_instance(media_instance_id: str) -> MediaInstance | None:
 def get_media_instance_url(media_instance_id: str) -> str:
     return f"{lib.util.env.SERVER_ADRESS}/media/fetch_media_instance?instance_ID={media_instance_id}"
 
-def get_media_instance_for_resolution_height(media_id: str, desired_height: int) -> MediaInstance | None:
-    full_media_data = get_media_parent_and_instances(media_id)
+def get_media_instance_for_resolution_height(media_parent_id: str, desired_height: int) -> MediaInstance | None:
+    full_media_data = get_media_parent_and_instances(media_parent_id)
     
     if not isinstance(full_media_data, MediaJointParentInstances):
         return
@@ -49,8 +49,8 @@ def get_media_instance_for_resolution_height(media_id: str, desired_height: int)
     # return the biggest image if none of the images are big enough
     return media_instances[-1]
     
-def get_media_instance_for_resolution_width(media_id: str, desired_width: int) -> MediaInstance | None:
-    full_media_data = get_media_parent_and_instances(media_id)
+def get_media_instance_for_resolution_width(media_parent_id: str, desired_width: int) -> MediaInstance | None:
+    full_media_data = get_media_parent_and_instances(media_parent_id)
     
     if not isinstance(full_media_data, MediaJointParentInstances):
         return

@@ -54,7 +54,7 @@ def save_flask_files(files: list[flask_datastructures.FileStorage]) -> list[str,
             return results
 
 
-def save_file(file: io.BytesIO, raw_filename: str, mimetype: str, results, uploader=None) -> str | Exception:
+def save_file(file: io.BytesIO, raw_filename: str, mimetype: str, results: list, uploader=None) -> str | Exception:
     success = 0
 
     file_hash: str = hashlib.md5(file.read()).hexdigest()

@@ -194,7 +194,7 @@ def fetch_media_instance_for_resolution_bureaucracy(flask_request: flask.request
     if dimension_check not in ["height", "width"]:
         return lib.util.flask_helper.generate_response(message=f"tried fetching instance for invalid dimension", code=401)
     
-    json_body_data: dict = flask.request.json
+    json_body_data: dict = flask_request.json
     
     auth_token = json_body_data.get("auth_token")
     user, rights = lib.util.user_api.get_user_and_rights_from_auth_token(auth_token)

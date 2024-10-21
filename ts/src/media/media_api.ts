@@ -1,5 +1,5 @@
 
-type Response = {
+export type Response = {
     data: any,
     message: string,
     time: number,
@@ -195,6 +195,6 @@ export async function fetch_media_instance_file(instance_ID: string) {
     return await request.blob() as File
 }
 
-export function fetch_media_instance_url(media_instance_id: string) {
-    return `/media/fetch_media_instance?instance_ID=${media_instance_id}` as string
+export function fetch_media_instance_url(instance_ID: string) {
+    return `/media/fetch_media_instance?instance_ID=${instance_ID}` as string
 }

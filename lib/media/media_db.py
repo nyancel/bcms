@@ -19,7 +19,7 @@ class Driver:
     SessionMaker = orm.sessionmaker(bind=engine, expire_on_commit=False)
 
 class MediaInstance(Driver.BASE):
-    __tablename__ = "file"
+    __tablename__ = "media_instances"
     instance_id: orm.Mapped[str] = orm.mapped_column(primary_key=True)
     parent_id: orm.Mapped[str]
     x_dimension: orm.Mapped[int]
@@ -35,7 +35,7 @@ class MediaInstance(Driver.BASE):
         return _dict
 
 class MediaParent(Driver.BASE):
-    __tablename__ = "media"
+    __tablename__ = "media_parents"
     id: orm.Mapped[str] = orm.mapped_column(primary_key=True)
     uploader_user_id: orm.Mapped[str]
     filename: orm.Mapped[str]
