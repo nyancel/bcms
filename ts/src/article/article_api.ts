@@ -47,33 +47,17 @@ export type ArticleSummary = {
     image: string,
 }
 
+
 export type PostArticleRequest = {
-    title: string,
-    body: Array<ArticleTextItem | ArticleMediaItem>,
-    desc: string,
+    id?: string,
+    title?: string,
+    body?: Array<ArticleTextItem | ArticleMediaItem>,
+    desc?: string,
+    approve?: boolean,
+    delete?: boolean,
+    edit?: boolean,
     auth_token: string,
 }
-
-export type EditArticleRequest = {
-    id: string,
-    title: string,
-    body: Array<ArticleTextItem | ArticleMediaItem>,
-    desc: string,
-    user_id: string,
-    auth_token: string,
-}
-
-export type DeleteArticleRequest = {
-    id: string,
-    auth_token: string,
-}
-
-export type ApproveArticleRequest = {
-    id: string;
-    auth_token: string;
-}
-
-export type ArticleRequest = PostArticleRequest | EditArticleRequest | DeleteArticleRequest | ApproveArticleRequest;
 
 async function req(endpoint: string, payload: any) {
     let response = await fetch(endpoint, {
@@ -97,7 +81,7 @@ export async function list_all_articles(auth_token: string) {
     return articles;
 }
 
-export async function post_new_article(request: ArticleRequest) {
+export async function post_article(request: PostArticleRequest) {
     let res = await req("/article/post_article", request);
     if (res.status_code != 200) {
         throw new Error(res.body.message)

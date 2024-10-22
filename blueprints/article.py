@@ -24,10 +24,9 @@ def post_article() -> dict:
     if not user:
         return helper.generate_response(data=None, code=400, message="User Not found")
 
-    article_id: str = data.get("article_id")
+    article_id: str = data.get("id")
     # Edit existing article
     if article_id:
-
         # Approve article
         approve: bool = data.get("approve")
         if approve:
@@ -64,41 +63,49 @@ def post_article() -> dict:
                     data=None, code=400, message="Could not delete article"
                 )
 
-        # Update article
-        title: str = data.get("title")
-        body: str = data.get("body")
-        desc: str = data.get("desc")
+        edit: bool = data.get("edit")
+        if edit:
+            # Update article
+            title: str = data.get("title")
+            body: str = data.get("body")
+            desc: str = data.get("desc")
 
-        # Atleast title or the body needs to be edited
-        if not (title or (body or desc)):
-            return helper.generate_response(
-                data=None,
-                code=400,
-                message="Nothing to change (title/body/desc are empty)",
+            # Atleast title or the body needs to be edited
+            if not (title or (body or desc)):
+                return helper.generate_response(
+                    data=None,
+                    code=400,
+                    message="Nothing to change (title/body/desc are empty)",
+                )
+
+            if not (rights.can_edit_article):
+                return helper.generate_response(
+                    data=None, code=400, message="Permission denied"
+                )
+
+            # Validation in library (own author can edit its own article)
+            fetched_article = article.update_article(
+                article_id=article_id,
+                user_id=user.id,
+                rights=rights.can_edit_article,
+                title=title,
+                body=body,
+                desc=desc,
             )
 
-        if not (rights.can_edit_article):
-            return helper.generate_response(
-                data=None, code=400, message="Permission denied"
-            )
+            if not fetched_article:
+                return helper.generate_response(
+                    data=None,
+                    code=400,
+                    message="Could not save article, or not appropriate rights!",
+                )
+            return fetched_article
 
-        # Validation in library (own author can edit its own article)
-        fetched_article = article.update_article(
-            article_id=article_id,
-            user_id=user.id,
-            rights=rights.can_edit_article,
-            title=title,
-            body=body,
-            desc=desc,
+        helper.generate_response(
+            data=None,
+            code=400,
+            message="Article id was supplied, but no function code!",
         )
-
-        if not fetched_article:
-            return helper.generate_response(
-                data=None,
-                code=400,
-                message="Could not save article, or not appropriate rights!",
-            )
-        return fetched_article
 
     # Create new article
 
