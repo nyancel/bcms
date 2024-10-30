@@ -37,6 +37,7 @@ export type MediaJointParentInstances = {
 
 export type MediaMetadata = {
     alt_text?: string,
+    author_credit_subtext?: string,
     filename?: string,
     is_unlisted?: boolean,
     is_deleted?: boolean,

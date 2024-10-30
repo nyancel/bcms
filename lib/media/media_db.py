@@ -43,6 +43,7 @@ class MediaParent(Driver.BASE):
     file_mimetype: orm.Mapped[str]
     file_hash: orm.Mapped[str]
     alt_text: orm.Mapped[str] = orm.mapped_column(default="")
+    author_credit_subtext: orm.Mapped[str] = orm.mapped_column(default="")
     content_type: orm.Mapped[str]
     creation_time: orm.Mapped[float]
     is_unlisted: orm.Mapped[bool] = orm.mapped_column(default=False)
@@ -65,6 +66,7 @@ class MediaParent(Driver.BASE):
         _dict["file_mimetype"] = self.file_mimetype
         _dict["file_hash"] = self.file_hash
         _dict["alt_text"] = self.alt_text
+        _dict["author_credit_subtext"] = self.author_credit_subtext
         _dict["content_type"] = self.content_type
         _dict["creation_time"] = self.creation_time
         _dict["is_unlisted"] = self.is_unlisted

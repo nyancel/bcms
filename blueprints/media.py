@@ -77,6 +77,7 @@ def update_media_metadata():
     # ensure only certain values can be changed with this endpoint
     valid_metadata_morph_keys = [
         "alt_text",
+        "author_credit_subtext",
         "is_unlisted",
         "is_deleted",
         "filename",
